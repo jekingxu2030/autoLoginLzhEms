@@ -301,10 +301,10 @@ def main_logic():
                                 [
                                     # "jekingxu@mic-power.cn",
                                     # "jekingxu@163.com",
-                                    # "marcin.lee@wic-power.com",
+                                    "marcin.lee@wic-power.com",
                                     "531556397@qq.com",
                                     "wicpower2023@gmail.com",
-                                    # "ng.support@baiyiled.nl",
+                                    "ng.support@baiyiled.nl",
                                 ],
                                 "【EMS Events】",
                                 f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“no_data”异常！请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
