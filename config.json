@@ -6,7 +6,7 @@
     "timing": {
         "load_wait_time": 10,
         "loop_interval": 60,
-        "dingtalk_times": 6
+        "dingtalk_times": 3
     },
     "encryption": {
         "ws_token_key": "514ee339fec647ce2353b5e0fa5ecc0a"

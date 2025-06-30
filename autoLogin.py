@@ -24,7 +24,7 @@ LOGIN_STATUS_CODE = None
 config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
 
 import threading
-
+stop_event = threading.Event()  # ← 任何线程都可以 set() 它
 # 运行设置窗口的函数
 def run_settings_window():
     root = tk.Tk()
@@ -175,10 +175,12 @@ try:
     # print(f"\n✅ 所有 JS 文件已保存到：{os.path.abspath(JS_SAVE_DIR)}")
     print("\n🟢 登录已完成...")
     # ===循环检测网页内容===================
-    dingtalk_times=10
+    getDataCounts=0;
     # 循环执行标志
     continue_running = True
-    while continue_running:
+
+    # while continue_running:
+    while not stop_event.is_set():
 
         try:
 
@@ -270,7 +272,12 @@ try:
                     f"webSiteState: Accessible"
                 )
                 # payload={"msgtype": "text", "text": {"content": content}}
-                send_dingtalk_msg(content)
+                if(getDataCounts>=dingtalk_times):
+                    send_dingtalk_msg(content)
+                else:
+                    print(
+                        f"\n❌还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                    )
             else:
                 print("\n✅ 数据加载正常")
 
@@ -300,3 +307,5 @@ finally:
     driver.quit()
     print("\n⚠️程序正常跑完结束...")
     print("⚠️请确保浏览器已关闭...")
+    print("🟢 浏览器已关闭，程序退出")
+    os._exit(0)          # 彻底结束进程，防止残余后台线程

@@ -6,7 +6,8 @@ import datetime
 
 
 class SettingsWindow:
-    def __init__(self, root, callback=None):
+
+    def __init__(self, root, callback=None, stop_event=None):
         self.root = root
         self.root.title("系统配置")
         self.root.geometry("400x500")
@@ -44,6 +45,7 @@ class SettingsWindow:
         if messagebox.askyesno("确认退出", "确定要退出整个程序吗?"):
             # 销毁窗口
             self.root.destroy()
+            self.stop_event.set()    # ① 通知主线程停止
             # 退出程序
             import sys
             sys.exit(0)
@@ -182,7 +184,7 @@ class SettingsWindow:
         ttk.Button(button_frame, text="关闭窗口", command=self.root.destroy).pack(
             side=tk.LEFT, padx=10
         )
-        
+
         # 退出程序按钮
         ttk.Button(button_frame, text="退出程序", command=self.on_exit).pack(
             side=tk.LEFT, padx=10
@@ -195,6 +197,11 @@ class SettingsWindow:
         ttk.Label(main_frame, text="调试输出:").grid(row=14, column=0, padx=5, pady=(5), sticky="w")
         self.debug_label = ttk.Label(main_frame, text="", width=50)
         self.debug_label.grid(row=14, column=1, padx=5, pady=(1,5), sticky="w")
+
+    def run_settings_window():
+        root = tk.Tk()
+        app = SettingsWindow(root, callback=on_config_saved, stop_event=stop_event)
+        root.mainloop()
 
 
 if __name__ == "__main__":
