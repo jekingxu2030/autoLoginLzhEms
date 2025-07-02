@@ -14,6 +14,7 @@ from selenium import webdriver
 import time
 import json
 from selenium import webdriver
+from ems_ws_monitor import EmsWsMonitor
 
 # === 路径 ===
 config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
@@ -23,8 +24,6 @@ os.makedirs(JS_SAVE_DIR, exist_ok=True)
 # === 状态 ===
 stop_event = threading.Event()
 running_event = threading.Event()
-
- 
 
 
 # === 全局变量 ===
@@ -36,6 +35,21 @@ config_ready = threading.Event()
 
 def thread_safe_update_debug_label(text):
     settings_window.log_lbl.after(0, lambda: settings_window.update_debug_label(text))
+
+
+def get_ws_url(driver):
+    # 获取浏览器性能日志
+    logs = driver.get_log("performance")
+    # 遍历日志
+    for entry in logs:
+        # 将日志中的message字段转换为json格式
+        message = json.loads(entry["message"])["message"]
+        # 判断日志中的method字段是否为Network.webSocketCreated
+        if message["method"] == "Network.webSocketCreated":
+            ws_url = message["params"]["url"]
+            print("✅ 捕获到WebSocket URL:", ws_url)
+            return ws_url
+    return None
 
 
 # === 主执行函数（登录 + 探测） ===
@@ -118,29 +132,11 @@ def main_logic():
         thread_safe_update_debug_label("缓存参数获取或设置完毕，开始探测内容...")
         print("✅ 登录成功，开始循环检测...")
 
-
-        def get_ws_url():
-            logs = driver.get_log('performance')
-            for entry in logs:
-                message = json.loads(entry['message'])['message']
-                if message['method'] == 'Network.webSocketCreated':
-                    ws_url = message['params']['url']
-                    print("捕获到WebSocket URL:", ws_url)
-                    return ws_url
-
-        ws_url = get_ws_url()
-        print("✅ 获取到的 WebSocket 完整地址：", ws_url)
-
-        getDataCounts = 0   #正常状态下推送间隔时间
-
+        getDataCounts = 0  # 正常状态下推送间隔时间
         while not stop_event.is_set():
             try:
                 print(f"\n当前页面: {driver.current_url}")
                 thread_safe_update_debug_label(f"\n当前页面: {driver.current_url}")
-
-                driver.execute_script("window.scrollBy(0, 10);")
-                driver.execute_script("window.dispatchEvent(new Event('mousemove'))")
-                thread_safe_update_debug_label("模拟网页操作，防止掉线...")
 
                 WebDriverWait(driver, 20).until(
                     lambda d: d.execute_script("return document.readyState")
@@ -162,90 +158,134 @@ def main_logic():
                     return false;"""
                     )
                 )
+                driver.execute_script("window.scrollBy(0, 10);")
+                driver.execute_script("window.dispatchEvent(new Event('mousemove'))")
+                thread_safe_update_debug_label("模拟网页操作，防止掉线...")
 
                 time.sleep(load_wait_time + 20)
-                detect_script = """
-                                 return (function () {
-                            const result = [];
-                            document.querySelectorAll('div').forEach((el, idx) => {
-                                try {
-                                    const inst = window.echarts.getInstanceByDom(el);
-                                    if (!inst) return;
-                                    const opt = inst.getOption();
-                                    if (!opt.series) return;
-                                    opt.series.forEach((s, sIdx) => {
-                                        // 取前 10 个点做样本
-                                        const sample = (Array.isArray(s.data) ? s.data : [s.data])
-                                                        .slice(0, 20)
-                                                        .map(d => (typeof d === 'object' ? d.value : d));
-                                        result.push({ chart: idx, series: sIdx, sample });
-                                    });
-                                } catch (e) { /* 忽略 */ }
-                            });
-                            return JSON.stringify(result);
-                        })();
-                             
-                  """
-                result = driver.execute_script(detect_script)
+
                 time.sleep(2)
 
-                print("检测结果:", result)
-                thread_safe_update_debug_label(f"检测结果：{result[:20]}")
-
-                if "87" in result:
-                    print("\n❌数据加载异常")
-                    errocontent = (
-                        f"Event: BY-01-EMS_StatusCheck\n"
-                        f"State: Alarm!\n"
-                        f"CheckUrl: {driver.current_url}\n"
-                        f"Message:网站全是默认值，可能未收到真实数据，请检查！\n"
-                        f"Result: {result[20]}\n"
-                        f"WebSiteState: Accessible"
+                # thread_safe_update_debug_label(f"检测结果：{result[:20]}")
+                #  ==================================================== #
+                # 第二种检测ws完整地址方法2-模块化
+                # 检测WS URL
+                ws_url = get_ws_url(driver)
+                if ws_url:
+                    thread_safe_update_debug_label(
+                        f"✅ 获取到的 WebSocket 完整地址：{ws_url[30]}"
                     )
-                    if getDataCounts >= dingtalk_times:
-                        print(f"发送的数据：{errocontent}")
-                        send_dingtalk_msg(errocontent)
-                        getDataCounts = 0
-                        thread_safe_update_debug_label("推送故障钉钉消息完成...")
-                    else:
-                        print(
-                            f"\n ⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
-                        )
-                        thread_safe_update_debug_label(
-                            f"⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
-                        )
-                        getDataCounts += 1
-                        print(f"✅已间隔次数 = {getDataCounts}")
-                else:
-                    print(f"\n✅ 数据加载正常,{getDataCounts}")
 
-                    if getDataCounts >= 1:  # 正常要比故障长20倍
-                        Content = (
+                    ws_monitor = EmsWsMonitor(ws_url, timeout=30)
+                    status = ws_monitor.start()  # True=收到数据
+                    if status == "ok":
+                        print("✅ 网站数据正常")
+                        thread_safe_update_debug_label(f"✅ 网站实时数据正常")
+                        print(f"\n✅ 数据加载正常,{getDataCounts}")
+                        if getDataCounts >= 1:  # 正常要比故障长20倍
+                            Content = (
+                                f"Event: BY-01-EMS_StatusCheck\n"
+                                f"State: Normal!\n"
+                                f"CheckUrl: {driver.current_url}\n"
+                                f"Message:网站数据正常，收到真实数据，请检查！\n"
+                                f"WebSiteState: Accessible！"
+                            )
+
+                            faultTime = (loop_interval + (load_wait_time * 4) + 26) * 10
+                            thread_safe_update_debug_label(
+                                f"正常状态推送间隔时长:" + str(faultTime) + "秒"
+                            )
+                            print(f"正常状态推送间隔时长:" + str(faultTime) + "秒")
+                            print(f"发送的数据2：{Content}")
+                            send_dingtalk_msg(Content)
+                            getDataCounts = 0
+                            thread_safe_update_debug_label("正常状态推送定消息完成...")
+                        else:
+                            print(
+                                f"\n ⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                            )
+                            thread_safe_update_debug_label(
+                                f"⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                            )
+                            getDataCounts += 1
+                    elif status == "empty":
+                        print("⚠️ 网站可访问但数据为空/默认值")
+                        thread_safe_update_debug_label(f"❌ 网站实时数据异常")
+                        errocontent = (
                             f"Event: BY-01-EMS_StatusCheck\n"
-                            f"State: Normal!\n"
+                            f"State: Alarm!\n"
                             f"CheckUrl: {driver.current_url}\n"
-                            f"Message:网站数据正常，收到真实数据，请检查！\n"
-                            f"Result: {result[:20]}\n"
-                            f"WebSiteState: Accessible！"
+                            f"Message:网站全是默认值或空值，可能未收到真实数据，请检查！\n"
+                            f"WebSiteState: Accessible"
                         )
-                     
-                        faultTime = (loop_interval + (load_wait_time * 4) + 26) * 10
-                        thread_safe_update_debug_label(
-                            f"正常状态推送间隔时长:" + str(faultTime) + "秒"
+                        if getDataCounts >= dingtalk_times:   # 正常的比故障长20倍
+                            print(f"发送的数据：{errocontent}")
+                            send_dingtalk_msg(errocontent)
+                            getDataCounts = 0
+                            thread_safe_update_debug_label("推送故障钉钉消息完成...")
+                        else:
+                            print(
+                              f"\n ⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                          )
+                            thread_safe_update_debug_label(
+                              f"⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                          )
+                            getDataCounts += 1
+                            print(f"✅已间隔次数 = {getDataCounts}")
+                    elif status == "no_msg":
+                        print("❌ 超时未收到任何推送,网站异常")
+                        thread_safe_update_debug_label(f"❌ 网站实时数据异常")
+                        errocontent = (
+                            f"Event: BY-01-EMS_StatusCheck\n"
+                            f"State: Alarm!\n"
+                            f"CheckUrl: {driver.current_url}\n"
+                            f"Message:网站请求数据超时，请检查！\n"
+                            f"WebSiteState: Accessible"
                         )
-                        print(f"正常状态推送间隔时长:" + str(faultTime) + "秒")
-                        print(f"发送的数据2：{Content}")
-                        send_dingtalk_msg(Content)
-                        getDataCounts = 0
-                        thread_safe_update_debug_label("正常状态推送定消息完成...")
-                    else:
-                        print(
-                            f"\n ⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                        if getDataCounts >= dingtalk_times:   # 正常的比故障长20倍
+                            print(f"发送的数据：{errocontent}")
+                            send_dingtalk_msg(errocontent)
+                            getDataCounts = 0
+                            thread_safe_update_debug_label("推送故障钉钉消息完成...")
+                        else:
+                            print(
+                              f"\n ⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                          )
+                            thread_safe_update_debug_label(
+                              f"⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                          )
+                            getDataCounts += 1
+                            print(f"✅已间隔次数 = {getDataCounts}")
+                    elif status == "no_ws":
+                        print("❌ WebSocket 连接失败")
+                        thread_safe_update_debug_label(f"❌ 网站连接异常")
+                        errocontent = (
+                            f"Event: BY-01-EMS_StatusCheck\n"
+                            f"State: Alarm!\n"
+                            f"CheckUrl: {driver.current_url}\n"
+                            f"Message:网站WS数据连接失败，请检查！\n"
+                            f"WebSiteState: Accessible"
                         )
-                        thread_safe_update_debug_label(
-                            f"⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
-                        )
-                        getDataCounts += 1
+                        if getDataCounts >= dingtalk_times:  # 正常的比故障长20倍
+                            print(f"发送的数据：{errocontent}")
+                            send_dingtalk_msg(errocontent)
+                            getDataCounts = 0
+                            thread_safe_update_debug_label("推送故障钉钉消息完成...")
+                        else:
+                            print(
+                                f"\n ⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                            )
+                            thread_safe_update_debug_label(
+                                f"⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                            )
+                            getDataCounts += 1
+                            print(f"✅已间隔次数 = {getDataCounts}")
+
+                else:
+                    print("❌ 未捕获到WebSocket URL")
+
+                # ========================================
+
                 driver.refresh()
                 print("\n✅ 刷新页面")
                 print(
