@@ -1,9 +1,7 @@
-
-
-
 import tkinter as tk
 from tkinter import ttk, messagebox
 import json, os, datetime
+# import tkinter as tk      # 记得已经 import 过就不用再写
 
 
 class SettingsWindow:
@@ -65,10 +63,9 @@ class SettingsWindow:
             with open(self.cfg_path, "w", encoding="utf-8") as f:
                 json.dump(self.cfg, f, ensure_ascii=False, indent=4)
 
-            self._log("配置保存成功")
+            self._log("配置保存成功")#传递到调试标签
             messagebox.showinfo("提示", "配置保存成功!")
-
-            if self.callback:
+            if self.callback: 
                 self.callback()  # 唤醒主线程
 
         except ValueError:
@@ -134,18 +131,33 @@ class SettingsWindow:
 
         # 按钮
         btn = ttk.Frame(m)
-        btn.grid(row=10, column=0, columnspan=2, pady=15)
-        ttk.Button(btn, text="保存并开始运行", command=self._save_cfg).pack(
-            side=tk.LEFT, padx=10
+        btn.grid(row=10, column=0, columnspan=2, padx=5, pady=15)
+        ttk.Button(btn, text="保存并开始运行",  command=self._save_cfg).pack(
+            side=tk.LEFT, padx=10, pady=( 5)
         )
-        ttk.Button(btn, text="停止执行", command=self._stop).pack(side=tk.LEFT, padx=10)
+        ttk.Button(btn, text="停止执行", command=self._stop).pack(side=tk.LEFT, pady=( 5),padx=10)
 
         # 日志
-        ttk.Label(m, text="调试:").grid(row=11, column=0, sticky="w")
-        self.log_lbl = ttk.Label(m, text="", width=32)
-        self.log_lbl.grid(row=11, column=1, sticky="w")
+        for r in range(0, 13):
+         m.rowconfigure(r, weight=1)   # 行 0~9 会被“撑开”
+          # ↳ m 是整个主 frame  
+        debug_frame = ttk.Frame(m)
+        # debug_frame.pack(side="bottom", fill="x")   # 始终贴底、横向铺满
+        # debug_frame = ttk.Frame(m)
+        debug_frame.grid(row=13, column=0, columnspan=2, sticky="w", padx=2, pady=2)
+        ttk.Label(debug_frame, text="调试:").pack(side="left")
+        self.log_lbl = tk.Label(
+            debug_frame,
+            text="",
+            width=50,
+            anchor="w",
+            # relief="solid",
+            borderwidth=1,
+        )
+        self.log_lbl.pack(side="left", padx=2,pady=2)
+        self.log_lbl.config(font=("Consolas", 8))  
 
-        m.columnconfigure(1, weight=1)
+        m.columnconfigure(1, weight=1)  # 让第二列拉伸
 
     # ------------------------------------------------------------------
     # 事件
@@ -158,3 +170,8 @@ class SettingsWindow:
 
     def _log(self, msg):
         self.log_lbl.config(text=f"{msg}  {datetime.datetime.now():%H:%M:%S}")
+    
+    # 更新调试标签
+    def update_debug_label(self, text):
+        # 将传入的文本设置为调试标签的文本
+        self.log_lbl.config(text=text)

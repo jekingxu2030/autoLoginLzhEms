@@ -36,3 +36,177 @@ pyinstaller --clean --noconfirm autoLogin.spec
 3. 如果验证码识别失败三次，会弹出输入框请求手动输入
 4. 可以随时点击"停止监控"按钮结束监控
 5. 所有操作日志都会实时显示在主界面
+
+
+钉钉接口官例子：
+
+
+POST https://oapi.dingtalk.com/robot/send?access_token=ACCESS_TOKEN
+{
+  "msgtype": "text", // 消息类型，可为 text、link、markdown、actionCard、feedCard
+  "text": {
+    "content": "这是一条文本消息内容"
+  },
+  "link": {
+    "messageUrl": "https://www.example.com", // 跳转链接
+    "picUrl": "https://example.com/image.png", // 图片链接
+    "text": "这是一条链接消息内容", // 消息内容
+    "title": "链接消息标题" // 消息标题
+  },
+  "markdown": {
+    "title": "Markdown消息标题",
+    "text": "#### 这是Markdown消息内容 \n ![图片](https://example.com/image.png)"
+  },
+  "actionCard": {
+    "title": "ActionCard消息标题",
+    "text": "#### 这是ActionCard内容 \n ![图片](https://example.com/image.png)",
+    "btnOrientation": "0", // 0-按钮竖直排列，1-按钮横向排列
+    "singleTitle": "阅读全文", // 单个按钮标题
+    "singleURL": "https://www.example.com", // 单个按钮跳转链接
+    "btns": [
+      {
+        "title": "按钮1",
+        "actionURL": "https://www.example.com/btn1"
+      },
+      {
+        "title": "按钮2",
+        "actionURL": "https://www.example.com/btn2"
+      }
+    ]
+  },
+  "feedCard": {
+    "links": [
+      {
+        "title": "FeedCard标题1",
+        "messageURL": "https://www.example.com/1",
+        "picURL": "https://example.com/image1.png"
+      },
+      {
+        "title": "FeedCard标题2",
+        "messageURL": "https://www.example.com/2",
+        "picURL": "https://example.com/image2.png"
+      }
+    ]
+  },
+  "at": {
+    "isAtAll": false, // 是否@所有人
+    "atUserIds": ["user001", "user002"], // 被@的用户ID列表
+    "atMobiles": ["15xxx", "18xxx"] // 被@的手机号列表
+  }
+}
+
+
+
+
+   # Content = {
+                        #     "title": "EMS 状态检查通知",
+                        #     "text": (
+                        #         f"Event: BY-01-EMS_StatusCheck\n"
+                        #         f"State: Normal!\n"
+                        #         f"CheckUrl: {driver.current_url}\n"
+                        #         f"Message:网站数据正常，收到真实数据，请检查！\n"
+                        #         f"Result: {result[:20]}\n"
+                        #         f"WebSiteState: Accessible！"
+                        #     ),
+                        #     "messageUrl": "http://ems.hy-power.net:8114/login",  # 点击跳转链接
+                        #     "picUrl": "http://ems.hy-power.net:8114/favicon.ico",  # 可以留空或者放图片链接
+                        # }
+                        
+                        
+                        
+ # return (function() {
+                  #     if (!window.echarts || !window.echarts.getInstanceByDom) {
+                  #         return 'ECharts 未定义或未加载';
+                  #     }
+                  #     const charts = [];
+                  #     document.querySelectorAll('div').forEach(el => {
+                  #         try {
+                  #             const chart = window.echarts.getInstanceByDom(el);
+                  #             if (chart) charts.push(chart);
+                  #         } catch (e) {
+                  #         return e;
+                  #         }
+                  #     });
+                  #     if (charts.length === 0) return '未找到图表实例';
+                  #     let allDefault = true;
+                  #     charts.forEach(chart => {
+                  #         const option = chart.getOption();
+                  #         if (option && option.series) {
+                  #             option.series.forEach(series => {
+                  #                 if (series.data) {
+                  #                     const data = Array.isArray(series.data) ? series.data : [series.data];
+                  #                     data.forEach(item => {
+                  #                         const value = typeof item === 'object' ? item.value : item;
+                  #                         if (value !== 87) allDefault = false;
+                  #                     });
+                  #                 }
+                  #             });
+                  #         }
+                  #     });
+                  #     return allDefault ? '所有数据均为默认值87' : '检测到真实数据';
+                  # })();
+                  
+                  # -----测试OK的
+                        # return (function () {
+                        #     const result = [];
+                        #     document.querySelectorAll('div').forEach((el, idx) => {
+                        #         try {
+                        #             const inst = window.echarts.getInstanceByDom(el);
+                        #             if (!inst) return;
+                        #             const opt = inst.getOption();
+                        #             if (!opt.series) return;
+                        #             opt.series.forEach((s, sIdx) => {
+                        #                 // 取前 10 个点做样本
+                        #                 const sample = (Array.isArray(s.data) ? s.data : [s.data])
+                        #                                 .slice(0, 10)
+                        #                                 .map(d => (typeof d === 'object' ? d.value : d));
+                        #                 result.push({ chart: idx, series: sIdx, sample });
+                        #             });
+                        #         } catch (e) { /* 忽略 */ }
+                        #     });
+                        #     return JSON.stringify(result);
+                        # })();
+                        
+                        
+                        
+                        
+                                       return (function () {
+                            var result = [];
+                            var divs = document.getElementsByTagName('div');
+
+                            for (var i = 0; i < divs.length; i++) {
+                                var el = divs[i];
+                                try {
+                                    var inst = window.echarts && window.echarts.getInstanceByDom
+                                              ? window.echarts.getInstanceByDom(el)
+                                              : null;
+                                    if (!inst) continue;
+
+                                    var opt = inst.getOption();
+                                    if (!opt || !opt.series) continue;
+
+                                    for (var s = 0; s < opt.series.length; s++) {
+                                        var series = opt.series[s];
+                                        var dataArr = series.data;
+                                        if (!dataArr) continue;
+
+                                        // 统一成数组
+                                        if (!Array.isArray(dataArr)) dataArr = [dataArr];
+
+                                        // 取前 10 个样本
+                                        var sample = [];
+                                        for (var k = 0; k < Math.min(10, dataArr.length); k++) {
+                                            var item = dataArr[k];
+                                            if (typeof item === 'object' && item !== null) {
+                                                sample.push(item.value);
+                                            } else {
+                                                sample.push(item);
+                                            }
+                                        }
+
+                                        result.push({ chart: i, series: s, sample: sample });
+                                    }
+                                } catch (e) { /* 忽略单个图的异常 */ }
+                            }
+                            return JSON.stringify(result);
+                        })();

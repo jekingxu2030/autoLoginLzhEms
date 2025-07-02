@@ -11,6 +11,12 @@ import tkinter as tk
 from settings_window import SettingsWindow
 from dingtalk_notify import send_dingtalk_msg
 from email_sender import send_email
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+import time
+import json
+from selenium.webdriver import Chrome
 
 # === 路径 ===
 config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
@@ -21,14 +27,28 @@ os.makedirs(JS_SAVE_DIR, exist_ok=True)
 stop_event = threading.Event()
 running_event = threading.Event()
 
+# 配置 Chrome 允许获取性能日志
+caps = DesiredCapabilities.CHROME
+caps["goog:loggingPrefs"] = {"performance": "ALL"}
+
+options = Options()
+driver = Chrome(options=options, capabilities=caps)
+
 # === 全局变量 ===
-driver = None
+# driver = None
 settings_window = None
+stop_event = threading.Event()
+config_ready = threading.Event()
+
+
+def thread_safe_update_debug_label(text):
+    settings_window.log_lbl.after(0, lambda: settings_window.update_debug_label(text))
 
 
 # === 主执行函数（登录 + 探测） ===
 def main_logic():
     try:
+
         with open(config_path, "r", encoding="utf-8") as f:
             config = json.load(f)
 
@@ -48,6 +68,7 @@ def main_logic():
 
         driver.get("http://ems.hy-power.net:8114/login")
         # settings_window.update_debug_label("登录中...")
+        thread_safe_update_debug_label("请求网页中...")
         time.sleep(load_wait_time * 2)
 
         driver.execute_script(
@@ -58,6 +79,7 @@ def main_logic():
         canvas = driver.find_element(By.ID, "canvas")
         verification_code = canvas.get_attribute("verificationcode")
         print("\n✅[验证码] =", verification_code)
+        thread_safe_update_debug_label(f"✅[验证码] ={verification_code}")
 
         driver.find_element(By.ID, "form_item_username").send_keys(username)
         driver.find_element(By.ID, "form_item_password").send_keys(password)
@@ -100,7 +122,7 @@ def main_logic():
             """
         )
         print("\n" + json.dumps(session_storage, indent=2, ensure_ascii=False))
-
+        thread_safe_update_debug_label("缓存参数获取或设置完毕，开始探测内容...")
         print("✅ 登录成功，开始循环检测...")
 
         getDataCounts = 0
@@ -108,9 +130,11 @@ def main_logic():
         while not stop_event.is_set():
             try:
                 print(f"\n当前页面: {driver.current_url}")
+                thread_safe_update_debug_label(f"\n当前页面: {driver.current_url}")
 
                 driver.execute_script("window.scrollBy(0, 10);")
                 driver.execute_script("window.dispatchEvent(new Event('mousemove'))")
+                thread_safe_update_debug_label("模拟网页操作，防止掉线...")
 
                 WebDriverWait(driver, 20).until(
                     lambda d: d.execute_script("return document.readyState")
@@ -135,110 +159,136 @@ def main_logic():
 
                 time.sleep(load_wait_time + 20)
                 detect_script = """
-                  return (function() {
-                      if (!window.echarts || !window.echarts.getInstanceByDom) {
-                          return 'ECharts 未定义或未加载';
-                      }
-                      const charts = [];
-                      document.querySelectorAll('div').forEach(el => {
-                          try {
-                              const chart = window.echarts.getInstanceByDom(el);
-                              if (chart) charts.push(chart);
-                          } catch (e) {
-                          return e;
-                          }
-                      });
-                      if (charts.length === 0) return '未找到图表实例';
-                      let allDefault = true;
-                      charts.forEach(chart => {
-                          const option = chart.getOption();
-                          if (option && option.series) {
-                              option.series.forEach(series => {
-                                  if (series.data) {
-                                      const data = Array.isArray(series.data) ? series.data : [series.data];
-                                      data.forEach(item => {
-                                          const value = typeof item === 'object' ? item.value : item;
-                                          if (value !== 87) allDefault = false;
-                                      });
-                                  }
-                              });
-                          }
-                      });
-                      return allDefault ? '所有数据均为默认值87' : '检测到真实数据';
-                  })();
+                                 return (function () {
+                            const result = [];
+                            document.querySelectorAll('div').forEach((el, idx) => {
+                                try {
+                                    const inst = window.echarts.getInstanceByDom(el);
+                                    if (!inst) return;
+                                    const opt = inst.getOption();
+                                    if (!opt.series) return;
+                                    opt.series.forEach((s, sIdx) => {
+                                        // 取前 10 个点做样本
+                                        const sample = (Array.isArray(s.data) ? s.data : [s.data])
+                                                        .slice(0, 20)
+                                                        .map(d => (typeof d === 'object' ? d.value : d));
+                                        result.push({ chart: idx, series: sIdx, sample });
+                                    });
+                                } catch (e) { /* 忽略 */ }
+                            });
+                            return JSON.stringify(result);
+                        })();
+                             
                   """
                 result = driver.execute_script(detect_script)
+                time.sleep(2)
+
                 print("检测结果:", result)
+                thread_safe_update_debug_label(f"检测结果：{result[:20]}")
 
                 if "87" in result:
-                    content = (
-                        f"evente: BY-EMS-01-系统可用性探测通知\n"
-                        f"state: Alarm\警告!\n"
-                        f"checkUrl: {driver.current_url}\n"
-                        f"message: ⚠️ 警告: 网站全是默认值，可能未收到真实数据，请检查！\n"
-                        f"result: {result}\n"
-                        f"webSiteState: Accessible\访问正常"
+                    print("\n❌数据加载异常")
+                    errocontent = (
+                        f"Event: BY-01-EMS_StatusCheck\n"
+                        f"State: Alarm!\n"
+                        f"CheckUrl: {driver.current_url}\n"
+                        f"Message:网站全是默认值，可能未收到真实数据，请检查！\n"
+                        f"Result: {result[20]}\n"
+                        f"WebSiteState: Accessible"
                     )
                     if getDataCounts >= dingtalk_times:
-                        send_dingtalk_msg(content)
+                        print(f"发送的数据：{errocontent}")
+                        send_dingtalk_msg(errocontent)
                         getDataCounts = 0
+                        thread_safe_update_debug_label("推送故障钉钉消息完成...")
                     else:
                         print(
-                            f"\n❌还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                            f"\n ⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                        )
+                        thread_safe_update_debug_label(
+                            f"⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
                         )
                         getDataCounts += 1
                         print(f"✅已间隔次数 = {getDataCounts}")
                 else:
-                    print("\n✅ 数据加载正常")
-                    ErrorContent = (
-                    f"event: BY-EMS-01-系统可用性探测通知\n"
-                    f"state: Normal\正常!\n"
-                    f"checkUrl: {driver.current_url}\n"
-                    f"message: ⚠️ 警告: 网站全是默认值，可能未收到真实数据，请检查！\n"
-                    f"result: {result}\n"
-                    f"webSiteState: Accessible\访问正常！"
-                    )
-                    if getDataCounts >= dingtalk_times * 20:
-                        send_dingtalk_msg(ErrorContent)
+                    print(f"\n✅ 数据加载正常,{getDataCounts}")
+
+                    if getDataCounts >= 1:  # 正常要比故障长20倍
+                        Content = (
+                            f"Event: BY-01-EMS_StatusCheck\n"
+                            f"State: Normal!\n"
+                            f"CheckUrl: {driver.current_url}\n"
+                            f"Message:网站数据正常，收到真实数据，请检查！\n"
+                            f"Result: {result[:20]}\n"
+                            f"WebSiteState: Accessible！"
+                        )
+                     
+                        faultTime = (loop_interval + (load_wait_time * 4) + 26) * 10
+                        thread_safe_update_debug_label(
+                            f"正常状态推送间隔时长:" + str(faultTime) + "秒"
+                        )
+                        print(f"正常状态推送间隔时长:" + str(faultTime) + "秒")
+                        print(f"发送的数据2：{Content}")
+                        send_dingtalk_msg(Content)
                         getDataCounts = 0
+                        thread_safe_update_debug_label("正常状态推送定消息完成...")
                     else:
                         print(
-                         f"\n❌还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
-                       )
-
+                            f"\n ⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                        )
+                        thread_safe_update_debug_label(
+                            f"⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                        )
+                        getDataCounts += 1
                 driver.refresh()
                 print("\n✅ 刷新页面")
-                print(f"\n等待 {loop_interval+(load_wait_time*4)+26} 秒后执行下一次循环...")
+                print(
+                    f"\n等待 {loop_interval+(load_wait_time*4)+26} 秒后执行下一次循环..."
+                )
+                thread_safe_update_debug_label(
+                    f"等待 {loop_interval+(load_wait_time*4)+26} 秒后执行下一次循环..."
+                )
                 time.sleep(loop_interval)
 
             except Exception as e:
                 print("循环错误:", e)
+                thread_safe_update_debug_label(f"❌循环错误" + str(e))
 
     except Exception as e:
         print("主逻辑异常:", e)
+        thread_safe_update_debug_label(f"❌主逻辑异常" + str(e))
     finally:
         if driver:
+            thread_safe_update_debug_label(f"❌线程退出,关闭浏览器...")
+            print("⚠️线程退出")
             driver.quit()
-        print("✅ 线程退出")
 
 
 # === 设置窗口线程 ===
+# 定义一个run_settings函数，用于运行设置窗口
 def run_settings():
+    # 声明一个全局变量settings_window
     global settings_window
+    # 创建一个Tkinter窗口
     root = tk.Tk()
+    # 创建一个SettingsWindow对象，并传入root、callback和stop_event参数
     settings_window = SettingsWindow(
         root, callback=start_main_logic, stop_event=stop_event
     )
+    # 进入Tkinter的主循环
     root.mainloop()
 
 
 # === 回调触发主逻辑 ===
 def start_main_logic():
+    # 如果running_event没有设置，则启动主线程
     if not running_event.is_set():
+        # 创建一个线程，目标函数为main_logic，设置为守护线程
         logic_thread = threading.Thread(target=main_logic, daemon=True)
         logic_thread.start()
         running_event.set()
         print("🚀 主线程已启动")
+        thread_safe_update_debug_label("🚀主线程已启动")
 
 
 if __name__ == "__main__":
