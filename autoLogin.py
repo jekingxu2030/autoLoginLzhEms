@@ -2,7 +2,6 @@ import json
 import os
 import time
 import threading
-from urllib.parse import urljoin, urlparse
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -12,11 +11,9 @@ from settings_window import SettingsWindow
 from dingtalk_notify import send_dingtalk_msg
 from email_sender import send_email
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 import time
 import json
-from selenium.webdriver import Chrome
+from selenium import webdriver
 
 # === 路径 ===
 config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
@@ -27,15 +24,11 @@ os.makedirs(JS_SAVE_DIR, exist_ok=True)
 stop_event = threading.Event()
 running_event = threading.Event()
 
-# 配置 Chrome 允许获取性能日志
-caps = DesiredCapabilities.CHROME
-caps["goog:loggingPrefs"] = {"performance": "ALL"}
+ 
 
-options = Options()
-driver = Chrome(options=options, capabilities=caps)
 
 # === 全局变量 ===
-# driver = None
+driver = None
 settings_window = None
 stop_event = threading.Event()
 config_ready = threading.Event()
@@ -125,7 +118,20 @@ def main_logic():
         thread_safe_update_debug_label("缓存参数获取或设置完毕，开始探测内容...")
         print("✅ 登录成功，开始循环检测...")
 
-        getDataCounts = 0
+
+        def get_ws_url():
+            logs = driver.get_log('performance')
+            for entry in logs:
+                message = json.loads(entry['message'])['message']
+                if message['method'] == 'Network.webSocketCreated':
+                    ws_url = message['params']['url']
+                    print("捕获到WebSocket URL:", ws_url)
+                    return ws_url
+
+        ws_url = get_ws_url()
+        print("✅ 获取到的 WebSocket 完整地址：", ws_url)
+
+        getDataCounts = 0   #正常状态下推送间隔时间
 
         while not stop_event.is_set():
             try:
