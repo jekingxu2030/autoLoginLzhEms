@@ -19,6 +19,9 @@ python autoLogin.py
 打包exe
 ```bash
 pyinstaller autoLogin.py
+
+最新打包方法：
+pyinstaller --clean --noconfirm autoLogin.spec
 执行打包后的程序
 .\dist\XXX.exe
 ## 功能说明

@@ -1,211 +1,154 @@
 import json
-from re import S
-import wsgiref
 import os
-import json
 import time
-import requests
+import threading
 from urllib.parse import urljoin, urlparse
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from Crypto.Cipher import AES
-import base64
-from Crypto.Util.Padding import pad
-import tkinter as tk
-from settings_window import SettingsWindow
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import tkinter as tk
+from settings_window import SettingsWindow
 from dingtalk_notify import send_dingtalk_msg
+from email_sender import send_email
 
-# 全局变量：存储登录状态码
-LOGIN_STATUS_CODE = None
-
-# 读取配置文件
+# === 路径 ===
 config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
-
-import threading
-stop_event = threading.Event()  # ← 任何线程都可以 set() 它
-# 运行设置窗口的函数
-def run_settings_window():
-    root = tk.Tk()
-    app = SettingsWindow(root, callback=on_config_saved)
-    root.mainloop()
-
-# 在单独线程中启动设置窗口
-settings_thread = threading.Thread(target=run_settings_window, daemon=True)
-def on_config_saved():
-    # 重新读取配置文件
-    global config, username, password, load_wait_time
-    with open(config_path, 'r', encoding='utf-8') as f:
-        config = json.load(f)
-    username = config['account']['username']
-    password = config['account']['password']
-    load_wait_time = config['timing']['load_wait_time']
-
-    # === 初始化 Chrome 浏览器 ===
-    options = webdriver.ChromeOptions()
-    options.add_argument("--start-maximized")
-    # driver = webdriver.Chrome(options=options)
-
-
-settings_thread.start()
-
-# 等待配置保存后执行后续逻辑
-with open(config_path, "r", encoding="utf-8") as f:
-    config = json.load(f)
-
-# 从配置中获取参数
-# 等待线程完成（保持主线程运行）
-while settings_thread.is_alive():
-    time.sleep(0.5)
-username = config["account"]["username"]
-password = config["account"]["password"]
-load_wait_time = config["timing"]["load_wait_time"]
-loop_interval = config["timing"]["loop_interval"]
-dingtalk_times= config["timing"]["dingtalk_times"]
-ws_token_key = config["encryption"]["ws_token_key"].encode("utf-8")
-
-# === 初始化 Chrome 浏览器（可视） ===
-options = webdriver.ChromeOptions()
-options.add_argument("--start-maximized")
-# 启用性能日志以捕获网络请求状态
-options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
-driver = webdriver.Chrome(options=options)
-
-# === 下载 JS 文件的存储目录 ===
 JS_SAVE_DIR = "./downloaded_js"
 os.makedirs(JS_SAVE_DIR, exist_ok=True)
 
+# === 状态 ===
+stop_event = threading.Event()
+running_event = threading.Event()
 
-try:
-    # === Step 1: 打开登录页 ===
-    driver.get("http://ems.hy-power.net:8114/login")
-    time.sleep(load_wait_time)
+# === 全局变量 ===
+driver = None
+settings_window = None
 
-    # 设置localStorage中的emsId
-    driver.execute_script(
-        "localStorage.setItem('local-power-station-active-emsId', 'E6F7D5412A20');"
-    )
 
-    # === Step 2: 获取验证码 ===
-    canvas = driver.find_element(By.ID, "canvas")
-    verification_code = canvas.get_attribute("verificationcode")
-    print("\n✅[验证码] =", verification_code)
+# === 主执行函数（登录 + 探测） ===
+def main_logic():
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = json.load(f)
 
-    # === Step 3: 填写账号密码验证码 ===
-    driver.find_element(By.ID, "form_item_username").clear()
-    driver.find_element(By.ID, "form_item_username").send_keys(username)
+        username = config["account"]["username"]
+        password = config["account"]["password"]
+        load_wait_time = config["timing"]["load_wait_time"]
+        loop_interval = config["timing"]["loop_interval"]
+        dingtalk_times = config["timing"]["dingtalk_times"]
+        # ws_token_key = config["encryption"]["ws_token_key"].encode("utf-8")
 
-    driver.find_element(By.ID, "form_item_password").clear()
-    driver.find_element(By.ID, "form_item_password").send_keys(password)
+        # === 浏览器设置 ===
+        global driver
+        options = webdriver.ChromeOptions()
+        options.add_argument("--start-maximized")
+        options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
+        driver = webdriver.Chrome(options=options)
 
-    driver.find_element(By.CSS_SELECTOR, 'input[placeholder="请输入验证码"]').send_keys(
-        verification_code
-    )
+        driver.get("http://ems.hy-power.net:8114/login")
+        # settings_window.update_debug_label("登录中...")
+        time.sleep(load_wait_time * 2)
 
-    # === Step 4: 提交登录表单 ===
-    login_button = driver.find_element(By.CSS_SELECTOR, "form.login-form button")
-    login_button.click()
+        driver.execute_script(
+            "localStorage.setItem('local-power-station-active-emsId', 'E6F7D5412A20');"
+        )
 
-    # === Step 5: 等待登录后页面加载完成 ===
-    time.sleep(load_wait_time*2)
+        # === 登录流程 ===
+        canvas = driver.find_element(By.ID, "canvas")
+        verification_code = canvas.get_attribute("verificationcode")
+        print("\n✅[验证码] =", verification_code)
 
-    # === Step 6: 打印 cookie、localStorage、sessionStorage ===
-    print("\n✅ [Cookies]:")
-    for cookie in driver.get_cookies():
-        print(f"\n{cookie['name']} = {cookie['value']}")
+        driver.find_element(By.ID, "form_item_username").send_keys(username)
+        driver.find_element(By.ID, "form_item_password").send_keys(password)
+        driver.find_element(
+            By.CSS_SELECTOR, 'input[placeholder="请输入验证码"]'
+        ).send_keys(verification_code)
+        time.sleep(2)
+        driver.find_element(By.CSS_SELECTOR, "form.login-form button").click()
 
-    print("\n✅ [localStorage]:")
-    time.sleep(2)
-    local_storage = driver.execute_script(
-        """
-        let items = {};
-        for (let i = 0; i < localStorage.length; i++) {
-            let k = localStorage.key(i);
-            items[k] = localStorage.getItem(k);
-        }
-        return items;
-        """
-    )
-    print(json.dumps(local_storage, indent=2, ensure_ascii=False))
+        time.sleep(load_wait_time * 1)
 
-    print("\n✅ [sessionStorage]:")
-    time.sleep(2)
-    session_storage = driver.execute_script(
-        """
-        let items = {};
-        for (let i = 0; i < sessionStorage.length; i++) {
-            let k = sessionStorage.key(i);
-            items[k] = sessionStorage.getItem(k);
-        }
-        return items;
-        """
-    )
-    print("\n" + json.dumps(session_storage, indent=2, ensure_ascii=False))
+        print("\n✅ [Cookies]:")
+        for cookie in driver.get_cookies():
+            print(f"\n{cookie['name']} = {cookie['value']}")
 
-    print("\n✅ [当前页面 URL]:", driver.current_url)
+        print("\n✅ [localStorage]:")
+        time.sleep(2)
+        local_storage = driver.execute_script(
+            """
+            let items = {};
+            for (let i = 0; i < localStorage.length; i++) {
+                let k = localStorage.key(i);
+                items[k] = localStorage.getItem(k);
+            }
+            return items;
+            """
+        )
+        print(json.dumps(local_storage, indent=2, ensure_ascii=False))
 
-    # === Step 7: 提取所有 JS 脚本 URL ===
-    script_elements = driver.find_elements(By.TAG_NAME, "script")
-    time.sleep(2)
+        print("\n✅ [sessionStorage]:")
+        time.sleep(2)
+        session_storage = driver.execute_script(
+            """
+            let items = {};
+            for (let i = 0; i < sessionStorage.length; i++) {
+                let k = sessionStorage.key(i);
+                items[k] = sessionStorage.getItem(k);
+            }
+            return items;
+            """
+        )
+        print("\n" + json.dumps(session_storage, indent=2, ensure_ascii=False))
 
-    js_urls = []
-    for script in script_elements:
-        src = script.get_attribute("src")
-        if src:
-            full_url = urljoin(driver.current_url, src)
-            js_urls.append(full_url)
+        print("✅ 登录成功，开始循环检测...")
 
-    # print(f"\n🧠 共发现 {len(js_urls)} 个 JS 文件，开始下载...\n")
+        getDataCounts = 0
 
-    # === Step 8: 下载 JS 文件 ===
-    for idx, js_url in enumerate(js_urls, 1):
-        try:
-            print(f"\n🔽 [{idx}/{len(js_urls)}] 下载: {js_url}")
-            # resp = requests.get(js_url, timeout=10)
-            # filename = os.path.basename(urlparse(js_url).path)
-            # if not filename.endswith(".js"):
-            #     filename = f"script_{idx}.js"
-            # file_path = os.path.join(JS_SAVE_DIR, filename)
-            # with open(file_path, "w", encoding="utf-8") as f:
-            #     f.write(resp.text)
-        except Exception as e:
-            print(f"\n❌ 下载失败: {js_url} 错误: {e}")
+        while not stop_event.is_set():
+            try:
+                print(f"\n当前页面: {driver.current_url}")
 
-    # print(f"\n✅ 所有 JS 文件已保存到：{os.path.abspath(JS_SAVE_DIR)}")
-    print("\n🟢 登录已完成...")
-    # ===循环检测网页内容===================
-    getDataCounts=0;
-    # 循环执行标志
-    continue_running = True
+                driver.execute_script("window.scrollBy(0, 10);")
+                driver.execute_script("window.dispatchEvent(new Event('mousemove'))")
 
-    # while continue_running:
-    while not stop_event.is_set():
+                WebDriverWait(driver, 20).until(
+                    lambda d: d.execute_script("return document.readyState")
+                    == "complete"
+                )
+                WebDriverWait(driver, 100).until(
+                    lambda d: d.execute_script(
+                        "return typeof window.echarts !== 'undefined'"
+                    )
+                )
+                WebDriverWait(driver, 100).until(
+                    lambda d: d.execute_script(
+                        """
+                    const allElements = document.getElementsByTagName('*');
+                    for (let i = 0; i < allElements.length; i++) {
+                        const instance = window.echarts.getInstanceByDom(allElements[i]);
+                        if (instance) return true;
+                    }
+                    return false;"""
+                    )
+                )
 
-        try:
-
-            # 再获取最新地址
-            print(f"\n✅ 当前页面实际地址：{driver.current_url}")
-
-            # ===================检测完整内容是否是默认数据方法1==================
-            detect_script = """
+                time.sleep(load_wait_time + 20)
+                detect_script = """
                   return (function() {
                       if (!window.echarts || !window.echarts.getInstanceByDom) {
                           return 'ECharts 未定义或未加载';
                       }
-
                       const charts = [];
                       document.querySelectorAll('div').forEach(el => {
                           try {
                               const chart = window.echarts.getInstanceByDom(el);
                               if (chart) charts.push(chart);
                           } catch (e) {
-                              // 忽略错误
+                          return e;
                           }
                       });
-
                       if (charts.length === 0) return '未找到图表实例';
-
                       let allDefault = true;
                       charts.forEach(chart => {
                           const option = chart.getOption();
@@ -221,91 +164,82 @@ try:
                               });
                           }
                       });
-
                       return allDefault ? '所有数据均为默认值87' : '检测到真实数据';
                   })();
                   """
-            # 保持热连接 防止页面跳转
-            driver.execute_script("window.scrollBy(0, 10);")  # 滚动
-            driver.execute_script("window.dispatchEvent(new Event('mousemove'))")  # 模拟鼠标事件
-            # 等待页面加载
-            WebDriverWait(driver, 10).until(
-                lambda d: d.execute_script("return document.readyState") == "complete",
-                message="网页未在10秒内加载完成",
-            )
-            # // 分阶段等待：1. ECharts库加载 2. 图表实例创建
-            WebDriverWait(driver, 40).until(
-                lambda d: d.execute_script(
-                    "return typeof window.echarts !== 'undefined' && typeof window.echarts.getInstanceByDom === 'function'"
-                ),
-                message="ECharts库未在40秒内加载完成",
-            )
-            # // 等待图表实例创建（增加短暂延迟确保数据绑定）
-            WebDriverWait(driver, 40).until(
-                lambda d: d.execute_script(
-                    """
-                      // 查找已初始化的ECharts实例
-                      const allElements = document.getElementsByTagName('*');
-                      for (let i = 0; i < allElements.length; i++) {
-                          const instance = window.echarts.getInstanceByDom(allElements[i]);
-                          if (instance) return true;
-                      }
-                      return false;
-                      """
-                ),
-                message="ECharts图表实例未在40秒内创建",
-            )
-            # // 额外等待数据加载
-            time.sleep(load_wait_time+20)
-            # 执行检测脚本
-            result = driver.execute_script(detect_script)
-            print(f"\n📊 数据检测结果: {result}")
+                result = driver.execute_script(detect_script)
+                print("检测结果:", result)
 
-            if "默认值" in result:
-                print("\n⚠️ 警告: 可能未加载真实数据")
-                content = (
-                    f"Event Type: BY-EMS-01-系统可用性探测通知\n"
-                    f"System Message: Alarm!\n"
+                if "87" in result:
+                    content = (
+                        f"evente: BY-EMS-01-系统可用性探测通知\n"
+                        f"state: Alarm\警告!\n"
+                        f"checkUrl: {driver.current_url}\n"
+                        f"message: ⚠️ 警告: 网站全是默认值，可能未收到真实数据，请检查！\n"
+                        f"result: {result}\n"
+                        f"webSiteState: Accessible\访问正常"
+                    )
+                    if getDataCounts >= dingtalk_times:
+                        send_dingtalk_msg(content)
+                        getDataCounts = 0
+                    else:
+                        print(
+                            f"\n❌还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                        )
+                        getDataCounts += 1
+                        print(f"✅已间隔次数 = {getDataCounts}")
+                else:
+                    print("\n✅ 数据加载正常")
+                    ErrorContent = (
+                    f"event: BY-EMS-01-系统可用性探测通知\n"
+                    f"state: Normal\正常!\n"
                     f"checkUrl: {driver.current_url}\n"
                     f"message: ⚠️ 警告: 网站全是默认值，可能未收到真实数据，请检查！\n"
-                    f"数据检测结果: {result}\n"
-                    f"webSiteState: Accessible"
-                )
-                # payload={"msgtype": "text", "text": {"content": content}}
-                if(getDataCounts>=dingtalk_times):
-                    send_dingtalk_msg(content)
-                else:
-                    print(
-                        f"\n❌还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                    f"result: {result}\n"
+                    f"webSiteState: Accessible\访问正常！"
                     )
-            else:
-                print("\n✅ 数据加载正常")
+                    if getDataCounts >= dingtalk_times * 20:
+                        send_dingtalk_msg(ErrorContent)
+                        getDataCounts = 0
+                    else:
+                        print(
+                         f"\n❌还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                       )
 
-            driver.refresh()  #刷新页面
-            print("\n✅ 刷新页面成功")
+                driver.refresh()
+                print("\n✅ 刷新页面")
+                print(f"\n等待 {loop_interval+(load_wait_time*4)+26} 秒后执行下一次循环...")
+                time.sleep(loop_interval)
 
-            print(f"\n等待 {loop_interval} 秒后执行下一次循环...")
-            time.sleep(loop_interval)    
+            except Exception as e:
+                print("循环错误:", e)
 
-        except Exception as e:
-            # 统一循环出错
-            print(f"\n循环出错...{e}")
+    except Exception as e:
+        print("主逻辑异常:", e)
+    finally:
+        if driver:
+            driver.quit()
+        print("✅ 线程退出")
 
 
-except Exception as e:
-    print("\n⚠️用户中断程序，退出循环...")
-    continue_running = False
+# === 设置窗口线程 ===
+def run_settings():
+    global settings_window
+    root = tk.Tk()
+    settings_window = SettingsWindow(
+        root, callback=start_main_logic, stop_event=stop_event
+    )
+    root.mainloop()
 
-    # 程序结束时关闭浏览器
-    driver.quit()
-    print("\n✅ 程序结束，关闭了浏览器")
-finally:
-    # === Step 9: 保持浏览器窗口打开 ===
-    # input("\n🟢 检测已完成，按回车键关闭浏览器...")  #按回车即可关闭浏览器窗口
 
-    # 程序结束时关闭浏览器
-    driver.quit()
-    print("\n⚠️程序正常跑完结束...")
-    print("⚠️请确保浏览器已关闭...")
-    print("🟢 浏览器已关闭，程序退出")
-    os._exit(0)          # 彻底结束进程，防止残余后台线程
+# === 回调触发主逻辑 ===
+def start_main_logic():
+    if not running_event.is_set():
+        logic_thread = threading.Thread(target=main_logic, daemon=True)
+        logic_thread.start()
+        running_event.set()
+        print("🚀 主线程已启动")
+
+
+if __name__ == "__main__":
+    run_settings()
