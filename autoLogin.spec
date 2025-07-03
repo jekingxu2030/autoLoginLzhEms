@@ -4,9 +4,9 @@
 a = Analysis(
     ['autoLogin.py'],
     pathex=[],
-    binaries=[('Crypto', 'Crypto', 'DATA')],
+    binaries=[],
     datas=[],
-    hiddenimports=['Crypto'],
+    hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
