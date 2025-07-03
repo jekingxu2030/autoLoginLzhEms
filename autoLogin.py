@@ -15,6 +15,8 @@ import time
 import json
 from selenium import webdriver
 from ems_ws_monitor import EmsWsMonitor
+from datetime import datetime
+
 
 # === 路径 ===
 config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
@@ -31,6 +33,14 @@ driver = None
 settings_window = None
 stop_event = threading.Event()
 config_ready = threading.Event()
+# ng.support@baiyiled.nl
+
+# send_email(
+#     []"ng.support@baiyiled.nl","maricn@wi-power.com"],
+#     "【EMS Events】",
+#     f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据异常！请您尽快检查和处理!谢谢!\n\n事件时间：{datetime.now()}",
+#     from_addr="531556397@qq.com",
+# )
 
 
 def thread_safe_update_debug_label(text):
@@ -183,7 +193,7 @@ def main_logic():
                         print("✅ 网站数据正常")
                         thread_safe_update_debug_label(f"✅ 网站实时数据正常")
                         print(f"\n✅ 数据加载正常,{getDataCounts}")
-                        if getDataCounts >= 1:  # 正常要比故障长20倍
+                        if getDataCounts >= dingtalk_times * 24:  # 正常要比故障长20倍
                             Content = (
                                 f"Event: BY-01-EMS_StatusCheck\n"
                                 f"State: Normal!\n"
@@ -201,6 +211,15 @@ def main_logic():
                             send_dingtalk_msg(Content)
                             sendDDtotal += 1
                             getDataCounts = 0
+                            send_email(
+                                [
+                                    "jekingxu@mic-power.cn" "jekingxu@163.com",
+                                    "wicpower2023@gmail.com",
+                                ],
+                                "【EMS Events】",
+                                f"《提示!》\n\n尊敬的用户您好！您的215P01项目EMS后台系统数据“正常” ，请您放心运行!谢谢!\n\n检测时间：{datetime.now()}",
+                                # from_addr="531556397@qq.com",
+                            )
                             thread_safe_update_debug_label("正常状态推送定消息完成...")
                         else:
                             print(
@@ -220,19 +239,28 @@ def main_logic():
                             f"Message:网站全是默认值或空值，可能未收到真实数据，请检查！\n"
                             f"WebSiteState: Accessible"
                         )
-                        if getDataCounts >= dingtalk_times:   # 正常的比故障长20倍
+                        if getDataCounts >= dingtalk_times:  # 正常的比故障长20倍
                             print(f"发送的数据：{errocontent}")
                             send_dingtalk_msg(errocontent)
                             sendDDtotal += 1
                             getDataCounts = 0
                             thread_safe_update_debug_label("推送故障钉钉消息完成...")
+                            send_email(
+                                [
+                                    "jekingxu@mic-power.cn" "jekingxu@163.com",
+                                    "wicpower2023@gmail.com",
+                                ],
+                                "【EMS Events】",
+                                f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“empty”异常！请您尽快检查和处理!谢谢!\n\n事件时间：{datetime.now()}",
+                                # from_addr="531556397@qq.com",
+                            )
                         else:
                             print(
-                              f"\n ⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
-                          )
+                                f"\n ⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                            )
                             thread_safe_update_debug_label(
-                              f"⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
-                          )
+                                f"⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                            )
                             getDataCounts += 1
                             print(f"✅已间隔次数 = {getDataCounts}")
                     elif status == "no_msg":
@@ -245,19 +273,25 @@ def main_logic():
                             f"Message:网站请求数据超时，请检查！\n"
                             f"WebSiteState: Accessible"
                         )
-                        if getDataCounts >= dingtalk_times:   # 正常的比故障长20倍
+                        if getDataCounts >= dingtalk_times:  # 正常的比故障长20倍
                             print(f"发送的数据：{errocontent}")
                             send_dingtalk_msg(errocontent)
                             sendDDtotal += 1
                             getDataCounts = 0
+                            send_email(
+                                ["jekingxu@mic-power.cn""jekingxu@163.com","wicpower2023@gmail.com"],
+                                "【EMS Events】",
+                                f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“no_msg”异常！请您尽快检查和处理!谢谢!\n\n事件时间：{datetime.now()}",
+                                # from_addr="531556397@qq.com",
+                            )
                             thread_safe_update_debug_label("推送故障钉钉消息完成...")
                         else:
                             print(
-                              f"\n ⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
-                          )
+                                f"\n ⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                            )
                             thread_safe_update_debug_label(
-                              f"⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
-                          )
+                                f"⚠️还要间隔 {dingtalk_times-getDataCounts} 次后再次发送钉钉消息！"
+                            )
                             getDataCounts += 1
                             print(f"✅已间隔次数 = {getDataCounts}")
                     elif status == "no_ws":
@@ -275,6 +309,15 @@ def main_logic():
                             send_dingtalk_msg(errocontent)
                             getDataCounts = 0
                             sendDDtotal += 1
+                            send_email(
+                                [
+                                    "jekingxu@mic-power.cn" "jekingxu@163.com",
+                                    "wicpower2023@gmail.com",
+                                ],
+                                "【EMS Events】",
+                                f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“no_ws”异常！请您尽快检查和处理!谢谢!\n\n事件时间：{datetime.now()}",
+                                # from_addr="531556397@qq.com",
+                            )
                             thread_safe_update_debug_label("推送故障钉钉消息完成...")
                         else:
                             print(
@@ -290,7 +333,7 @@ def main_logic():
                     print("❌ 未捕获到WebSocket URL")
 
                 # ========================================
-
+                time.sleep(loop_interval)
                 driver.refresh()
                 print("\n✅ 刷新页面")
                 print(
@@ -299,8 +342,8 @@ def main_logic():
                 thread_safe_update_debug_label(
                     f"等待 {loop_interval+(load_wait_time*4)+26} 秒后执行下一次循环..."
                 )
-                time.sleep(loop_interval)
-                print(f"本次已发送钉钉：{ sendDDtotal}次")
+
+                print(f"本轮已发送钉钉：{ sendDDtotal}次")
                 thread_safe_update_debug_label(f"本次已发送钉钉：{ sendDDtotal}次")
             except Exception as e:
                 print("循环错误:", e)

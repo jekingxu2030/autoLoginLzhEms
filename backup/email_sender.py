@@ -25,7 +25,7 @@ import smtplib
 import traceback
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import Any, Dict, Optional, Union, List
+from typing import Any, Dict, Optional
 
 # from autoLogin import thread_safe_update_debug_label
 
@@ -97,18 +97,14 @@ class EmailSender:
     # ------------------------------------------------------------------
     def send(
         self,
-        to_addr: Union[str, List[str]],
+        to_addr: str,
         subject: str,
         body: str,
         from_addr: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """发送邮件并返回 ``success`` 与 ``response``。
-        
-        参数:
-            to_addr: 可以是单个收件人地址字符串，或收件人地址列表
-        """
+        """发送邮件并返回 ``success`` 与 ``response``。"""
         from_real = self._auto_addr(from_addr or self.username)
-        to_real = [self._auto_addr(addr) for addr in ([to_addr] if isinstance(to_addr, str) else to_addr)]
+        to_real = self._auto_addr(to_addr)
 
         print(
             f"⚡ Connecting → {self.smtp_host}:{self.smtp_port} (TLS={self.use_tls})\n"
@@ -135,9 +131,9 @@ class EmailSender:
                 )
                 print(f"LOGIN → {code} {reply.decode(errors='ignore')}")
 
-                msg = self._make_msg(from_real, to_real[0], subject, body)
+                msg = self._make_msg(from_real, to_real, subject, body)
                 print("⚡ SENDMAIL …")
-                response = server.sendmail(from_real, to_real, msg.as_string())
+                response = server.sendmail(from_real, [to_real], msg.as_string())
 
                 if response == {}:
                     print("✔ Queued successfully. Message‑ID:", msg["Message-ID"])
@@ -161,16 +157,12 @@ _default_sender = EmailSender()
 
 
 def send_email(
-    to_addr: Union[str, List[str]],
+    to_addr: str,
     subject: str,
     body: str,
     from_addr: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """快捷函数：直接发信，可自定义发件人。
-    
-    参数:
-        to_addr: 可以是单个收件人地址字符串，或收件人地址列表
-    """
+    """快捷函数：直接发信，可自定义发件人。"""
     return _default_sender.send(to_addr, subject, body, from_addr=from_addr)
 
 
