@@ -76,6 +76,7 @@ def main_logic():
         driver.get("http://ems.hy-power.net:8114/login")
         # settings_window.update_debug_label("登录中...")
         thread_safe_update_debug_label("请求网页中...")
+        print("\n✅[请求网页一 已完成")
         time.sleep(load_wait_time * 2)
 
         driver.execute_script(
@@ -131,7 +132,7 @@ def main_logic():
         print("\n" + json.dumps(session_storage, indent=2, ensure_ascii=False))
         thread_safe_update_debug_label("缓存参数获取或设置完毕，开始探测内容...")
         print("✅ 登录成功，开始循环检测...")
-
+        sendDDtotal = 0
         getDataCounts = 0  # 正常状态下推送间隔时间
         while not stop_event.is_set():
             try:
@@ -198,6 +199,7 @@ def main_logic():
                             print(f"正常状态推送间隔时长:" + str(faultTime) + "秒")
                             print(f"发送的数据2：{Content}")
                             send_dingtalk_msg(Content)
+                            sendDDtotal += 1
                             getDataCounts = 0
                             thread_safe_update_debug_label("正常状态推送定消息完成...")
                         else:
@@ -221,6 +223,7 @@ def main_logic():
                         if getDataCounts >= dingtalk_times:   # 正常的比故障长20倍
                             print(f"发送的数据：{errocontent}")
                             send_dingtalk_msg(errocontent)
+                            sendDDtotal += 1
                             getDataCounts = 0
                             thread_safe_update_debug_label("推送故障钉钉消息完成...")
                         else:
@@ -245,6 +248,7 @@ def main_logic():
                         if getDataCounts >= dingtalk_times:   # 正常的比故障长20倍
                             print(f"发送的数据：{errocontent}")
                             send_dingtalk_msg(errocontent)
+                            sendDDtotal += 1
                             getDataCounts = 0
                             thread_safe_update_debug_label("推送故障钉钉消息完成...")
                         else:
@@ -270,6 +274,7 @@ def main_logic():
                             print(f"发送的数据：{errocontent}")
                             send_dingtalk_msg(errocontent)
                             getDataCounts = 0
+                            sendDDtotal += 1
                             thread_safe_update_debug_label("推送故障钉钉消息完成...")
                         else:
                             print(
@@ -295,7 +300,8 @@ def main_logic():
                     f"等待 {loop_interval+(load_wait_time*4)+26} 秒后执行下一次循环..."
                 )
                 time.sleep(loop_interval)
-
+                print(f"本次已发送钉钉：{ sendDDtotal}次")
+                thread_safe_update_debug_label(f"本次已发送钉钉：{ sendDDtotal}次")
             except Exception as e:
                 print("循环错误:", e)
                 thread_safe_update_debug_label(f"❌循环错误" + str(e))
