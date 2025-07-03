@@ -213,12 +213,12 @@ def main_logic():
                             getDataCounts = 0
                             send_email(
                                 [
-                                    "jekingxu@mic-power.cn" "jekingxu@163.com",
+                                    "jekingxu@mic-power.cn", "jekingxu@163.com",
                                     "wicpower2023@gmail.com",
                                 ],
                                 "【EMS Events】",
                                 f"《提示!》\n\n尊敬的用户您好！您的215P01项目EMS后台系统数据“正常” ，请您放心运行!谢谢!\n\n检测时间：{datetime.now()}",
-                                # from_addr="531556397@qq.com",
+                                # from_addr="service@wic-power.com",
                             )
                             thread_safe_update_debug_label("正常状态推送定消息完成...")
                         else:
@@ -247,7 +247,7 @@ def main_logic():
                             thread_safe_update_debug_label("推送故障钉钉消息完成...")
                             send_email(
                                 [
-                                    "jekingxu@mic-power.cn" "jekingxu@163.com",
+                                    "jekingxu@mic-power.cn","jekingxu@163.com",
                                     "wicpower2023@gmail.com",
                                 ],
                                 "【EMS Events】",
@@ -279,10 +279,14 @@ def main_logic():
                             sendDDtotal += 1
                             getDataCounts = 0
                             send_email(
-                                ["jekingxu@mic-power.cn""jekingxu@163.com","wicpower2023@gmail.com"],
+                                [
+                                    "jekingxu@mic-power.cn", "jekingxu@163.com",
+                                    "wicpower2023@gmail.com",
+                                ],
                                 "【EMS Events】",
                                 f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“no_msg”异常！请您尽快检查和处理!谢谢!\n\n事件时间：{datetime.now()}",
-                                # from_addr="531556397@qq.com",
+                                # from_addr="service@wic-power.com",
+                                 from_addr="531556397@qq.com",
                             )
                             thread_safe_update_debug_label("推送故障钉钉消息完成...")
                         else:
@@ -311,7 +315,7 @@ def main_logic():
                             sendDDtotal += 1
                             send_email(
                                 [
-                                    "jekingxu@mic-power.cn" "jekingxu@163.com",
+                                    "jekingxu@mic-power.cn" ,"jekingxu@163.com",
                                     "wicpower2023@gmail.com",
                                 ],
                                 "【EMS Events】",

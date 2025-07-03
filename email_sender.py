@@ -18,7 +18,6 @@
 依赖全为标准库。
 """
 
-
 import email.utils
 import os
 import smtplib
@@ -34,17 +33,20 @@ from typing import Any, Dict, Optional, Union, List
 ###############################################################################
 
 # SMTP_HOST = os.getenv("SMTP_HOST", "email.wic-power.cn")
+# SMTP_HOST = os.getenv("SMTP_HOST", "smtp.163.com")
 SMTP_HOST = os.getenv("SMTP_HOST", "smtp.qq.com")
+# SMTP_PORT = int(os.getenv("SMTP_PORT", 465))
 SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
-# SMTP_USERNAME = os.getenv("SMTP_USERNAME", "sysinfo@wic-power.cn")
-# SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "wicpower")
+# SMTP_USERNAME = os.getenv("SMTP_USERNAME", "jekingxu@163.com")
 SMTP_USERNAME = os.getenv("SMTP_USERNAME", "531556397@qq.com")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "kjsqxtoiwqumbhjb")
-USE_TLS = os.getenv("SMTP_USE_TLS", "true").lower() == "true"  # 默认关闭 TLS
-USE_SSL = os.getenv("SMTP_USE_SSL", "true").lower() == "true"
-# USE_TLS = true # 默认
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "kjsqxtoiwqumbhjb")  # qq
+# SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "KNwjzDdvVh29NdV") #163
+
+# TLS和SSL只能同时开一种
+USE_TLS = os.getenv("SMTP_USE_TLS", "true").lower() == "true"
 DEBUG = os.getenv("SMTP_DEBUG", "false").lower() == "true"
 DEFAULT_DOMAIN = os.getenv("SMTP_DEFAULT_DOMAIN", "qq.com")
+# DEFAULT_DOMAIN = os.getenv("SMTP_DEFAULT_DOMAIN", "163.com")
 
 ###############################################################################
 # 核心类
@@ -103,45 +105,76 @@ class EmailSender:
         from_addr: Optional[str] = None,
     ) -> Dict[str, Any]:
         """发送邮件并返回 ``success`` 与 ``response``。
-        
+
         参数:
             to_addr: 可以是单个收件人地址字符串，或收件人地址列表
         """
         from_real = self._auto_addr(from_addr or self.username)
-        to_real = [self._auto_addr(addr) for addr in ([to_addr] if isinstance(to_addr, str) else to_addr)]
+        # 确保收件人地址格式正确，分割可能合并的地址
+        to_real = []
+        for addr in [to_addr] if isinstance(to_addr, str) else to_addr:
+            # 处理可能合并的地址（如'jekingxu@mic-power.cnjekingxu@163.com'）
+            if "@" in addr and addr.count("@") > 1:
+                # 更精确地分割合并的邮箱地址
+                parts = addr.split("@")
+                domains = parts[1::2]  # 获取所有域名部分
+                usernames = parts[::2]  # 获取所有用户名部分
+
+                # 重新组合成正确的邮箱地址
+                for i in range(len(usernames)):
+                    if i < len(domains):
+                        to_real.append(self._auto_addr(f"{usernames[i]}@{domains[i]}"))
+                    else:
+                        to_real.append(self._auto_addr(usernames[i]))
+            else:
+                to_real.append(self._auto_addr(addr))
 
         print(
+            f"⚡ SMTP服务器配置 → 主机: {self.smtp_host}, 端口: {self.smtp_port}, TLS: {self.use_tls}\n"
+            f"用户名: {self.username}, 默认域名: {self.default_domain}\n"
             f"⚡ Connecting → {self.smtp_host}:{self.smtp_port} (TLS={self.use_tls})\n"
             f"Envelope‑From: {from_real}  →  To: {to_real}"
         )
         try:
-            with smtplib.SMTP(self.smtp_host, self.smtp_port, timeout=30) as server:
-                if self.debug:
-                    server.set_debuglevel(1)
+            for attempt in range(3):
+                try:
+                    with smtplib.SMTP(
+                        self.smtp_host, self.smtp_port, timeout=30
+                    ) as server:
+                        if self.debug:
+                            server.set_debuglevel(1)
 
-                code, reply = server.ehlo()
-                print(f"EHLO → {code} {reply.decode(errors='ignore')}")
+                        code, reply = server.ehlo()
+                        print(f"EHLO → {code} {reply.decode(errors='ignore')}")
 
-                if self.use_tls:
-                    print("⚡ STARTTLS …")
-                    code, reply = server.starttls()
-                    print(f"STARTTLS → {code} {reply.decode(errors='ignore')}")
-                    code, reply = server.ehlo()
-                    print(f"EHLO (TLS) → {code} {reply.decode(errors='ignore')}")
+                        if self.use_tls:
+                            print("⚡ STARTTLS …")
+                            code, reply = server.starttls()
+                            print(f"STARTTLS → {code} {reply.decode(errors='ignore')}")
+                            code, reply = server.ehlo()
+                            print(
+                                f"EHLO (TLS) → {code} {reply.decode(errors='ignore')}"
+                            )
 
-                print("⚡ LOGIN …")
-                code, reply = server.login(
-                    self._auto_addr(self.username), self.password
-                )
-                print(f"LOGIN → {code} {reply.decode(errors='ignore')}")
+                        print("⚡ LOGIN …")
+                        code, reply = server.login(
+                            self._auto_addr(self.username), self.password
+                        )
+                        print(f"LOGIN → {code} {reply.decode(errors='ignore')}")
 
-                msg = self._make_msg(from_real, to_real[0], subject, body)
-                print("⚡ SENDMAIL …")
-                response = server.sendmail(from_real, to_real, msg.as_string())
+                        msg = self._make_msg(from_real, to_real[0], subject, body)
+                        print("⚡ SENDMAIL …")
+                        response = server.sendmail(from_real, to_real, msg.as_string())
+                        break
+                except smtplib.SMTPServerDisconnected as e:
+                    if attempt == 2:
+                        raise
+                    print(f"⚠ 连接断开，正在重试 ({attempt+1}/3)...")
+                    continue
 
                 if response == {}:
                     print("✔ Queued successfully. Message‑ID:", msg["Message-ID"])
-                    # thread_safe_update_debug_label(f"✔ 邮件发送成功！Message‑ID:"+ msg["Message-ID"]) 
+                    # thread_safe_update_debug_label(f"✔ 邮件发送成功！Message‑ID:"+ msg["Message-ID"])
                     return {"success": True, "response": "250 Queued"}
 
                 print("✖ 部分失败:", response)
@@ -167,7 +200,7 @@ def send_email(
     from_addr: Optional[str] = None,
 ) -> Dict[str, Any]:
     """快捷函数：直接发信，可自定义发件人。
-    
+
     参数:
         to_addr: 可以是单个收件人地址字符串，或收件人地址列表
     """

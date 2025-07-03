@@ -4,8 +4,8 @@
         "password": "123456789"
     },
     "timing": {
-        "load_wait_time": 3,
-        "loop_interval": 6,
+        "load_wait_time": 1,
+        "loop_interval": 3,
         "dingtalk_times": 0
     },
     "encryption": {
