@@ -5,7 +5,7 @@
     },
     "timing": {
         "load_wait_time": 1,
-        "loop_interval": 3,
+        "loop_interval": 1,
         "dingtalk_times": 0
     },
     "encryption": {

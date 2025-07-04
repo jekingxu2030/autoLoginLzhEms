@@ -9,7 +9,7 @@ class SettingsWindow:
 
     def __init__(self, root, callback=None, stop_event=None):
         self.root = root
-        self.root.title("系统配置")
+        self.root.title("LZH-EMS状态检查")
         self.root.geometry("400x500")
         self.root.resizable(False, False)
 

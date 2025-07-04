@@ -9,7 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import tkinter as tk
 from settings_window import SettingsWindow
 from dingtalk_notify import send_dingtalk_msg
-from email_sender import send_email
+from email_sender_wy import send_email
 from selenium import webdriver
 import time
 import json
@@ -172,11 +172,8 @@ def main_logic():
                 driver.execute_script("window.scrollBy(0, 10);")
                 driver.execute_script("window.dispatchEvent(new Event('mousemove'))")
                 thread_safe_update_debug_label("模拟网页操作，防止掉线...")
-
                 time.sleep(load_wait_time + 20)
-
                 time.sleep(2)
-
                 # thread_safe_update_debug_label(f"检测结果：{result[:20]}")
                 #  ==================================================== #
                 # 第二种检测ws完整地址方法2-模块化
@@ -213,12 +210,15 @@ def main_logic():
                             getDataCounts = 0
                             send_email(
                                 [
-                                    "jekingxu@mic-power.cn", "jekingxu@163.com",
+                                    "jekingxu@mic-power.cn",
+                                    "jekingxu@163.com",
                                     "wicpower2023@gmail.com",
+                                    "ng.support@baiyiled.nl",
                                 ],
                                 "【EMS Events】",
                                 f"《提示!》\n\n尊敬的用户您好！您的215P01项目EMS后台系统数据“正常” ，请您放心运行!谢谢!\n\n检测时间：{datetime.now()}",
                                 # from_addr="service@wic-power.com",
+                                from_addr="jekingxu@163.com",
                             )
                             thread_safe_update_debug_label("正常状态推送定消息完成...")
                         else:
@@ -247,12 +247,15 @@ def main_logic():
                             thread_safe_update_debug_label("推送故障钉钉消息完成...")
                             send_email(
                                 [
-                                    "jekingxu@mic-power.cn","jekingxu@163.com",
+                                    "jekingxu@mic-power.cn",
+                                    "jekingxu@163.com",
                                     "wicpower2023@gmail.com",
+                                    "ng.support@baiyiled.nl",
                                 ],
                                 "【EMS Events】",
                                 f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“empty”异常！请您尽快检查和处理!谢谢!\n\n事件时间：{datetime.now()}",
                                 # from_addr="531556397@qq.com",
+                                from_addr="jekingxu@163.com",
                             )
                         else:
                             print(
@@ -280,13 +283,16 @@ def main_logic():
                             getDataCounts = 0
                             send_email(
                                 [
-                                    "jekingxu@mic-power.cn", "jekingxu@163.com",
+                                    "jekingxu@mic-power.cn",
+                                    "jekingxu@163.com",
                                     "wicpower2023@gmail.com",
+                                    "ng.support@baiyiled.nl",
                                 ],
                                 "【EMS Events】",
                                 f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“no_msg”异常！请您尽快检查和处理!谢谢!\n\n事件时间：{datetime.now()}",
                                 # from_addr="service@wic-power.com",
-                                 from_addr="531556397@qq.com",
+                                #  from_addr="531556397@qq.com",  #QQ发送时必须用原发送邮箱名称
+                                from_addr="jekingxu@163.com",
                             )
                             thread_safe_update_debug_label("推送故障钉钉消息完成...")
                         else:
@@ -315,12 +321,15 @@ def main_logic():
                             sendDDtotal += 1
                             send_email(
                                 [
-                                    "jekingxu@mic-power.cn" ,"jekingxu@163.com",
+                                    "jekingxu@mic-power.cn",
+                                    "jekingxu@163.com",
                                     "wicpower2023@gmail.com",
+                                    "ng.support@baiyiled.nl"
                                 ],
                                 "【EMS Events】",
                                 f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“no_ws”异常！请您尽快检查和处理!谢谢!\n\n事件时间：{datetime.now()}",
                                 # from_addr="531556397@qq.com",
+                                from_addr="jekingxu@163.com",
                             )
                             thread_safe_update_debug_label("推送故障钉钉消息完成...")
                         else:
@@ -364,17 +373,20 @@ def main_logic():
 
 
 # === 设置窗口线程 ===
-# 定义一个run_settings函数，用于运行设置窗口
 def run_settings():
-    # 声明一个全局变量settings_window
     global settings_window
-    # 创建一个Tkinter窗口
     root = tk.Tk()
-    # 创建一个SettingsWindow对象，并传入root、callback和stop_event参数
+    
+    def on_closing():
+        stop_event.set()
+        if driver:
+            driver.quit()
+        root.destroy()
+    
+    root.protocol("WM_DELETE_WINDOW", on_closing)
     settings_window = SettingsWindow(
         root, callback=start_main_logic, stop_event=stop_event
     )
-    # 进入Tkinter的主循环
     root.mainloop()
 
 

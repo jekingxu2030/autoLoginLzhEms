@@ -121,6 +121,17 @@ class EmsWsMonitor:
         self.thread = None
         self._stop_event = threading.Event()
 
+    def stop_monitor(self):
+        """
+        显式停止监控线程和WebSocket连接
+        """
+        self.stop()
+        if self.thread and self.thread.is_alive():
+            self.thread.join(timeout=1)
+        if self.ws:
+            self.ws.close()
+        print("WebSocket 监控已完全停止")
+
     # ─────────── WebSocket 回调 ───────────
     def _on_message(self, ws, message: str):
         self.msg_arrived = True  # 收到任何消息
