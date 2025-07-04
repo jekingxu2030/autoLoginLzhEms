@@ -175,3 +175,4 @@ class SettingsWindow:
     def update_debug_label(self, text):
         # 将传入的文本设置为调试标签的文本
         self.log_lbl.config(text=text)
+   

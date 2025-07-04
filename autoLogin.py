@@ -230,7 +230,7 @@ def main_logic():
                                     "ng.support@baiyiled.nl",
                                 ],
                                 "【EMS Events】",
-                                f"《提示!》\n\n尊敬的用户您好！您的215P01项目EMS后台系统数据“正常” ，请您放心运行!谢谢!\n\n检测时间：{datetime.now()}",
+                                f"《提示!》\n\n尊敬的用户您好！您的215P01项目EMS后台系统数据“正常” ，请您放心运行!谢谢!\nCheckUrl: {driver.current_url}\n\n\n检测时间：{datetime.now()}",
                                 # from_addr="service@wic-power.com",
                                 from_addr="jekingxu@163.com",
                             )
@@ -269,7 +269,7 @@ def main_logic():
                                     "ng.support@baiyiled.nl",
                                 ],
                                 "【EMS Events】",
-                                f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“empty”异常！请您尽快检查和处理!谢谢!\n\n事件时间：{datetime.now()}",
+                                f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“empty”异常！请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
                                 # from_addr="531556397@qq.com",
                                 from_addr="jekingxu@163.com",
                             )
@@ -307,7 +307,7 @@ def main_logic():
                                     "ng.support@baiyiled.nl",
                                 ],
                                 "【EMS Events】",
-                                f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“no_msg”异常！请您尽快检查和处理!谢谢!\n\n事件时间：{datetime.now()}",
+                                f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“no_msg”异常！请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
                                 # from_addr="service@wic-power.com",
                                 #  from_addr="531556397@qq.com",  #QQ发送时必须用原发送邮箱名称
                                 from_addr="jekingxu@163.com",
@@ -347,7 +347,7 @@ def main_logic():
                                     "ng.support@baiyiled.nl",
                                 ],
                                 "【EMS Events】",
-                                f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“no_ws”异常！请您尽快检查和处理!谢谢!\n\n事件时间：{datetime.now()}",
+                                f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“no_ws”异常！请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
                                 # from_addr="531556397@qq.com",
                                 from_addr="jekingxu@163.com",
                             )
@@ -387,22 +387,38 @@ def main_logic():
         thread_safe_update_debug_label(f"❌主逻辑异常" + str(e))
     finally:
         if driver:
-            thread_safe_update_debug_label(f"❌线程退出,关闭浏览器...")
-            print("⚠️线程退出")
-            driver.quit()
+            try:
+                thread_safe_update_debug_label(f"❌线程退出,正在关闭浏览器...")
+                print("⚠️线程退出,正在关闭浏览器")
+                driver.quit()
+                time.sleep(1)  # 确保浏览器完全关闭
+                if hasattr(driver, 'service') and driver.service.process:
+                    driver.service.process.terminate()
+            except Exception as e:
+                print(f"关闭浏览器时出错: {e}")
+                thread_safe_update_debug_label(f"❌关闭浏览器时出错: {e}")
 
 
 # === 设置窗口线程 ===
 def run_settings():
     global settings_window
     root = tk.Tk()
-    
+
     def on_closing():
         stop_event.set()
+        running_event.clear()
         if driver:
-            driver.quit()
+            try:
+                driver.quit()
+                time.sleep(2)  # 增加等待时间
+                if hasattr(driver, 'service') and driver.service.process:
+                    driver.service.process.kill()  # 使用更强制的方式终止进程
+            except Exception as e:
+                print(f"关闭浏览器时出错: {e}")
+                import os
+                os.system("taskkill /f /im chrome.exe")  # 强制终止所有chrome进程
         root.destroy()
-    
+
     root.protocol("WM_DELETE_WINDOW", on_closing)
     settings_window = SettingsWindow(
         root, callback=start_main_logic, stop_event=stop_event
