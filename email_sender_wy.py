@@ -105,24 +105,39 @@ class EmailSender:
         body: str,
         from_addr: Optional[str] = None,
     ) -> Dict[str, Any]:
+        # 获取发件人地址
         from_real = self._auto_addr(from_addr or self.username)
         to_real = []
+        # 遍历收件人地址
         for addr in [to_addr] if isinstance(to_addr, str) else to_addr:
+            # 如果收件人地址中包含多个@符号，则将其拆分为用户名和域名
             if "@" in addr and addr.count("@") > 1:
                 parts = addr.split("@")
                 domains = parts[1::2]
                 usernames = parts[::2]
+                # 遍历用户名和域名，将其组合为完整的收件人地址
                 for i in range(len(usernames)):
                     if i < len(domains):
                         to_real.append(self._auto_addr(f"{usernames[i]}@{domains[i]}"))
                     else:
                         to_real.append(self._auto_addr(usernames[i]))
             else:
+                # 如果收件人地址中不包含多个@符号，则直接将其转换为完整的收件人地址
                 to_real.append(self._auto_addr(addr))
 
         # 使用BCC密送方式发送邮件
         try:
-            msg = self._make_msg(from_real, from_real, subject, body)  # 这里改为显示实际收件人
+            # msg = self._make_msg(
+            #     from_real, to_real[0], subject, body
+            # )  # 这里改为显示实际收件人
+            # 创建邮件消息
+            msg = self._make_msg(
+                from_real,
+                "Undisclosed Recipients-noreply<service@wic-power.cn>",
+                subject,
+                body,
+            )
+            # 如果使用SSL连接
             if self.use_ssl:
                 with smtplib.SMTP_SSL(self.smtp_host, self.smtp_port, timeout=30) as server:
                     if self.debug:
@@ -131,12 +146,14 @@ class EmailSender:
                     server.login(self._auto_addr(self.username), self.password)
                     response = server.sendmail(from_real, to_real, msg.as_string())  # 这里发送给实际收件人
             else:
+                # 如果不使用SSL连接
                 with smtplib.SMTP(self.smtp_host, self.smtp_port, timeout=30) as server:
                     if self.debug:
                         server.set_debuglevel(1)
                     server.login(self._auto_addr(self.username), self.password)
                     response = server.sendmail(from_real, to_real, msg.as_string())  # 这里发送给实际收件人
 
+            # 如果发送成功
             if response == {}:
                 print(f"✔ 邮件已成功发送给 {len(to_real)} 个收件人")
                 return {"success": True, "response": "邮件已发送"}
@@ -148,6 +165,7 @@ class EmailSender:
             return {"success": False, "response": str(e)}
 
         return {"success": True, "response": "所有邮件已发送"}
+        # 打印SMTP服务器配置
         print(
             f"⚡ SMTP服务器配置 → 主机: {self.smtp_host}, 端口: {self.smtp_port}, SSL: {self.use_ssl}\n"
             f"用户名: {self.username}, 默认域名: {self.default_domain}\n"
@@ -155,8 +173,10 @@ class EmailSender:
             f"Envelope‑From: {from_real}  →  To: {to_real}"
         )
         try:
+            # 尝试发送邮件，最多重试3次
             for attempt in range(3):
                 try:
+                    # 如果使用SSL连接
                     if self.use_ssl:
                         with smtplib.SMTP_SSL(
                             self.smtp_host, self.smtp_port, timeout=30
@@ -173,6 +193,7 @@ class EmailSender:
                             )
                             print(f"LOGIN → {code} {reply.decode(errors='ignore')}")
 
+                            # 创建邮件消息
                             msg = self._make_msg(from_real, to_real[0], subject, body)
                             print("⚡ SENDMAIL …")
                             response = server.sendmail(
@@ -181,6 +202,7 @@ class EmailSender:
                             print(f"⚡email_server_sendmail empty is send ok → {response}")
                             break
                     else:
+                        # 如果不使用SSL连接
                         with smtplib.SMTP(
                             self.smtp_host, self.smtp_port, timeout=30
                         ) as server:
@@ -195,6 +217,7 @@ class EmailSender:
                             print(f"LOGIN → {code} {reply.decode(errors='ignore')}")
                             print(f"⚡email_server → {reply}")
 
+                            # 创建邮件消息
                             msg = self._make_msg(from_real, to_real[0], subject, body)
                             print("⚡ SENDMAIL …")
                             response = server.sendmail(
@@ -208,6 +231,7 @@ class EmailSender:
                     print(f"⚠ 连接断开，正在重试 ({attempt+1}/3)...")
                     continue
 
+                # 如果发送成功
                 if response == {}:
                     print("✔ Queued successfully. Message‑ID:", msg["Message-ID"])
                     return {"success": True, "response": "250 Queued"}
@@ -216,6 +240,7 @@ class EmailSender:
                     return {"success": False, "response": str(response)}
 
         except Exception:  # pylint: disable=broad-except
+            # 如果发送过程中出现异常
             tb = traceback.format_exc()
             print("！ 发送过程中出现异常:\n", tb)
             return {"success": False, "response": tb}

@@ -98,7 +98,7 @@ def main_logic():
         driver.get("http://ems.hy-power.net:8114/login")
         # settings_window.update_debug_label("登录中...")
         thread_safe_update_debug_label("请求网页中...")
-        print("\n✅[请求 {driver.current_url} 已完成")
+        print(f"\n✅[请求 {driver.current_url} 已完成")
         time.sleep(load_wait_time * 2)
 
         driver.execute_script(
@@ -196,7 +196,7 @@ def main_logic():
                         f"✅ 获取到的 WebSocket 完整地址：{ws_url[30]}"
                     )
 
-                    ws_monitor = EmsWsMonitor(ws_url, timeout=30)
+                    ws_monitor = EmsWsMonitor(ws_url, timeout=loop_interval)  #测试完改成改回30
                     status = ws_monitor.start()  # True=收到数据
                     if status == "ok":
                         print("✅ 网站数据正常")
@@ -211,7 +211,7 @@ def main_logic():
                                 f"WebSiteState: Accessible！"
                             )
 
-                            faultTime = (loop_interval + (load_wait_time * 4) + 26) * 10
+                            faultTime = ((loop_interval*2) + (load_wait_time * 4) + 26) * 10
                             thread_safe_update_debug_label(
                                 f"正常状态推送间隔时长:" + str(faultTime) + "秒"
                             )
@@ -224,7 +224,8 @@ def main_logic():
                                 [
                                     # "jekingxu@mic-power.cn",
                                     # "jekingxu@163.com",
-                                    "wicpower2023@gmail.com",
+                                    # "marcin.lee@wic-power.com",
+                                     "wicpower2023@gmail.com",
                                     "531556397@qq.com",
                                     "ng.support@baiyiled.nl",
                                 ],
@@ -262,6 +263,7 @@ def main_logic():
                                 [
                                     # "jekingxu@mic-power.cn",
                                     # "jekingxu@163.com",
+                                    # "marcin.lee@wic-power.com",
                                     "wicpower2023@gmail.com",
                                     "531556397@qq.com",
                                     "ng.support@baiyiled.nl",
@@ -299,6 +301,7 @@ def main_logic():
                                 [
                                     # "jekingxu@mic-power.cn",
                                     # "jekingxu@163.com",
+                                    # "marcin.lee@wic-power.com",
                                     "531556397@qq.com",
                                     "wicpower2023@gmail.com",
                                     "ng.support@baiyiled.nl",
@@ -338,6 +341,7 @@ def main_logic():
                                 [
                                     # "jekingxu@mic-power.cn",
                                     # "jekingxu@163.com",
+                                    # "marcin.lee@wic-power.com",
                                     "wicpower2023@gmail.com",
                                     "531556397@qq.com",
                                     "ng.support@baiyiled.nl",
