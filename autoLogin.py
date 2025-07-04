@@ -58,15 +58,19 @@ def get_ws_url(driver):
         if message["method"] == "Network.webSocketCreated":
             ws_url = message["params"]["url"]
             print("✅ 捕获到WebSocket URL:", ws_url)
-            # 保存WebSocket URL到config.json
-            import json
-            with open('config.json', 'r+') as f:
-                config = json.load(f)
-                config['websocket_url'] = ws_url
-                f.seek(0)
-                json.dump(config, f, indent=4)
-                f.truncate()
+
+            # 将WebSocket URL写入config.ini文件
+            import configparser
+
+            config = configparser.ConfigParser()
+            config.read("config.ini")
+            if not config.has_section("websocket"):
+                config.add_section("websocket")
+            config.set("websocket", "url", ws_url)
+            with open("config.ini", "w") as configfile:
+                config.write(configfile)
             return ws_url
+
     return None
 
 
