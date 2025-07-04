@@ -58,6 +58,14 @@ def get_ws_url(driver):
         if message["method"] == "Network.webSocketCreated":
             ws_url = message["params"]["url"]
             print("✅ 捕获到WebSocket URL:", ws_url)
+            # 保存WebSocket URL到config.json
+            import json
+            with open('config.json', 'r+') as f:
+                config = json.load(f)
+                config['websocket_url'] = ws_url
+                f.seek(0)
+                json.dump(config, f, indent=4)
+                f.truncate()
             return ws_url
     return None
 
@@ -86,7 +94,7 @@ def main_logic():
         driver.get("http://ems.hy-power.net:8114/login")
         # settings_window.update_debug_label("登录中...")
         thread_safe_update_debug_label("请求网页中...")
-        print("\n✅[请求网页一 已完成")
+        print("\n✅[请求 {driver.current_url} 已完成")
         time.sleep(load_wait_time * 2)
 
         driver.execute_script(
@@ -210,9 +218,10 @@ def main_logic():
                             getDataCounts = 0
                             send_email(
                                 [
-                                    "jekingxu@mic-power.cn",
-                                    "jekingxu@163.com",
+                                    # "jekingxu@mic-power.cn",
+                                    # "jekingxu@163.com",
                                     "wicpower2023@gmail.com",
+                                    "531556397@qq.com",
                                     "ng.support@baiyiled.nl",
                                 ],
                                 "【EMS Events】",
@@ -247,9 +256,10 @@ def main_logic():
                             thread_safe_update_debug_label("推送故障钉钉消息完成...")
                             send_email(
                                 [
-                                    "jekingxu@mic-power.cn",
-                                    "jekingxu@163.com",
+                                    # "jekingxu@mic-power.cn",
+                                    # "jekingxu@163.com",
                                     "wicpower2023@gmail.com",
+                                    "531556397@qq.com",
                                     "ng.support@baiyiled.nl",
                                 ],
                                 "【EMS Events】",
@@ -283,8 +293,9 @@ def main_logic():
                             getDataCounts = 0
                             send_email(
                                 [
-                                    "jekingxu@mic-power.cn",
-                                    "jekingxu@163.com",
+                                    # "jekingxu@mic-power.cn",
+                                    # "jekingxu@163.com",
+                                    "531556397@qq.com",
                                     "wicpower2023@gmail.com",
                                     "ng.support@baiyiled.nl",
                                 ],
@@ -321,10 +332,11 @@ def main_logic():
                             sendDDtotal += 1
                             send_email(
                                 [
-                                    "jekingxu@mic-power.cn",
-                                    "jekingxu@163.com",
+                                    # "jekingxu@mic-power.cn",
+                                    # "jekingxu@163.com",
                                     "wicpower2023@gmail.com",
-                                    "ng.support@baiyiled.nl"
+                                    "531556397@qq.com",
+                                    "ng.support@baiyiled.nl",
                                 ],
                                 "【EMS Events】",
                                 f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“no_ws”异常！请您尽快检查和处理!谢谢!\n\n事件时间：{datetime.now()}",

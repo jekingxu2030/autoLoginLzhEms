@@ -89,8 +89,8 @@ class EmailSender:
         body: str,
     ) -> MIMEMultipart:
         msg = MIMEMultipart()
-        msg["From"] = from_addr
-        msg["To"] = to_addr
+        msg["From"] = f"{from_addr.split('@')[0]} <{from_addr}>"
+        msg["To"] = f"{to_addr.split('@')[0]} <{to_addr}>"
         msg["Subject"] = subject
         msg["Date"] = email.utils.formatdate(localtime=True)
         msg["Message-ID"] = email.utils.make_msgid(domain=self.default_domain)
@@ -105,23 +105,13 @@ class EmailSender:
         body: str,
         from_addr: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """发送邮件并返回 ``success`` 与 ``response``。
-
-        参数:
-            to_addr: 可以是单个收件人地址字符串，或收件人地址列表
-        """
         from_real = self._auto_addr(from_addr or self.username)
-        # 确保收件人地址格式正确，分割可能合并的地址
         to_real = []
         for addr in [to_addr] if isinstance(to_addr, str) else to_addr:
-            # 处理可能合并的地址（如'jekingxu@mic-power.cnjekingxu@163.com'）
             if "@" in addr and addr.count("@") > 1:
-                # 更精确地分割合并的邮箱地址
                 parts = addr.split("@")
-                domains = parts[1::2]  # 获取所有域名部分
-                usernames = parts[::2]  # 获取所有用户名部分
-
-                # 重新组合成正确的邮箱地址
+                domains = parts[1::2]
+                usernames = parts[::2]
                 for i in range(len(usernames)):
                     if i < len(domains):
                         to_real.append(self._auto_addr(f"{usernames[i]}@{domains[i]}"))
@@ -130,6 +120,34 @@ class EmailSender:
             else:
                 to_real.append(self._auto_addr(addr))
 
+        # 使用BCC密送方式发送邮件
+        try:
+            msg = self._make_msg(from_real, from_real, subject, body)  # 这里改为显示实际收件人
+            if self.use_ssl:
+                with smtplib.SMTP_SSL(self.smtp_host, self.smtp_port, timeout=30) as server:
+                    if self.debug:
+                        server.set_debuglevel(1)
+                    server.ehlo()
+                    server.login(self._auto_addr(self.username), self.password)
+                    response = server.sendmail(from_real, to_real, msg.as_string())  # 这里发送给实际收件人
+            else:
+                with smtplib.SMTP(self.smtp_host, self.smtp_port, timeout=30) as server:
+                    if self.debug:
+                        server.set_debuglevel(1)
+                    server.login(self._auto_addr(self.username), self.password)
+                    response = server.sendmail(from_real, to_real, msg.as_string())  # 这里发送给实际收件人
+
+            if response == {}:
+                print(f"✔ 邮件已成功发送给 {len(to_real)} 个收件人")
+                return {"success": True, "response": "邮件已发送"}
+            else:
+                print(f"✖ 部分发送失败:", response)
+                return {"success": False, "response": str(response)}
+        except Exception as e:
+            print(f"✖ 发送出错:", str(e))
+            return {"success": False, "response": str(e)}
+
+        return {"success": True, "response": "所有邮件已发送"}
         print(
             f"⚡ SMTP服务器配置 → 主机: {self.smtp_host}, 端口: {self.smtp_port}, SSL: {self.use_ssl}\n"
             f"用户名: {self.username}, 默认域名: {self.default_domain}\n"

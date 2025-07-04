@@ -9,7 +9,7 @@ class SettingsWindow:
 
     def __init__(self, root, callback=None, stop_event=None):
         self.root = root
-        self.root.title("LZH-EMS状态检查")
+        self.root.title("LZH-EMS_State_Check")
         self.root.geometry("400x500")
         self.root.resizable(False, False)
 
@@ -48,9 +48,9 @@ class SettingsWindow:
     def _save_cfg(self):
         try:
             key = self.key_entry.get().strip()
-            if len(key) != 32:
-                messagebox.showerror("错误", "加密密钥必须是 16 字节（32 个字符）!")
-                return
+            # if len(key) != 32:
+            #     messagebox.showerror("错误", "加密密钥必须是 16 字节（32 个字符）!")
+            #     return
 
             # 更新内存配置
             self.cfg["account"]["username"] = self.user_entry.get().strip()
