@@ -196,7 +196,7 @@ def main_logic():
                         f"✅ 获取到的 WebSocket 完整地址：{ws_url[30]}"
                     )
 
-                    ws_monitor = EmsWsMonitor(ws_url, timeout=loop_interval)  #测试完改成改回30
+                    ws_monitor = EmsWsMonitor(ws_url, timeout=loop_interval)  #测试完改成改回30  发起ws连接获取数据
                     status = ws_monitor.start()  # True=收到数据
                     if status == "ok":
                         print("✅ 网站数据正常")

@@ -24,6 +24,7 @@ class EmsWsMonitor:
     ]
 
     def __init__(self, ws_url: str, timeout: int = 15, poll_interval: float = 0.5):
+        # 初始化 WebSocket 连接
         if not ws_url:
             raise ValueError("无法获取 WebSocket URL，无法连接")
 
@@ -37,17 +38,21 @@ class EmsWsMonitor:
 
         self.ws = None
         self.thread = None
-        self._stop_event = threading.Event()
+        self._stop_event = threading.Event()  # 停止事件，用于停止线程
 
     def stop_monitor(self):
         """
         显式停止监控线程和WebSocket连接
         """
+        # 停止监控线程
         self.stop()
+        # 如果监控线程存在且正在运行，则等待1秒后停止
         if self.thread and self.thread.is_alive():
             self.thread.join(timeout=1)
+        # 如果WebSocket连接存在，则关闭连接
         if self.ws:
             self.ws.close()
+        # 打印提示信息
         print("WebSocket 监控已完全停止")
 
     # ─────────── WebSocket 回调 ───────────
@@ -57,7 +62,8 @@ class EmsWsMonitor:
             payload = json.loads(message)
             if payload.get("func") == "rtv":
                 for item in payload.get("data", []):
-                    v = item.get("value")
+                    v = item.get("value") 
+                    print(f"收到数据value: {v}")
                     # 有效值判定：既不为空/None，也不等于 87 或 "87"
                     if v not in ("", None, 87, "87"):
                         self.data_valid = True
@@ -67,6 +73,7 @@ class EmsWsMonitor:
         print(f"收到数据推送: {message[:220]}...")
 
     def _on_error(self, ws, error):
+        # 打印 WebSocket 错误信息
         print(f"WebSocket 错误: {error}")
 
     def _on_close(self, ws, code, msg):
@@ -116,9 +123,13 @@ class EmsWsMonitor:
         return "ok"
 
     def stop(self):
+        # 设置停止事件
         self._stop_event.set()
+        # 如果WebSocket存在，则关闭
         if self.ws:
             self.ws.close()
+        # 如果线程存在且正在运行，则等待线程结束
         if self.thread and self.thread.is_alive():
             self.thread.join()
+        # 打印WebSocket监听已停止
         print("WebSocket 监听已停止")
