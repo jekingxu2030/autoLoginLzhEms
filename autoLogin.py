@@ -20,6 +20,8 @@ from datetime import datetime
 # 将WebSocket URL写入config.ini文件
 import configparser
 
+# from ems_ws_monitor import EmsWsInterceptor
+
 config = configparser.ConfigParser()
 
 # === 路径 ===
@@ -38,13 +40,6 @@ settings_window = None
 stop_event = threading.Event()
 config_ready = threading.Event()
 # ng.support@baiyiled.nl
-
-# send_email(
-#     []"ng.support@baiyiled.nl","maricn@wi-power.com"],
-#     "【EMS Events】",
-#     f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据异常！请您尽快检查和处理!谢谢!\n\n事件时间：{datetime.now()}",
-#     from_addr="531556397@qq.com",
-# )
 
 
 def thread_safe_update_debug_label(text):
@@ -88,6 +83,10 @@ def get_ws_url(driver):
 
             # 读取ini并写入配置文件
             set_config_value("config.ini", "websocket", "url", ws_url)
+            thread_safe_update_debug_label(
+                        f"✅ 获取到的 WebSocket 完整地址：{ws_url[30]}"
+                    )
+
             return ws_url
 
     return None
@@ -232,24 +231,21 @@ def main_logic():
                 thread_safe_update_debug_label("模拟网页操作，防止掉线...")
                 time.sleep(loop_interval + 20)
 
-                # thread_safe_update_debug_label(f"检测结果：{result[:20]}")
-                #  ==================================================== #
-                # 第二种检测ws完整地址方法2-模块化
+           
+                #  ==================================================== #            
                 # 检测WS URL
-                ws_url = get_ws_url(driver)
-                if ws_url:
-                    thread_safe_update_debug_label(
-                        f"✅ 获取到的 WebSocket 完整地址：{ws_url[30]}"
-                    )
-
+                ws_url = get_ws_url(driver)  # --更新ws连接字套
+                # 每次调用获取一次 rtv 推送（若存在）
+                ws_monitor = EmsWsMonitor(driver, timeout=20)
+                status = ws_monitor.start()
+                print("检测状态：", status)
+                if status:
+                    # 你可以自行判断数据有效性
+                    print("✅ 成功拦截到RTV推送")
                     lsstSendtTime = (
                         (loop_interval * 3) + (load_wait_time * 2) + 51
                     ) * (dingtalk_times - intervalCounts)
-
-                    ws_monitor = EmsWsMonitor(
-                        ws_url, timeout=loop_interval + 10
-                    )  # 测试完改成改回30  发起ws连接获取数据
-                    status = ws_monitor.start()  # True=收到数据
+              
                     if status == "ok":
                         print("✅ 网站数据正常")
                         thread_safe_update_debug_label(f"✅ 网站实时数据正常")
@@ -281,7 +277,7 @@ def main_logic():
                                 [
                                     # "jekingxu@mic-power.cn",
                                     # "jekingxu@163.com",
-                                    "marcin.lee@wic-power.com",
+                                    # "marcin.lee@wic-power.com",
                                     "wicpower2023@gmail.com",
                                     "531556397@qq.com",
                                     "ng.support@baiyiled.nl",
@@ -320,10 +316,10 @@ def main_logic():
                                 [
                                     # "jekingxu@mic-power.cn",
                                     # "jekingxu@163.com",
-                                    "marcin.lee@wic-power.com",
+                                    # "marcin.lee@wic-power.com",
                                     "wicpower2023@gmail.com",
                                     "531556397@qq.com",
-                                    "ng.support@baiyiled.nl",
+                                    # "ng.support@baiyiled.nl",
                                 ],
                                 "【EMS Events】",
                                 f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“empty”异常！请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
@@ -396,10 +392,10 @@ def main_logic():
                                 [
                                     # "jekingxu@mic-power.cn",
                                     # "jekingxu@163.com",
-                                    "marcin.lee@wic-power.com",
+                                    # "marcin.lee@wic-power.com",
                                     "wicpower2023@gmail.com",
                                     "531556397@qq.com",
-                                    "ng.support@baiyiled.nl",
+                                    # "ng.support@baiyiled.nl",
                                 ],
                                 "【EMS Events】",
                                 f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“no_ws”异常！请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
@@ -414,6 +410,43 @@ def main_logic():
                             thread_safe_update_debug_label(
                                 f"⚠️还要间隔 {dingtalk_times-intervalCounts} 次后再次发送钉钉消息！"
                             )
+                            intervalCounts += 1
+                    elif status == "error":
+                        print("❌ WebSocket 连接错误")
+                        thread_safe_update_debug_label(f"❌ 网站连接错误")
+                        errocontent = (
+                          f"Event: BY-01-EMS_StatusCheck\n"
+                          f"State: Alarm!\n"
+                          f"CheckUrl: {driver.current_url}\n"
+                          f"Message:网站WS数据连接错误，请检查！\n"
+                          f"WebSiteState: cantConnect"
+                      )
+                        if intervalCounts >= dingtalk_times:  # 正常的比故障长20倍
+                            send_dingtalk_msg(errocontent)
+                            intervalCounts = 0
+                            sendDDtotal += 1
+                            send_email(
+                              [
+                                  # "jekingxu@mic-power.cn",
+                                  # "jekingxu@163.com",
+                                  # "marcin.lee@wic-power.com",
+                                  "wicpower2023@gmail.com",
+                                  "531556397@qq.com",
+                                  # "ng.support@baiyiled.nl",
+                              ],
+                              "【EMS Events】",
+                              f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS连接异常！请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
+                              # from_addr="531556397@qq.com",
+                              from_addr="jekingxu@163.com",
+                          )
+                            thread_safe_update_debug_label("推送故障钉钉消息完成...")
+                        else:
+                            print(
+                              f"\n ⚠️还要间隔 {dingtalk_times-intervalCounts} 次后再次发送钉钉消息！"
+                          )
+                            thread_safe_update_debug_label(
+                              f"⚠️还要间隔 {dingtalk_times-intervalCounts} 次后再次发送钉钉消息！"
+                          )
                             intervalCounts += 1
 
                     print(f"✅已间隔次数 = {intervalCounts}")
