@@ -134,6 +134,7 @@ class EmailSender:
             msg = self._make_msg(
                 from_real,
                 "Undisclosed Recipients-noreply<service@wic-power.cn>",
+                # to_addr,
                 subject,
                 body,
             )
@@ -161,7 +162,7 @@ class EmailSender:
                 print(f"✖ 部分发送失败:", response)
                 return {"success": False, "response": str(response)}
         except Exception as e:
-            print(f"✖ 发送出错:", str(e))
+            print(f"✖ 邮件发送出错:", str(e))
             return {"success": False, "response": str(e)}
 
         return {"success": True, "response": "所有邮件已发送"}
@@ -171,7 +172,7 @@ class EmailSender:
             f"用户名: {self.username}, 默认域名: {self.default_domain}\n"
             f"⚡ Connecting → {self.smtp_host}:{self.smtp_port} (SSL={self.use_ssl})\n"
             f"Envelope‑From: {from_real}  →  To: {to_real}"
-        )
+         )
         try:
             # 尝试发送邮件，最多重试3次
             for attempt in range(3):
@@ -241,9 +242,9 @@ class EmailSender:
 
         except Exception:  # pylint: disable=broad-except
             # 如果发送过程中出现异常
-            tb = traceback.format_exc()
-            print("！ 发送过程中出现异常:\n", tb)
-            return {"success": False, "response": tb}
+              tb = traceback.format_exc()
+              print("！ 发送过程中出现异常:\n", tb)
+        return {"success": False, "response": tb}
 
 
 ###############################################################################

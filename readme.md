@@ -14,8 +14,8 @@ pip install -r requirements.txt
 
 2. 运行程序：
 ```bash
-先进入虚拟环境
-.\venv\Scripts\activate
+先进入虚拟环境   --本项目不需要虚拟环境
+.\venv\Scripts\activate    
 再运行程序
 python autoLogin.py
 ```
