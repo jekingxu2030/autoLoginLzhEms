@@ -1,0 +1,1436 @@
+{
+  "d_air_condition": [
+    {
+      "id": 413001051,
+      "fieldChnName": "空调 实时设备状态",
+      "fieldEngName": "air conditioner Realtime device state",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_dev_stat"
+    },
+    {
+      "id": 413001100,
+      "fieldChnName": "空调 盘管温度（℃）",
+      "fieldEngName": "air conditioner Coil temperature（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413001101,
+      "fieldChnName": "空调 冷凝温度（℃）",
+      "fieldEngName": "air conditioner Condensation temperature（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413001102,
+      "fieldChnName": "空调 室内温度（℃）",
+      "fieldEngName": "air conditioner Indoor temperature（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413001103,
+      "fieldChnName": "空调 湿度（%）",
+      "fieldEngName": "air conditioner humidity（%）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413001105,
+      "fieldChnName": "空调 制冷点（℃）",
+      "fieldEngName": "air conditioner Cooling point（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413001106,
+      "fieldChnName": "空调 制冷回差（℃）",
+      "fieldEngName": "air conditioner Cooling hysteresis（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413001107,
+      "fieldChnName": "空调 加热点（℃）",
+      "fieldEngName": "air conditioner Heating point（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413001108,
+      "fieldChnName": "空调 加热回差（℃）",
+      "fieldEngName": "air conditioner Heating hysteresis（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413001109,
+      "fieldChnName": "空调 除湿点（%）",
+      "fieldEngName": "air conditioner dehumidification point（%）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413001110,
+      "fieldChnName": "除湿回差（%）",
+      "fieldEngName": "Dehumidification hysteresis（%）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413001111,
+      "fieldChnName": "空调 高温点（℃）",
+      "fieldEngName": "air conditioner High temperature point（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413001112,
+      "fieldChnName": "空调 低温点（℃）",
+      "fieldEngName": "air conditioner Low temperature point（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413001113,
+      "fieldChnName": "空调 高湿点（%）",
+      "fieldEngName": "air conditioner High humidity point（%）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413001114,
+      "fieldChnName": "空调 内风机停止点（℃）",
+      "fieldEngName": "air conditioner Inner fan stop point（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413001126,
+      "fieldChnName": "空调 整机状态",
+      "fieldEngName": "air conditioner Overall machine status",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413001127,
+      "fieldChnName": "空调 内风机",
+      "fieldEngName": "air conditioner Internal fan",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413001128,
+      "fieldChnName": "空调 外风机",
+      "fieldEngName": "air conditioner External fan",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413001129,
+      "fieldChnName": "空调 压缩机",
+      "fieldEngName": "air conditioner compressor",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413001130,
+      "fieldChnName": "空调 电加热",
+      "fieldEngName": "air conditioner Electric heating",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413002142,
+      "fieldChnName": "温湿度计 湿度（%）",
+      "fieldEngName": "Thermohygrometer humidity",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413002143,
+      "fieldChnName": "温湿度计 温度（℃）",
+      "fieldEngName": "Thermohygrometer temperature",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003051,
+      "fieldChnName": "2#空调 实时设备状态",
+      "fieldEngName": "2#air conditioner Realtime device state",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_dev_stat"
+    },
+    {
+      "id": 413003100,
+      "fieldChnName": "2#空调 盘管温度（℃）",
+      "fieldEngName": "2#air conditioner Coil temperature（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003101,
+      "fieldChnName": "2#空调 冷凝温度（℃）",
+      "fieldEngName": "2#air conditioner Condensation temperature（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003102,
+      "fieldChnName": "2#空调 室内温度（℃）",
+      "fieldEngName": "2#air conditioner Indoor temperature（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003103,
+      "fieldChnName": "2#空调 湿度（%）",
+      "fieldEngName": "2#air conditioner humidity（%）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003105,
+      "fieldChnName": "2#空调 制冷点（℃）",
+      "fieldEngName": "2#air conditioner Cooling point（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003106,
+      "fieldChnName": "2#空调 制冷回差（℃）",
+      "fieldEngName": "2#air conditioner Cooling hysteresis（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003107,
+      "fieldChnName": "2#空调 加热点（℃）",
+      "fieldEngName": "2#air conditioner Heating point（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003108,
+      "fieldChnName": "2#空调 加热回差（℃）",
+      "fieldEngName": "2#air conditioner Heating hysteresis（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003109,
+      "fieldChnName": "2#空调 除湿点（%）",
+      "fieldEngName": "2#air conditioner dehumidification point（%）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003110,
+      "fieldChnName": "2#空调 除湿点（%）",
+      "fieldEngName": "2#air conditioner Dehumidification point（%）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003111,
+      "fieldChnName": "2#空调 高温点（℃）",
+      "fieldEngName": "2#air conditioner High temperature point（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003112,
+      "fieldChnName": "2#空调 低温点（℃）",
+      "fieldEngName": "2#air conditioner Low temperature point（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003113,
+      "fieldChnName": "2#空调 高湿点（%）",
+      "fieldEngName": "2#air conditioner High humidity point（%）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003114,
+      "fieldChnName": "2#空调 内风机停止点（℃）",
+      "fieldEngName": "2#air conditioner Inner fan stop point（℃）",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003126,
+      "fieldChnName": "2#空调 整机状态",
+      "fieldEngName": "2#air conditioner Overall machine status",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003127,
+      "fieldChnName": "2#空调 内风机",
+      "fieldEngName": "2#air conditioner Internal fan",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003128,
+      "fieldChnName": "2#空调 外风机",
+      "fieldEngName": "2#air conditioner External fan",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003129,
+      "fieldChnName": "2#空调 压缩机",
+      "fieldEngName": "2#air conditioner compressor",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 413003130,
+      "fieldChnName": "2#空调 电加热",
+      "fieldEngName": "2#air conditioner Electric heating",
+      "value": null,
+      "tableName": "d_air_condition",
+      "fieldName": "rtv_other"
+    }
+  ],
+  "d_pv": [
+    {
+      "id": 407001100,
+      "fieldChnName": "1#MPTT 散热器温度（℃）",
+      "fieldEngName": "1#MPTT Radiator temperature（℃）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407001101,
+      "fieldChnName": "1#MPTT 高压侧总电压（V）",
+      "fieldEngName": "1#MPTT Total voltage on the high-voltage（V）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407001102,
+      "fieldChnName": "1#MPTT 高压侧正母线电压（V）",
+      "fieldEngName": "1#MPTT High - voltage side positive bus voltage（V）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407001103,
+      "fieldChnName": "1#MPTT 高压侧负母线电压（V）",
+      "fieldEngName": "1#MPTT High - voltage side negative bus voltage（V）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407001104,
+      "fieldChnName": "1#MPTT 高压侧正负母线压差（V）",
+      "fieldEngName": "1#MPTT The voltage difference on the high - voltage side（V）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407001105,
+      "fieldChnName": "1#MPTT 低压侧电压（V）",
+      "fieldEngName": "1#MPTT Voltage on the low-voltage side（V）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407001106,
+      "fieldChnName": "1#MPTT 低压侧电流（A）",
+      "fieldEngName": "1#MPTT Current on the low - voltage side（A）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407001107,
+      "fieldChnName": "1#MPTT 低压侧直流功率（kW）",
+      "fieldEngName": "1#MPTT DC power on the low-voltage side（kW）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407001108,
+      "fieldChnName": "1#MPTT 模块环境温度（℃）",
+      "fieldEngName": "1#MPTT Module ambient temperature（℃）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407001109,
+      "fieldChnName": "1#MPTT 环境温度限额功率（kW）",
+      "fieldEngName": "1#MPTT Environmental temperature limit power（kW）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407001110,
+      "fieldChnName": "1#MPTT 运行功率限制值（kW）",
+      "fieldEngName": "1#MPTT Operating power limit value（kW）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407001111,
+      "fieldChnName": "1#MPTT 正绝缘电阻",
+      "fieldEngName": "1#MPTT Positive insulation resistance",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407001112,
+      "fieldChnName": "1#MPTT 负绝缘电阻",
+      "fieldEngName": "1#MPTT Negative insulation resistance",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407001113,
+      "fieldChnName": "1#MPTT 总充电电量（kWh）",
+      "fieldEngName": "1#MPTT Total charging power（kWh）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407001114,
+      "fieldChnName": "1#MPTT 总放电电量（kWh）",
+      "fieldEngName": "1#MPTT Total discharging power（kWh）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407001115,
+      "fieldChnName": "1#MPTT 日充电电量（kWh）",
+      "fieldEngName": "1#MPTT Daily charging power（kWh）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407001116,
+      "fieldChnName": "1#MPTT 日放电电量（kWh）",
+      "fieldEngName": "1#MPTT Daily discharge capacity（kWh）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407001900,
+      "fieldChnName": "光伏限制功率轮询时间",
+      "fieldEngName": "Cycle Time",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407002100,
+      "fieldChnName": "2#MPTT 散热器温度（℃）",
+      "fieldEngName": "2#MPTT Radiator temperature（℃）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407002101,
+      "fieldChnName": "2#MPTT 高压侧总电压（V）",
+      "fieldEngName": "2#MPTT Total voltage on the high-voltage（V）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407002102,
+      "fieldChnName": "2#MPTT 高压侧正母线电压（V）",
+      "fieldEngName": "2#MPTT High - voltage side positive bus voltage（V）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407002103,
+      "fieldChnName": "2#MPTT 高压侧负母线电压（V）",
+      "fieldEngName": "2#MPTT High - voltage side negative bus voltage（V）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407002104,
+      "fieldChnName": "2#MPTT 高压侧正负母线压差（V）",
+      "fieldEngName": "2#MPTT The voltage difference on the high - voltage side（V）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407002105,
+      "fieldChnName": "2#MPTT 低压侧电压（V）",
+      "fieldEngName": "2#MPTT Voltage on the low-voltage side（V）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407002106,
+      "fieldChnName": "2#MPTT 低压侧电流（A）",
+      "fieldEngName": "2#MPTT Current on the low - voltage side（A）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407002107,
+      "fieldChnName": "2#MPTT 低压侧直流功率（kW）",
+      "fieldEngName": "2#MPTT DC power on the low-voltage side（kW）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407002108,
+      "fieldChnName": "2#MPTT 模块环境温度（℃）",
+      "fieldEngName": "2#MPTT Module ambient temperature（℃）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407002109,
+      "fieldChnName": "2#MPTT 环境温度限额功率（kW）",
+      "fieldEngName": "2#MPTT Environmental temperature limit power（kW）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407002110,
+      "fieldChnName": "2#MPTT 运行功率限制值（kW）",
+      "fieldEngName": "2#MPTT Operating power limit value（kW）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407002111,
+      "fieldChnName": "2#MPTT 正绝缘电阻",
+      "fieldEngName": "2#MPTT Positive insulation resistance",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407002112,
+      "fieldChnName": "2#MPTT 负绝缘电阻",
+      "fieldEngName": "2#MPTT Negative insulation resistance",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407002113,
+      "fieldChnName": "2#MPTT 总充电电量（kWh）",
+      "fieldEngName": "2#MPTT Total charging power（kWh）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407002114,
+      "fieldChnName": "2#MPTT 总放电电量（kWh）",
+      "fieldEngName": "2#MPTT Total discharging power（kWh）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407002115,
+      "fieldChnName": "2#MPTT 日充电电量（kWh）",
+      "fieldEngName": "2#MPTT Daily charging power（kWh）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 407002116,
+      "fieldChnName": "2#MPTT 日放电电量（kWh）",
+      "fieldEngName": "2#MPTT Daily discharge capacity（kWh）",
+      "value": null,
+      "tableName": "d_pv",
+      "fieldName": "rtv_other"
+    }
+  ],
+  "d_pcs": [
+    {
+      "id": 409001058,
+      "fieldChnName": "储能变流器 AB线实时电压（V）",
+      "fieldEngName": "PCS Real time voltage of line AB (V)",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_Uab"
+    },
+    {
+      "id": 409001059,
+      "fieldChnName": "储能变流器 BC线实时电压（V）",
+      "fieldEngName": "PCS Real time voltage of line BC (V)",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_Ubc"
+    },
+    {
+      "id": 409001060,
+      "fieldChnName": "储能变流器 CA线实时电压（V）",
+      "fieldEngName": "PCS Real time voltage of line CA (V)",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_Uca"
+    },
+    {
+      "id": 409001061,
+      "fieldChnName": "储能变流器 A相实时电流（A）",
+      "fieldEngName": "PCS Real time current of phase A (A)",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_Ia"
+    },
+    {
+      "id": 409001062,
+      "fieldChnName": "储能变流器 B相实时电流（A）",
+      "fieldEngName": "PCS Real time current of phase B (A)",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_Ib"
+    },
+    {
+      "id": 409001063,
+      "fieldChnName": "储能变流器 C相实时电流（A）",
+      "fieldEngName": "PCS Real time current of phase C (A)",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_Ic"
+    },
+    {
+      "id": 409001064,
+      "fieldChnName": "储能变流器 A相实时有功功率（kW）",
+      "fieldEngName": "PCS Real time active power of phase A (kW)",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_Pa"
+    },
+    {
+      "id": 409001065,
+      "fieldChnName": "储能变流器 B相实时有功功率（kW）",
+      "fieldEngName": "PCS Real time active power of phase B (kW)",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_Pb"
+    },
+    {
+      "id": 409001066,
+      "fieldChnName": "储能变流器 C相实时有功功率（kW）",
+      "fieldEngName": "PCS Real time active power of phase C (kW)",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_Pc"
+    },
+    {
+      "id": 409001067,
+      "fieldChnName": "储能变流器 三相实时有功功率（kW）",
+      "fieldEngName": "PCS Three phase real-time active power (kW)",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_P"
+    },
+    {
+      "id": 409001068,
+      "fieldChnName": "储能变流器 A相实时无功功率（kVar）",
+      "fieldEngName": "PCS Real time reactive power of phase A (kVar)",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_Qa"
+    },
+    {
+      "id": 409001069,
+      "fieldChnName": "储能变流器 B相实时无功功率（kVar）",
+      "fieldEngName": "PCS Real time reactive power of phase B (kVar)",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_Qb"
+    },
+    {
+      "id": 409001070,
+      "fieldChnName": "储能变流器 C相实时无功功率（kVar）",
+      "fieldEngName": "PCS Real time reactive power of phase C (kVar)",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_Qc"
+    },
+    {
+      "id": 409001071,
+      "fieldChnName": "储能变流器 三相实时无功功率（kVar）",
+      "fieldEngName": "PCS Real time oil temperature (℃)",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_Q"
+    },
+    {
+      "id": 409001072,
+      "fieldChnName": "储能变流器 A相实时视在功率（kVA）",
+      "fieldEngName": "PCS Real time apparent power of phase A (kVA)",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_Sa"
+    },
+    {
+      "id": 409001073,
+      "fieldChnName": "储能变流器 B相实时视在功率（kVA）",
+      "fieldEngName": "PCS Real time apparent power of phase B (kVA)",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_Sb"
+    },
+    {
+      "id": 409001074,
+      "fieldChnName": "储能变流器 C相实时视在功率（kVA）",
+      "fieldEngName": "PCS Real time apparent power of phase C (kVA)",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_Sc"
+    },
+    {
+      "id": 409001075,
+      "fieldChnName": "储能变流器 三相实时视在功率（kVA）",
+      "fieldEngName": "PCS Three phase real-time apparent power (kVA)",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_S"
+    },
+    {
+      "id": 409001100,
+      "fieldChnName": "储能变流器 A相电压（V）",
+      "fieldEngName": "Phase A voltage（V）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001101,
+      "fieldChnName": "储能变流器 B相电压（V）",
+      "fieldEngName": "Phase B voltage（V）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001102,
+      "fieldChnName": "储能变流器 C相电压（V）",
+      "fieldEngName": "Phase C voltage（V）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001103,
+      "fieldChnName": "储能变流器 电感A相电流（A）",
+      "fieldEngName": "Inductor A - phase current（A）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001104,
+      "fieldChnName": "储能变流器 电感B相电流（A）",
+      "fieldEngName": "Inductor B - phase current（A）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001105,
+      "fieldChnName": "储能变流器 电感C相电流（A）",
+      "fieldEngName": "Inductor C - phase current（A）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001106,
+      "fieldChnName": "储能变流器 电网频率（Hz）",
+      "fieldEngName": "power grid frequency（Hz）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001107,
+      "fieldChnName": "储能变流器 当前相序",
+      "fieldEngName": "Current phase sequence",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001108,
+      "fieldChnName": "储能变流器 交流功率因数",
+      "fieldEngName": "AC power factor",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001109,
+      "fieldChnName": "储能变流器 总母线电压（V）",
+      "fieldEngName": "Total bus voltage（V）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001110,
+      "fieldChnName": "储能变流器 正母线电压（V）",
+      "fieldEngName": "Positive bus voltage（V）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001111,
+      "fieldChnName": "储能变流器 负母线电压（V）",
+      "fieldEngName": "Negative bus voltage（V）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001112,
+      "fieldChnName": "储能变流器 电池电压（V）",
+      "fieldEngName": "Battery voltage（V）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001113,
+      "fieldChnName": "储能变流器 电池电流（A）",
+      "fieldEngName": "Battery current（A）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001114,
+      "fieldChnName": "储能变流器 直流功率（kW）",
+      "fieldEngName": "DC power（kW）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001115,
+      "fieldChnName": "储能变流器 直流总电流（A）",
+      "fieldEngName": "Total DC current（A）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001116,
+      "fieldChnName": "储能变流器 IGBT温度（℃）",
+      "fieldEngName": "IGBT temperature（℃）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001117,
+      "fieldChnName": "储能变流器 环境温度（℃）",
+      "fieldEngName": "ambient temperature（℃）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001118,
+      "fieldChnName": "储能变流器 电感温度（℃）",
+      "fieldEngName": "Inductor temperature（℃）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001119,
+      "fieldChnName": "储能变流器 当前充放电工作模式",
+      "fieldEngName": "working mode",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001120,
+      "fieldChnName": "储能变流器 A相功率因数",
+      "fieldEngName": "Power factor of Phase A",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001121,
+      "fieldChnName": "储能变流器 B相功率因数",
+      "fieldEngName": "Power factor of Phase B",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001122,
+      "fieldChnName": "储能变流器 C相功率因数",
+      "fieldEngName": "Power factor of Phase C",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001123,
+      "fieldChnName": "储能变流器 直流历史充电量（kWh）",
+      "fieldEngName": "DC historical charging capacity（kWh）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001124,
+      "fieldChnName": "储能变流器 直流日充电量（kWh）",
+      "fieldEngName": "Daily DC charging capacity（kWh）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001125,
+      "fieldChnName": "储能变流器 直流历史放电量（kWh）",
+      "fieldEngName": "DC historical discharge amount（kWh）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001126,
+      "fieldChnName": "储能变流器 直流日放电量（kWh）",
+      "fieldEngName": "Daily DC discharge capacity（kWh）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001127,
+      "fieldChnName": "储能变流器 交流历史充电量（kWh）",
+      "fieldEngName": "AC historical charging amount（kWh）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001128,
+      "fieldChnName": "储能变流器 交流日充电量（kWh）",
+      "fieldEngName": "AC daily charging capacity（kWh）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001129,
+      "fieldChnName": "储能变流器 交流历史放电量（kWh）",
+      "fieldEngName": "AC historical discharge amount（kWh）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 409001130,
+      "fieldChnName": "储能变流器 交流日放电量（kWh）",
+      "fieldEngName": "Daily AC discharge capacity（kWh）",
+      "value": null,
+      "tableName": "d_pcs",
+      "fieldName": "rtv_other"
+    }
+  ],
+  "d_bms": [
+    {
+      "id": 412001051,
+      "fieldChnName": "BMS 实时设备状态",
+      "fieldEngName": "BMS Realtime device state",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_dev_stat"
+    },
+    {
+      "id": 412001052,
+      "fieldChnName": "BMS 实时电压（V）",
+      "fieldEngName": "BMS Voltage(V)",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_volt"
+    },
+    {
+      "id": 412001053,
+      "fieldChnName": "BMS 实时电流（A）",
+      "fieldEngName": "BMS Current(A)",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_cur"
+    },
+    {
+      "id": 412001054,
+      "fieldChnName": "BMS 最大可充电电流（A）",
+      "fieldEngName": "BMS Charge current limit(A)",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_chg_current_lmt"
+    },
+    {
+      "id": 412001055,
+      "fieldChnName": "BMS 最大可放电电流（A）",
+      "fieldEngName": "BMS Discharge current limit(A)",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_dsg_current_lmt"
+    },
+    {
+      "id": 412001056,
+      "fieldChnName": "BMS Soc（%）",
+      "fieldEngName": "BMS Soc(%)",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_soc"
+    },
+    {
+      "id": 412001100,
+      "fieldChnName": "BMS SOH（%）",
+      "fieldEngName": "BMS SOH（%）",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001101,
+      "fieldChnName": "BMS 允许充电最大功率（kW）",
+      "fieldEngName": "BMS Maximum allowable charging power（kW）",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001102,
+      "fieldChnName": "BMS 允许放电最大功率（kW）",
+      "fieldEngName": "BMS Maximum allowable discharge power（kW）",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001103,
+      "fieldChnName": "BMS 允许充电最大电压（V）",
+      "fieldEngName": "BMS Maximum allowable charging voltage（V）",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001104,
+      "fieldChnName": "BMS 允许放电最大电压（V）",
+      "fieldEngName": "BMS Maximum allowable discharge voltage（V）",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001105,
+      "fieldChnName": "BMS 模块温度（℃）",
+      "fieldEngName": "BMS Module temperature（℃）",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001106,
+      "fieldChnName": "BMS 绝缘电阻",
+      "fieldEngName": "BMS Insulation resistance",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001107,
+      "fieldChnName": "BMS 平均单体电压（V）",
+      "fieldEngName": "BMS Average single - cell voltage（V）",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001108,
+      "fieldChnName": "BMS 平均单体温度",
+      "fieldEngName": "BMS Average monomer temperature",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001109,
+      "fieldChnName": "BMS 最高单体电压（V）",
+      "fieldEngName": "BMS Maximum single - cell voltage（V）",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001110,
+      "fieldChnName": "BMS 最高单体电压点",
+      "fieldEngName": "BMS The highest single - cell voltage point",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001111,
+      "fieldChnName": "BMS 最低单体电压（V）",
+      "fieldEngName": "BMS Minimum single-cell voltage（V）",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001112,
+      "fieldChnName": "BMS 最低单体电压点",
+      "fieldEngName": "BMS The lowest monomer voltage point",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001113,
+      "fieldChnName": "BMS 最高单体温度（℃）",
+      "fieldEngName": "BMS Maximum monomer temperature（℃）",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001114,
+      "fieldChnName": "BMS 最高单体温度点",
+      "fieldEngName": "BMS The highest monomer temperature point",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001115,
+      "fieldChnName": "BMS 最低单体温度（℃）",
+      "fieldEngName": "BMS Minimum monomer temperature（℃）",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001116,
+      "fieldChnName": "BMS 最低单体温度点",
+      "fieldEngName": "BMS The lowest monomer temperature point",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001117,
+      "fieldChnName": "BMS 累计充电电量（kWh）",
+      "fieldEngName": "BMS Accumulated charging power（kWh）",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001118,
+      "fieldChnName": "BMS 累计放电电量（kWh）",
+      "fieldEngName": "BMS Accumulated discharged electricity（kWh）",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001119,
+      "fieldChnName": "BMS 单次累计充电电量（kWh）",
+      "fieldEngName": "BMS Single cumulative charged power（kWh）",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001120,
+      "fieldChnName": "BMS 单次累计放电电量（kWh）",
+      "fieldEngName": "BMS Single cumulative discharged power（kWh）",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001121,
+      "fieldChnName": "BMS 可充电量（kWh）",
+      "fieldEngName": "BMS Rechargeable capacity（kWh）",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001122,
+      "fieldChnName": "BMS 可放电量（kWh）",
+      "fieldEngName": "BMS Dischargeable capacity（kWh）",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 412001123,
+      "fieldChnName": "BMS 实时功率（kW）",
+      "fieldEngName": "BMS Real-time power（kW）",
+      "value": null,
+      "tableName": "d_bms",
+      "fieldName": "rtv_other"
+    }
+  ],
+  "d_grid": [
+    {
+      "id": 411001052,
+      "fieldChnName": "电表 AB相实时电压（V）",
+      "fieldEngName": "METER Real time voltage of phase AB(V)",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_Uab"
+    },
+    {
+      "id": 411001053,
+      "fieldChnName": "电表 BC相实时电压（V）",
+      "fieldEngName": "METER Real time voltage of phase BC(V)",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_Ubc"
+    },
+    {
+      "id": 411001054,
+      "fieldChnName": "电表 CA相实时电压（V）",
+      "fieldEngName": "METER Real time voltage of phase CA(V)",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_Uca"
+    },
+    {
+      "id": 411001055,
+      "fieldChnName": "电表 A相实时电流（A）",
+      "fieldEngName": "METER Real time current of phase A (A)",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_Ia"
+    },
+    {
+      "id": 411001056,
+      "fieldChnName": "电表 B相实时电流（A）",
+      "fieldEngName": "METER Real time current of phase B (A)",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_Ib"
+    },
+    {
+      "id": 411001057,
+      "fieldChnName": "电表 C相实时电流（A）",
+      "fieldEngName": "METER Real time current of phase C (A)",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_Ic"
+    },
+    {
+      "id": 411001058,
+      "fieldChnName": "电表 A相实时有功功率（kW）",
+      "fieldEngName": "METER Real time active power of phase A (kW)",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_Pa"
+    },
+    {
+      "id": 411001059,
+      "fieldChnName": "电表 B相实时有功功率（kW）",
+      "fieldEngName": "METER Real time active power of phase B (kW)",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_Pb"
+    },
+    {
+      "id": 411001060,
+      "fieldChnName": "电表 C相实时有功功率（kW）",
+      "fieldEngName": "METER Real time active power of phase C (kW)",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_Pc"
+    },
+    {
+      "id": 411001061,
+      "fieldChnName": "电表 三相实时有功功率（kW）",
+      "fieldEngName": "METER Three phase real-time active power (kW)",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_P"
+    },
+    {
+      "id": 411001062,
+      "fieldChnName": "电表 A相实时无功功率（kVar）",
+      "fieldEngName": "METER Real time reactive power of phase A (kVar)",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_Qa"
+    },
+    {
+      "id": 411001063,
+      "fieldChnName": "电表 B相实时无功功率（kVar）",
+      "fieldEngName": "METER Real time reactive power of phase B (kVar)",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_Qb"
+    },
+    {
+      "id": 411001064,
+      "fieldChnName": "电表 C相实时无功功率（kVar）",
+      "fieldEngName": "METER Real time reactive power of phase C (kVar)",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_Qc"
+    },
+    {
+      "id": 411001065,
+      "fieldChnName": "电表 三相实时无功功率（kVar）",
+      "fieldEngName": "METER Real time oil temperature (℃)",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_Q"
+    },
+    {
+      "id": 411001066,
+      "fieldChnName": "电表 A相实时视在功率（kVA）",
+      "fieldEngName": "METER Real time apparent power of phase A (kVA)",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_Sa"
+    },
+    {
+      "id": 411001067,
+      "fieldChnName": "电表 B相实时视在功率（kVA）",
+      "fieldEngName": "METER Real time apparent power of phase B (kVA)",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_Sb"
+    },
+    {
+      "id": 411001068,
+      "fieldChnName": "电表 C相实时视在功率（kVA）",
+      "fieldEngName": "METER Real time apparent power of phase C (kVA)",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_Sc"
+    },
+    {
+      "id": 411001069,
+      "fieldChnName": "电表 三相实时视在功率（kVA）",
+      "fieldEngName": "METER Three phase real-time apparent power (kVA)",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_S"
+    },
+    {
+      "id": 411001100,
+      "fieldChnName": "电表 功率因数（%）",
+      "fieldEngName": "METER Power factor（%）",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 411001101,
+      "fieldChnName": "电表 频率（Hz）",
+      "fieldEngName": "METER frequency（Hz）",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 411001102,
+      "fieldChnName": "电表 下网电量（kWh）",
+      "fieldEngName": "METER Power consumption from the grid（kWh）",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_other"
+    },
+    {
+      "id": 411001103,
+      "fieldChnName": "电表 上网电量（kWh）",
+      "fieldEngName": "METER Power output to the grid（kWh）",
+      "value": null,
+      "tableName": "d_grid",
+      "fieldName": "rtv_other"
+    }
+  ]
+}

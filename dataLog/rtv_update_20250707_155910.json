@@ -1,0 +1,56 @@
+[
+  {
+    "id": 409001058,
+    "fieldChnName": "储能变流器 AB线实时电压（V）",
+    "fieldEngName": "PCS Real time voltage of line AB (V)",
+    "value": "393.90000000000003",
+    "tableName": "d_pcs",
+    "device_type": "d_pcs",
+    "ts": "2025-07-07 15:59:10"
+  },
+  {
+    "id": 409001061,
+    "fieldChnName": "储能变流器 A相实时电流（A）",
+    "fieldEngName": "PCS Real time current of phase A (A)",
+    "value": "35.800000000000004",
+    "tableName": "d_pcs",
+    "device_type": "d_pcs",
+    "ts": "2025-07-07 15:59:10"
+  },
+  {
+    "id": 409001062,
+    "fieldChnName": "储能变流器 B相实时电流（A）",
+    "fieldEngName": "PCS Real time current of phase B (A)",
+    "value": "34.800000000000004",
+    "tableName": "d_pcs",
+    "device_type": "d_pcs",
+    "ts": "2025-07-07 15:59:10"
+  },
+  {
+    "id": 409001063,
+    "fieldChnName": "储能变流器 C相实时电流（A）",
+    "fieldEngName": "PCS Real time current of phase C (A)",
+    "value": "35.399999999999999",
+    "tableName": "d_pcs",
+    "device_type": "d_pcs",
+    "ts": "2025-07-07 15:59:10"
+  },
+  {
+    "id": 411001055,
+    "fieldChnName": "电表 A相实时电流（A）",
+    "fieldEngName": "METER Real time current of phase A (A)",
+    "value": "58.800000000000004",
+    "tableName": "d_grid",
+    "device_type": "d_grid",
+    "ts": "2025-07-07 15:59:10"
+  },
+  {
+    "id": 411001056,
+    "fieldChnName": "电表 B相实时电流（A）",
+    "fieldEngName": "METER Real time current of phase B (A)",
+    "value": "22.800000000000001",
+    "tableName": "d_grid",
+    "device_type": "d_grid",
+    "ts": "2025-07-07 15:59:10"
+  }
+]

@@ -45,7 +45,8 @@ def fetch_menu_once():
                         print(
                             f"[MENU]Data数据的第一层键名: {list(data.get('data', {}).keys())}"
                         )
-
+                        
+                     
                         return data.get("data")
 
                     else:
@@ -79,11 +80,20 @@ class EmsWsMonitor:
 
                 menu_cache = self.parse_menu_data(self.menu_data)
                 self.menu_cache = menu_cache  # ← 加这一句
-                print("[MENU] 缓存字典键值对数:", len(menu_cache))  # 总共多少个设备类型
+                print("[MENU] 缓存字典数据项:", len(menu_cache))  # 总共多少个设备类型
                 for device_type, field_list in menu_cache.items():
                     print(
                         f"[MENU] 设备类型: {device_type}，字段数量: {len(field_list)}"
                     )
+
+                    # 保存menu_list数据到文件
+                timestamp = time.strftime("%Y%m%d_%H%M%S")
+                log_dir = os.path.join(os.path.dirname(__file__), "dataLog")
+                os.makedirs(log_dir, exist_ok=True)
+                log_file = os.path.join(log_dir, f"menu_list_update_{timestamp}.json")
+                # with open(log_file, "w", encoding="utf-8") as f:
+                #     json.dump(menu_cache, f, ensure_ascii=False, indent=2)
+                print(f"[DEBUG] Menu_list数据已保存到: {log_file}")
 
                 # print(f"\n[WS] 菜单list整理完成:{menu_cache}")
             else:
@@ -133,7 +143,7 @@ class EmsWsMonitor:
                                                     if entry["id"] == new_id:
                                                         entry["value"] = new_value
                                                         print(
-                                                            f"[更新] 设备类型: {device_type} → ID: {new_id}, Value: {new_value}"
+                                                            # f"[更新] 设备类型: {device_type} → ID: {new_id}, Value: {new_value}"
                                                         )
                                                         updated = True
                                                         updated_count += 1
@@ -146,7 +156,7 @@ class EmsWsMonitor:
                                             )
                                     print(f"[RTV] 共更新字段值: {updated_count}")
 
-                                    # 构建导出的列表：只导出已更新过 value 的字段（即 value 不为 None）
+                                    # 构建导出完整list+data的列表：只导出已更新过 value 的字段（即 value 不为 None）
                                     export_data = []
                                     timestamp = datetime.now().strftime(
                                         "%Y-%m-%d %H:%M:%S"
@@ -175,34 +185,34 @@ class EmsWsMonitor:
                                     file_path = os.path.join(folder_path, file_name)
 
                                     # 保存为 JSON 文件
-                                    with open(file_path, "w", encoding="utf-8") as f:
-                                        json.dump(
-                                            export_data, f, ensure_ascii=False, indent=2
-                                        )
+                                    # with open(file_path, "w", encoding="utf-8") as f:
+                                    #     json.dump(
+                                    #         export_data, f, ensure_ascii=False, indent=2
+                                    #     )
                                     print(f"[RTV] 已保存更新数据到: {file_path}")
 
                                 if self.data_valid:
-                                    return "ok"
+                                    return "✅ok"
 
                             elif data.get("func") == "menu":
                                 print(f"\n[WS拦截] MENU数据: {payload[:80]}...")
 
                     except Exception as e:
                         print(f"[WS监听异常] {e}")
-                        return "error"
+                        return "❌error"
 
                 time.sleep(0.5)
 
             if not self.msg_arrived:
-                return "no_msg"
+                return "❌no_msg"
             elif not self.data_valid:
-                return "empty"
+                return "❌empty"
             else:
-                return "ok"
+                return "✅ok"
 
         except Exception as e:
             print(f"[WS错误] {e}")
-            return "no_ws"
+            return "❌no_ws"
 
     # 数据合成处理
     def parse_menu_data(self, menu_data):
@@ -240,7 +250,10 @@ class EmsWsMonitor:
                         entry["engName"] = rtv_item["engName"]
                     if "tableName" in rtv_item:
                         entry["tableName"] = rtv_item["tableName"]
-
+                    if "engName" in rtv_item:
+                        entry["engName"] = rtv_item["engName"]
+                    if "fieldName" in rtv_item:
+                        entry["fieldName"] = rtv_item["fieldName"]
                     cache[device_type].append(entry)
 
         return cache

@@ -1,0 +1,47 @@
+[
+  {
+    "id": 411001055,
+    "fieldChnName": "电表 A相实时电流（A）",
+    "fieldEngName": "METER Real time current of phase A (A)",
+    "value": "60",
+    "tableName": "d_grid",
+    "device_type": "d_grid",
+    "ts": "2025-07-07 15:56:49"
+  },
+  {
+    "id": 411001056,
+    "fieldChnName": "电表 B相实时电流（A）",
+    "fieldEngName": "METER Real time current of phase B (A)",
+    "value": "22.800000000000001",
+    "tableName": "d_grid",
+    "device_type": "d_grid",
+    "ts": "2025-07-07 15:56:49"
+  },
+  {
+    "id": 411001057,
+    "fieldChnName": "电表 C相实时电流（A）",
+    "fieldEngName": "METER Real time current of phase C (A)",
+    "value": "32.399999999999999",
+    "tableName": "d_grid",
+    "device_type": "d_grid",
+    "ts": "2025-07-07 15:56:49"
+  },
+  {
+    "id": 411001061,
+    "fieldChnName": "电表 三相实时有功功率（kW）",
+    "fieldEngName": "METER Three phase real-time active power (kW)",
+    "value": "22.760000000000002",
+    "tableName": "d_grid",
+    "device_type": "d_grid",
+    "ts": "2025-07-07 15:56:49"
+  },
+  {
+    "id": 411001069,
+    "fieldChnName": "电表 三相实时视在功率（kVA）",
+    "fieldEngName": "METER Three phase real-time apparent power (kVA)",
+    "value": "23.920000000000002",
+    "tableName": "d_grid",
+    "device_type": "d_grid",
+    "ts": "2025-07-07 15:56:49"
+  }
+]

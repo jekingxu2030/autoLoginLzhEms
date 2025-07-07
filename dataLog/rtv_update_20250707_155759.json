@@ -1,0 +1,38 @@
+[
+  {
+    "id": 409001061,
+    "fieldChnName": "储能变流器 A相实时电流（A）",
+    "fieldEngName": "PCS Real time current of phase A (A)",
+    "value": "36.300000000000004",
+    "tableName": "d_pcs",
+    "device_type": "d_pcs",
+    "ts": "2025-07-07 15:57:59"
+  },
+  {
+    "id": 409001062,
+    "fieldChnName": "储能变流器 B相实时电流（A）",
+    "fieldEngName": "PCS Real time current of phase B (A)",
+    "value": "35.300000000000004",
+    "tableName": "d_pcs",
+    "device_type": "d_pcs",
+    "ts": "2025-07-07 15:57:59"
+  },
+  {
+    "id": 409001063,
+    "fieldChnName": "储能变流器 C相实时电流（A）",
+    "fieldEngName": "PCS Real time current of phase C (A)",
+    "value": "36",
+    "tableName": "d_pcs",
+    "device_type": "d_pcs",
+    "ts": "2025-07-07 15:57:59"
+  },
+  {
+    "id": 411001061,
+    "fieldChnName": "电表 三相实时有功功率（kW）",
+    "fieldEngName": "METER Three phase real-time active power (kW)",
+    "value": "23.84",
+    "tableName": "d_grid",
+    "device_type": "d_grid",
+    "ts": "2025-07-07 15:57:59"
+  }
+]
