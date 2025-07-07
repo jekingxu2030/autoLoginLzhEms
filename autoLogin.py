@@ -253,7 +253,7 @@ def main_logic():
                         [
                             "wicpower2023@gmail.com",
                             # "531556397@qq.com",
-                            "ng.support@baiyiled.nl",
+                            # "ng.support@baiyiled.nl",
                         ],
                         "【EMS Events】",
                         f"《提示!》\n\n尊敬的用户您好！您的215P01项目EMS后台系统数据“正常” ，请您放心运行!谢谢!\nCheckUrl: {driver.current_url}\n\n\n检测时间：{datetime.now()}",
