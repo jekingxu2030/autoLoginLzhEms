@@ -14,9 +14,10 @@ from selenium import webdriver
 import time
 import json
 from selenium import webdriver
-from ems_ws_monitor import EmsWsMonitor
-from datetime import datetime
+from ems_ws_monitor import EmsWsMonitor,fetch_menu_once
 
+from datetime import datetime
+import gc  # 引入垃圾回收模块
 # 将WebSocket URL写入config.ini文件
 import configparser
 
@@ -86,16 +87,90 @@ def get_ws_url(driver):
             thread_safe_update_debug_label(
                         f"✅ 获取到的 WebSocket 完整地址：{ws_url[30]}"
                     )
-
             return ws_url
-
     return None
 
 
+# =================保存cookie、stroge、seection方法
+def save_browser_cache_to_config(driver):
+    # 保存 Cookies
+    for cookie in driver.get_cookies():
+        key = str(cookie["name"])
+        value = str(cookie["value"])
+        set_config_value("config.ini", "cookie", key, value)
+        # print(f"保存cookie: {cookie['name']} = {cookie['value']}")
+    # 保存 localStorage
+    local_storage = driver.execute_script(
+        """
+        let items = {};
+        for (let i = 0; i < localStorage.length; i++) {
+            let k = localStorage.key(i);
+            items[k] = localStorage.getItem(k);
+        }
+        return items;
+    """
+    )
+    for key, value in local_storage.items():
+        set_config_value("config.ini", "localStorage", key, value)
+        # print(f"保存localStorage: {key} = {value}")
+
+    # 保存 sessionStorage
+    session_storage = driver.execute_script(
+        """
+        let items = {};
+        for (let i = 0; i < sessionStorage.length; i++) {
+            let k = sessionStorage.key(i);
+            items[k] = sessionStorage.getItem(k);
+        }
+        return items;
+    """
+    )
+    for key, value in session_storage.items():
+        set_config_value("config.ini", "sessionStorage", key, value)
+        # print(f"保存sessionStorage: {key} = {value}")
+
+
+# ==============主线程2.0=======================
 # === 主执行函数（登录 + 探测） ===
+def login(driver, username, password, load_wait_time):
+
+    driver.get("http://ems.hy-power.net:8114/login")
+    thread_safe_update_debug_label("请求网页中...")
+    time.sleep(load_wait_time + 10)
+
+     #设置emsId
+    driver.execute_script(
+        "localStorage.setItem('local-power-station-active-emsId', 'E6F7D5412A20');"
+    )
+    time.sleep(load_wait_time)
+
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "canvas")))
+    canvas = driver.find_element(By.ID, "canvas")
+    verification_code = canvas.get_attribute("verificationcode")
+    print("\n✅[验证码] =", verification_code)
+
+    driver.find_element(By.ID, "form_item_username").clear()
+    driver.find_element(By.ID, "form_item_username").send_keys(username)
+    driver.find_element(By.ID, "form_item_password").clear()
+    driver.find_element(By.ID, "form_item_password").send_keys(password)
+    driver.find_element(By.CSS_SELECTOR, 'input[placeholder="请输入验证码"]').clear()
+    driver.find_element(By.CSS_SELECTOR, 'input[placeholder="请输入验证码"]').send_keys(
+        verification_code
+    )
+
+    time.sleep(load_wait_time+ 2)
+    WebDriverWait(driver, 10).until(
+        EC.element_to_be_clickable((By.CSS_SELECTOR, "form.login-form button"))
+    ).click()
+    print("\n✅提交了登录表单")
+    save_browser_cache_to_config(driver)
+
+    time.sleep(load_wait_time + 5)
+    thread_safe_update_debug_label("登录成功，开始探测内容...")
+
+
 def main_logic():
     try:
-
         with open(config_path, "r", encoding="utf-8") as f:
             config = json.load(f)
 
@@ -104,371 +179,153 @@ def main_logic():
         load_wait_time = config["timing"]["load_wait_time"]
         loop_interval = config["timing"]["loop_interval"]
         dingtalk_times = config["timing"]["dingtalk_times"]
-        # ws_token_key = config["encryption"]["ws_token_key"].encode("utf-8")
 
-        # === 浏览器设置 ===
         global driver
         options = webdriver.ChromeOptions()
         options.add_argument("--start-maximized")
         options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
         driver = webdriver.Chrome(options=options)
 
-        driver.get("http://ems.hy-power.net:8114/login")
-        # settings_window.update_debug_label("登录中...")
-        thread_safe_update_debug_label("请求网页中...")
-        print(f"\n✅[请求 {driver.current_url} 已完成")
-        time.sleep((load_wait_time + 10))
+        # 登录
+        login(driver, username, password, load_wait_time)
+        time.sleep(load_wait_time+loop_interval+10)
+        # 状态计数变量
+        same_error_count = 0
+        intervalCounts = 0
+        total_cycle_count = 0
+        checkCounts = 0
 
-        driver.execute_script(
-            "localStorage.setItem('local-power-station-active-emsId', 'E6F7D5412A20');"
-        )
+        # 在主程序启动时调用
+        menu_data = fetch_menu_once()
 
-        # === 登录流程 ===
-        canvas = driver.find_element(By.ID, "canvas")
-        verification_code = canvas.get_attribute("verificationcode")
-        print("\n✅[验证码] =", verification_code)
-        thread_safe_update_debug_label(f"✅[验证码] ={verification_code}")
-
-        # 填表并登录
-        driver.find_element(By.ID, "form_item_username").send_keys(username)
-        driver.find_element(By.ID, "form_item_password").send_keys(password)
-        driver.find_element(
-            By.CSS_SELECTOR, 'input[placeholder="请输入验证码"]'
-        ).send_keys(verification_code)
-        time.sleep(2)
-        # 点击登录
-        driver.find_element(By.CSS_SELECTOR, "form.login-form button").click()
-
-        time.sleep(load_wait_time + 5)
-
-        # 读取cookie
-        print("\n✅ [Cookies]:")
-        for cookie in driver.get_cookies():
-            if cookie:
-                print(f"\ncookie：{cookie['name']} = {cookie['value']}")
-                key = str(cookie["name"])     # 取 name 并转字符串
-                value = str(cookie["value"])  # 取 value 并转字符串
-                set_config_value(
-                    # "config.ini", "cookie", f"{cookie['name']}", f"{cookie['value']}"
-                     "config.ini", "cookie",key,value )
-
-        # 读取localStorage
-        print("\n✅ [localStorage]:")
-        time.sleep(2)
-        local_storage = driver.execute_script(
-            """
-            let items = {};
-            for (let i = 0; i < localStorage.length; i++) {
-                let k = localStorage.key(i);
-                items[k] = localStorage.getItem(k);
-            }
-            return items;
-            """
-        )
-        print(json.dumps(local_storage, indent=2, ensure_ascii=False))
-        for key, value in local_storage.items():
-            key = str(key)
-            value = str(value)
-            set_config_value("config.ini", "localStorage", key, value)
-            print(f"\nlocalStorage:{key} = {value}")
-
-        # 读取sessionStorage
-        print("\n✅ [sessionStorage]:")
-        time.sleep(2)
-        session_storage = driver.execute_script(
-            """
-            let items = {};
-            for (let i = 0; i < sessionStorage.length; i++) {
-                let k = sessionStorage.key(i);
-                items[k] = sessionStorage.getItem(k);
-            }
-            return items;
-            """
-        )
-        for key, value in session_storage.items():
-            key = str(key)
-            value = str(value)
-            set_config_value("config.ini", "session_storage", key, value)
-            print(f"\nsession_storage:{key} = {value}")
-        print("\n" + json.dumps(session_storage, indent=2, ensure_ascii=False))
-
-        thread_safe_update_debug_label("缓存参数获取或设置完毕，开始探测内容...")
-        print("✅ 登录成功，开始循环检测...")
-        sendDDtotal = 0
-        intervalCounts = 0  # 正常状态下推送间隔时间
-
-        # 循环检测
         while not stop_event.is_set():
-            try:
-                print(f"\n当前页面: {driver.current_url}")
-                thread_safe_update_debug_label(f"\n当前页面: {driver.current_url}")
-                # 判断页面是否加载完成
-                WebDriverWait(driver, 20).until(
-                    lambda d: d.execute_script("return document.readyState")
-                    == "complete"
-                )
-                # 检测echarts是否加载完成
-                WebDriverWait(driver, 100).until(
-                    lambda d: d.execute_script(
-                        "return typeof window.echarts !== 'undefined'"
-                    )
-                )
-                # 检测echarts是否加载完成
-                WebDriverWait(driver, 100).until(
-                    lambda d: d.execute_script(
-                        """
-                    const allElements = document.getElementsByTagName('*');
-                    for (let i = 0; i < allElements.length; i++) {
-                        const instance = window.echarts.getInstanceByDom(allElements[i]);
-                        if (instance) return true;
-                    }
-                    return false;"""
-                    )
-                )
-                # 模拟操作鼠标
-                driver.execute_script("window.scrollBy(0, 10);")
-                driver.execute_script("window.dispatchEvent(new Event('mousemove'))")
-                thread_safe_update_debug_label("模拟网页操作，防止掉线...")
-                time.sleep(loop_interval + 20)
+            total_cycle_count += 1
 
-           
-                #  ==================================================== #            
-                # 检测WS URL
-                ws_url = get_ws_url(driver)  # --更新ws连接字套
-                # 每次调用获取一次 rtv 推送（若存在）
-                ws_monitor = EmsWsMonitor(driver, timeout=20)
-                status = ws_monitor.start()
-                print("检测状态：", status)
-                if status:
-                    # 你可以自行判断数据有效性
-                    print("✅ 成功拦截到RTV推送")
-                    lsstSendtTime = (
-                        (loop_interval * 3) + (load_wait_time * 2) + 51
-                    ) * (dingtalk_times - intervalCounts)
-              
-                    if status == "ok":
-                        print("✅ 网站数据正常")
-                        thread_safe_update_debug_label(f"✅ 网站实时数据正常")
-                        print(f"\n✅ 数据加载正常,{intervalCounts}")
-                        if intervalCounts >= dingtalk_times * 24:  # 正常要比故障长20倍
-                            Content = (
-                                f"Event: BY-01-EMS_StatusCheck\n"
-                                f"State: Normal!\n"
-                                f"CheckUrl: {driver.current_url}\n"
-                                f"Message:网站数据正常，收到真实数据，请检查！\n"
-                                f"WebSiteState: Accessible！"
-                            )
+            WebDriverWait(driver, 20).until(
+                lambda d: d.execute_script("return document.readyState") == "complete"
+            )
+            driver.execute_script("window.scrollBy(0, 10);")
+            driver.execute_script("window.dispatchEvent(new Event('mousemove'))")
+            time.sleep(loop_interval + 20)
 
-                            thread_safe_update_debug_label(
-                                f"正常状态推送间隔时长:"
-                                + str(lsstSendtTime * 24)
-                                + "秒"
-                            )
-                            print(
-                                f"正常状态推送间隔时长:"
-                                + str(lsstSendtTime * 24)
-                                + "秒"
-                            )
-                            # print(f"发送的数据2：{Content}")
-                            send_dingtalk_msg(Content)
-                            sendDDtotal += 1
-                            intervalCounts = 0
-                            send_email(
-                                [
-                                    # "jekingxu@mic-power.cn",
-                                    # "jekingxu@163.com",
-                                    # "marcin.lee@wic-power.com",
-                                    "wicpower2023@gmail.com",
-                                    "531556397@qq.com",
-                                    "ng.support@baiyiled.nl",
-                                ],
-                                "【EMS Events】",
-                                f"《提示!》\n\n尊敬的用户您好！您的215P01项目EMS后台系统数据“正常” ，请您放心运行!谢谢!\nCheckUrl: {driver.current_url}\n\n\n检测时间：{datetime.now()}",
-                                # from_addr="service@wic-power.com",
-                                from_addr="jekingxu@163.com",
-                            )
-                            thread_safe_update_debug_label("正常状态推送定消息完成...")
-                        else:
-                            print(
-                                f"\n ⚠️还要间隔 {dingtalk_times-intervalCounts} 次后再次发送钉钉消息！"
-                            )
-                            thread_safe_update_debug_label(
-                                f"⚠️还要间隔 {dingtalk_times-intervalCounts} 次后再次发送钉钉消息！"
-                            )
-                            intervalCounts += 1
-                    elif status == "empty":
-                        print("⚠️ 网站可访问但数据为空/默认值")
-                        thread_safe_update_debug_label(f"❌ 网站实时数据异常")
-                        errocontent = (
-                            f"Event: BY-01-EMS_StatusCheck\n"
-                            f"State: Alarm!\n"
-                            f"CheckUrl: {driver.current_url}\n"
-                            f"Message:网站全是默认值或空值，可能未收到真实数据，请检查！\n"
-                            f"WebSiteState: Accessible"
-                        )
-                        if intervalCounts >= dingtalk_times:  # 正常的比故障长20倍
-                            # print(f"发送的数据：{errocontent}")
-                            send_dingtalk_msg(errocontent)
-                            sendDDtotal += 1
-                            intervalCounts = 0
-                            thread_safe_update_debug_label("推送故障钉钉消息完成...")
-                            send_email(
-                                [
-                                    # "jekingxu@mic-power.cn",
-                                    # "jekingxu@163.com",
-                                    # "marcin.lee@wic-power.com",
-                                    "wicpower2023@gmail.com",
-                                    "531556397@qq.com",
-                                    # "ng.support@baiyiled.nl",
-                                ],
-                                "【EMS Events】",
-                                f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“empty”异常！请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
-                                # from_addr="531556397@qq.com",
-                                from_addr="jekingxu@163.com",
-                            )
-                        else:
-                            print(
-                                f"\n ⚠️还要间隔 {dingtalk_times-intervalCounts} 次后再次发送钉钉消息！"
-                            )
-                            thread_safe_update_debug_label(
-                                f"⚠️还要间隔 {dingtalk_times-intervalCounts} 次后再次发送钉钉消息！"
-                            )
-                            intervalCounts += 1
-                    elif status == "no_msg":
-                        print("❌ 超时未收到任何推送,网站异常")
-                        thread_safe_update_debug_label(f"❌ 网站实时数据异常")
-                        errocontent = (
-                            f"Event: BY-01-EMS_StatusCheck\n"
-                            f"State: Alarm!\n"
-                            f"CheckUrl: {driver.current_url}\n"
-                            f"Message:网站请求数据超时，请检查！\n"
-                            f"WebSiteState: Accessible"
-                        )
-                        if intervalCounts >= dingtalk_times:  # 正常的比故障长20倍
-                            # print(f"发送的数据：{errocontent}")
-                            send_dingtalk_msg(errocontent)
-                            sendDDtotal += 1
-                            intervalCounts = 0
-                            send_email(
-                                [
-                                    # "jekingxu@mic-power.cn",
-                                    # "jekingxu@163.com",
-                                    # "marcin.lee@wic-power.com",
-                                    "531556397@qq.com",
-                                    "wicpower2023@gmail.com",
-                                    # "ng.support@baiyiled.nl",
-                                ],
-                                "【EMS Events】",
-                                f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“no_data”异常！请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
-                                # from_addr="service@wic-power.com",
-                                #  from_addr="531556397@qq.com",  #QQ发送时必须用原发送邮箱名称
-                                from_addr="jekingxu@163.com",
-                            )
-                            thread_safe_update_debug_label("推送故障钉钉消息完成...")
-                        else:
-                            print(
-                                f"\n ⚠️还要间隔 {dingtalk_times-intervalCounts} 次后再次发送钉钉消息！"
-                            )
-                            thread_safe_update_debug_label(
-                                f"⚠️还要间隔 {dingtalk_times-intervalCounts} 次后再次发送钉钉消息！"
-                            )
-                            intervalCounts += 1
-                    elif status == "no_ws":
-                        print("❌ WebSocket 连接失败")
-                        thread_safe_update_debug_label(f"❌ 网站连接异常")
-                        errocontent = (
-                            f"Event: BY-01-EMS_StatusCheck\n"
-                            f"State: Alarm!\n"
-                            f"CheckUrl: {driver.current_url}\n"
-                            f"Message:网站WS数据连接失败，请检查！\n"
-                            f"WebSiteState: Accessible"
-                        )
-                        if intervalCounts >= dingtalk_times:  # 正常的比故障长20倍
-                            # print(f"发送的数据：{errocontent}")
-                            send_dingtalk_msg(errocontent)
-                            intervalCounts = 0
-                            sendDDtotal += 1
-                            send_email(
-                                [
-                                    # "jekingxu@mic-power.cn",
-                                    # "jekingxu@163.com",
-                                    # "marcin.lee@wic-power.com",
-                                    "wicpower2023@gmail.com",
-                                    "531556397@qq.com",
-                                    # "ng.support@baiyiled.nl",
-                                ],
-                                "【EMS Events】",
-                                f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统数据“no_ws”异常！请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
-                                # from_addr="531556397@qq.com",
-                                from_addr="jekingxu@163.com",
-                            )
-                            thread_safe_update_debug_label("推送故障钉钉消息完成...")
-                        else:
-                            print(
-                                f"\n ⚠️还要间隔 {dingtalk_times-intervalCounts} 次后再次发送钉钉消息！"
-                            )
-                            thread_safe_update_debug_label(
-                                f"⚠️还要间隔 {dingtalk_times-intervalCounts} 次后再次发送钉钉消息！"
-                            )
-                            intervalCounts += 1
-                    elif status == "error":
-                        print("❌ WebSocket 连接错误")
-                        thread_safe_update_debug_label(f"❌ 网站连接错误")
-                        errocontent = (
-                          f"Event: BY-01-EMS_StatusCheck\n"
-                          f"State: Alarm!\n"
-                          f"CheckUrl: {driver.current_url}\n"
-                          f"Message:网站WS数据连接错误，请检查！\n"
-                          f"WebSiteState: cantConnect"
-                      )
-                        if intervalCounts >= dingtalk_times:  # 正常的比故障长20倍
-                            send_dingtalk_msg(errocontent)
-                            intervalCounts = 0
-                            sendDDtotal += 1
-                            send_email(
-                              [
-                                  # "jekingxu@mic-power.cn",
-                                  # "jekingxu@163.com",
-                                  # "marcin.lee@wic-power.com",
-                                  "wicpower2023@gmail.com",
-                                  "531556397@qq.com",
-                                  # "ng.support@baiyiled.nl",
-                              ],
-                              "【EMS Events】",
-                              f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS连接异常！请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
-                              # from_addr="531556397@qq.com",
-                              from_addr="jekingxu@163.com",
-                          )
-                            thread_safe_update_debug_label("推送故障钉钉消息完成...")
-                        else:
-                            print(
-                              f"\n ⚠️还要间隔 {dingtalk_times-intervalCounts} 次后再次发送钉钉消息！"
-                          )
-                            thread_safe_update_debug_label(
-                              f"⚠️还要间隔 {dingtalk_times-intervalCounts} 次后再次发送钉钉消息！"
-                          )
-                            intervalCounts += 1
+            ws_url = get_ws_url(driver)
+            ws_monitor = EmsWsMonitor(driver, timeout=load_wait_time+loop_interval+5, menu_data=menu_data)
+            status = ws_monitor.start()
+            print("检测状态：", status)
 
-                    print(f"✅已间隔次数 = {intervalCounts}")
-                else:
-                    print("❌ 未捕获到WebSocket URL")
+            if status == "✅ok":
+                same_error_count = 0
 
-                # ========================================
-                time.sleep(loop_interval)
-                driver.refresh()
-                print("\n✅ 刷新页面")
+                # 打印正常状态推送间隔
+                normal_push_interval =((loop_interval*4) + 32+(load_wait_time*6))* ((dingtalk_times* 24)-intervalCounts)
                 print(
-                    f"\n等待至少 {(loop_interval*3)+(load_wait_time*3)+51+(dingtalk_times-intervalCounts)} 秒后执行下一次循环..."
-                )
-                thread_safe_update_debug_label(
-                    f"等待至少 {(loop_interval*3)+(load_wait_time*3)+51+(dingtalk_times-intervalCounts)} 秒后执行下一次循环..."
+                    f"✅ 当前为【正常状态】,距离下次推送间隔约 {normal_push_interval} 秒 ≈ {normal_push_interval / 60:.1f} 分钟"
                 )
 
-                print(f"本轮已发送钉钉：{ sendDDtotal}次")
-                thread_safe_update_debug_label(f"本次已发送钉钉：{ sendDDtotal}次")
-            except Exception as e:
-                print("循环错误:", e)
-                thread_safe_update_debug_label(f"❌循环错误" + str(e))
+                if intervalCounts >= dingtalk_times * 24:
+
+                    Content = (
+                        f"Event: BY-P01-EMS_StatusCheck\n"
+                        f"State: Normal!\n"
+                        f"CheckUrl: {driver.current_url}\n"
+                        f"Message:网站数据正常，收到真实数据，请检查！\n"
+                        f"WebSiteState: Accessible！"
+                    )
+                    send_dingtalk_msg(Content)
+                    send_email(
+                        [
+                            "wicpower2023@gmail.com",
+                            "531556397@qq.com",
+                            "ng.support@baiyiled.nl",
+                        ],
+                        "【EMS Events】",
+                        f"《提示!》\n\n尊敬的用户您好！您的215P01项目EMS后台系统数据“正常” ，请您放心运行!谢谢!\nCheckUrl: {driver.current_url}\n\n\n检测时间：{datetime.now()}",
+                        from_addr="jekingxu@163.com",
+                    )
+                    intervalCounts = 0
+                else:
+                    intervalCounts += 1
+
+            elif status in ["empty", "no_msg", "no_ws", "error"]:
+                same_error_count += 1
+
+                # 根据状态自适应输出网站状态描述
+                if status == "empty":
+                    web_state_desc = "网站访问正常，但数据为空"
+                elif status == "no_msg":
+                    web_state_desc = "WebSocket连接正常，但无有效消息"
+                elif status == "no_ws":
+                    web_state_desc = "⚠️ 无法建立 WebSocket 连接"
+                elif status == "error":
+                    web_state_desc = "❌ 发生未知错误，页面可能无法访问"
+                else:
+                    web_state_desc = "❓ 状态异常"
+                errocontent = (
+                    f"Event: BY-P01-EMS_StatusCheck\n"
+                    f"State: Alarm!\n"
+                    f"CheckUrl: {driver.current_url}\n"
+                    f"Message:网站状态异常[{status}]，请检查！\n"
+                    f"WebSiteState: {web_state_desc}"
+                )
+                # 打印异常状态推送间隔
+                error_frist_push_interval = ((loop_interval * 4) + 32 + (load_wait_time * 6) )*(2-same_error_count)
+                print(f"❗ 当前为【异常状态: {status}】，具体首次推送时间：{error_frist_push_interval}秒")
+
+                error_push_interval = (((loop_interval * 4) + 32) + (
+                    load_wait_time * 6
+                ) *(2-same_error_count))* ((dingtalk_times ) - intervalCounts)
+
+                print(f"❗ 当前为【异常状态: {status}】，距离下一次推送约 {error_push_interval} 秒 ≈ {error_push_interval / 60:.1f} 分钟")
+
+                if same_error_count == 2:
+                    send_dingtalk_msg(errocontent)
+                    send_email(
+                        [
+                            "wicpower2023@gmail.com",
+                            "531556397@qq.com",
+                        ],
+                        "【EMS Events】",
+                        f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统出现异常状态：{status}。请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
+                        from_addr="jekingxu@163.com",
+                    )
+
+                    intervalCounts = 0
+                elif same_error_count > 2:
+                    if intervalCounts >= dingtalk_times:
+                        send_dingtalk_msg(errocontent)
+                        send_email(
+                            [
+                                "wicpower2023@gmail.com",
+                                "531556397@qq.com",
+                            ],
+                            "【EMS Events】",
+                            f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统持续异常[{status}]。请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
+                            from_addr="jekingxu@163.com",
+                        )
+                        intervalCounts = 0
+                    else:
+                        intervalCounts += 1
+
+            # 清理缓存与内存
+            gc.collect()
+
+            time.sleep(loop_interval)
+            driver.refresh()    #刷新网页
+
+            checkCounts += 1
+            print(f"\n✅已经检测第{checkCounts}轮")
+
+            # 定期重启浏览器防止资源泄漏
+            if total_cycle_count % 1000 == 0:
+                print("🔁 达到1000次检测，准备重启浏览器...")
+                try:
+                    restart_browser(username, password, load_wait_time+10)
+                    time.sleep(load_wait_time+5)
+                except Exception as e:
+                    print(f"🔁 浏览器重启失败: {e}")
+                    thread_safe_update_debug_label(f"❌浏览器重启失败: {e}")
+
+                    # 这里要重新执行登录操作（填写用户名、密码、验证码等）
 
     except Exception as e:
         print("主线程逻辑异常:", e)
@@ -479,7 +336,7 @@ def main_logic():
                 thread_safe_update_debug_label(f"❌线程退出,正在关闭浏览器...")
                 print("⚠️线程退出,正在关闭浏览器")
                 driver.quit()
-                time.sleep(12)  # 确保浏览器完全关闭
+                time.sleep(12)
                 if hasattr(driver, "service") and driver.service.process:
                     driver.service.process.terminate()
             except Exception as e:
@@ -487,12 +344,36 @@ def main_logic():
                 thread_safe_update_debug_label(f"❌关闭浏览器时出错: {e}")
 
 
+# ==============================================
+# 重启函数
+def restart_browser(username, password, load_wait_time):
+    global driver
+    try:
+        driver.quit()
+        time.sleep(5)
+    except Exception:
+        pass
+
+    gc.collect()
+
+    options = webdriver.ChromeOptions()
+    options.add_argument("--start-maximized")
+    options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
+
+    driver = webdriver.Chrome(options=options)
+    login(driver, username, password, load_wait_time)
+    time.sleep(load_wait_time + load_wait_time + 5)
+
+
+# ==============================================
+
 # === 设置窗口线程 ===
 def run_settings():
     global settings_window
     root = tk.Tk()
 
     def on_closing():
+        # /*******  88517a0e-ce2f-486d-b6d6-1ecd6e20a7f5  *******/
         stop_event.set()
         running_event.clear()
         if driver:

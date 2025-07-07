@@ -41,62 +41,72 @@ pyinstaller --clean --noconfirm autoLogin.spec
 5. 所有操作日志都会实时显示在主界面
 
 
+最佳时间参数配置
+{
+  "timing": {
+    "load_wait_time": 10,
+    "loop_interval": 3,
+    "dingtalk_times": 38
+  }
+}
+
+
 钉钉接口官例子：
 
 
-POST https://oapi.dingtalk.com/robot/send?access_token=ACCESS_TOKEN
-{
-  "msgtype": "text", // 消息类型，可为 text、link、markdown、actionCard、feedCard
-  "text": {
-    "content": "这是一条文本消息内容"
-  },
-  "link": {
-    "messageUrl": "https://www.example.com", // 跳转链接
-    "picUrl": "https://example.com/image.png", // 图片链接
-    "text": "这是一条链接消息内容", // 消息内容
-    "title": "链接消息标题" // 消息标题
-  },
-  "markdown": {
-    "title": "Markdown消息标题",
-    "text": "#### 这是Markdown消息内容 \n ![图片](https://example.com/image.png)"
-  },
-  "actionCard": {
-    "title": "ActionCard消息标题",
-    "text": "#### 这是ActionCard内容 \n ![图片](https://example.com/image.png)",
-    "btnOrientation": "0", // 0-按钮竖直排列，1-按钮横向排列
-    "singleTitle": "阅读全文", // 单个按钮标题
-    "singleURL": "https://www.example.com", // 单个按钮跳转链接
-    "btns": [
-      {
-        "title": "按钮1",
-        "actionURL": "https://www.example.com/btn1"
-      },
-      {
-        "title": "按钮2",
-        "actionURL": "https://www.example.com/btn2"
-      }
-    ]
-  },
-  "feedCard": {
-    "links": [
-      {
-        "title": "FeedCard标题1",
-        "messageURL": "https://www.example.com/1",
-        "picURL": "https://example.com/image1.png"
-      },
-      {
-        "title": "FeedCard标题2",
-        "messageURL": "https://www.example.com/2",
-        "picURL": "https://example.com/image2.png"
-      }
-    ]
-  },
-  "at": {
-    "isAtAll": false, // 是否@所有人
-    "atUserIds": ["user001", "user002"], // 被@的用户ID列表
-    "atMobiles": ["15xxx", "18xxx"] // 被@的手机号列表
-  }
-}
+# POST https://oapi.dingtalk.com/robot/send?access_token=ACCESS_TOKEN
+# {
+#   "msgtype": "text", // 消息类型，可为 text、link、markdown、actionCard、feedCard
+#   "text": {
+#     "content": "这是一条文本消息内容"
+#   },
+#   "link": {
+#     "messageUrl": "https://www.example.com", // 跳转链接
+#     "picUrl": "https://example.com/image.png", // 图片链接
+#     "text": "这是一条链接消息内容", // 消息内容
+#     "title": "链接消息标题" // 消息标题
+#   },
+#   "markdown": {
+#     "title": "Markdown消息标题",
+#     "text": "#### 这是Markdown消息内容 \n ![图片](https://example.com/image.png)"
+#   },
+#   "actionCard": {
+#     "title": "ActionCard消息标题",
+#     "text": "#### 这是ActionCard内容 \n ![图片](https://example.com/image.png)",
+#     "btnOrientation": "0", // 0-按钮竖直排列，1-按钮横向排列
+#     "singleTitle": "阅读全文", // 单个按钮标题
+#     "singleURL": "https://www.example.com", // 单个按钮跳转链接
+#     "btns": [
+#       {
+#         "title": "按钮1",
+#         "actionURL": "https://www.example.com/btn1"
+#       },
+#       {
+#         "title": "按钮2",
+#         "actionURL": "https://www.example.com/btn2"
+#       }
+#     ]
+#   },
+#   "feedCard": {
+#     "links": [
+#       {
+#         "title": "FeedCard标题1",
+#         "messageURL": "https://www.example.com/1",
+#         "picURL": "https://example.com/image1.png"
+#       },
+#       {
+#         "title": "FeedCard标题2",
+#         "messageURL": "https://www.example.com/2",
+#         "picURL": "https://example.com/image2.png"
+#       }
+#     ]
+#   },
+#   "at": {
+#     "isAtAll": false, // 是否@所有人
+#     "atUserIds": ["user001", "user002"], // 被@的用户ID列表
+#     "atMobiles": ["15xxx", "18xxx"] // 被@的手机号列表
+#   }
+# }
 
 
 
@@ -173,43 +183,5 @@ POST https://oapi.dingtalk.com/robot/send?access_token=ACCESS_TOKEN
                         
                         
                         
-                                       return (function () {
-                            var result = [];
-                            var divs = document.getElementsByTagName('div');
-
-                            for (var i = 0; i < divs.length; i++) {
-                                var el = divs[i];
-                                try {
-                                    var inst = window.echarts && window.echarts.getInstanceByDom
-                                              ? window.echarts.getInstanceByDom(el)
-                                              : null;
-                                    if (!inst) continue;
-
-                                    var opt = inst.getOption();
-                                    if (!opt || !opt.series) continue;
-
-                                    for (var s = 0; s < opt.series.length; s++) {
-                                        var series = opt.series[s];
-                                        var dataArr = series.data;
-                                        if (!dataArr) continue;
-
-                                        // 统一成数组
-                                        if (!Array.isArray(dataArr)) dataArr = [dataArr];
-
-                                        // 取前 10 个样本
-                                        var sample = [];
-                                        for (var k = 0; k < Math.min(10, dataArr.length); k++) {
-                                            var item = dataArr[k];
-                                            if (typeof item === 'object' && item !== null) {
-                                                sample.push(item.value);
-                                            } else {
-                                                sample.push(item);
-                                            }
-                                        }
-
-                                        result.push({ chart: i, series: s, sample: sample });
-                                    }
-                                } catch (e) { /* 忽略单个图的异常 */ }
-                            }
-                            return JSON.stringify(result);
-                        })();
+                        
+                        
