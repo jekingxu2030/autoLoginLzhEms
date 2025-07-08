@@ -4,9 +4,9 @@
         "password": "123456789"
     },
     "timing": {
-        "load_wait_time": 5,
+        "load_wait_time": 10,
         "loop_interval": 3,
-        "dingtalk_times": 3
+        "dingtalk_times": 14
     },
     "encryption": {
         "ws_token_key": "514ee339fec647ce2353b5e0fa5ecc0a"
