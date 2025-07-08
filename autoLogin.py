@@ -180,9 +180,11 @@ def main_logic():
 
         username = config["account"]["username"]
         password = config["account"]["password"]
-        load_wait_time = config["timing"]["load_wait_time"]
-        loop_interval = config["timing"]["loop_interval"]
-        dingtalk_times = config["timing"]["dingtalk_times"]
+        load_wait_time = config["timing"]["load_wait_time"]  #第一个时间
+        loop_interval = config["timing"]["loop_interval"]   #第二个时间
+        dingtalk_times = config["timing"]["dingtalk_times"]  #第三个时间
+        # email_times = config["timing"]["email_times"]  #第四个时间
+        # email_interval = config["timing"]["email_interval"]  #第五个时间
 
         global driver
         options = webdriver.ChromeOptions()
@@ -257,6 +259,7 @@ def main_logic():
                         [
                             "wicpower2023@gmail.com",
                             # "531556397@qq.com",
+                            "marcin.lee@wic-power.com"
                             "ng.support@baiyiled.nl",
                         ],
                         "【EMS Events】",
