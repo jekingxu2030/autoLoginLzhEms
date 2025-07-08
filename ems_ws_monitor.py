@@ -93,7 +93,7 @@ class EmsWsMonitor:
                 log_file = os.path.join(log_dir, f"menu_list_update_{timestamp}.json")
                 # with open(log_file, "w", encoding="utf-8") as f:
                 #     json.dump(menu_cache, f, ensure_ascii=False, indent=2)
-                print(f"[DEBUG] Menu_list数据已保存到: {log_file}")
+                # print(f"[DEBUG] Menu_list数据已保存到: {log_file}")
 
                 # print(f"\n[WS] 菜单list整理完成:{menu_cache}")
             else:
@@ -117,7 +117,7 @@ class EmsWsMonitor:
 
                             if data.get("func") == "rtv":
                                 self.msg_arrived = True
-                                print(f"\n[WS拦截] 收到RTV数据帧: {payload[:80]}...")
+                                print(f"\n[WS拦截] 收到RTV数据帧: {payload[:20]}...")
 
                                 rtv_data = data.get("data", [])
                                 print(f"\n[WS拦截] 共接收 {len(rtv_data)} 个字段ID")
@@ -142,9 +142,9 @@ class EmsWsMonitor:
                                                 for entry in field_list:
                                                     if entry["id"] == new_id:
                                                         entry["value"] = new_value
-                                                        print(
-                                                            # f"[更新] 设备类型: {device_type} → ID: {new_id}, Value: {new_value}"
-                                                        )
+                                                        # print(
+                                                        #     f"[更新] 设备类型: {device_type} → ID: {new_id}, Value: {new_value}"
+                                                        # )
                                                         updated = True
                                                         updated_count += 1
                                                         break
@@ -195,7 +195,7 @@ class EmsWsMonitor:
                                     return "✅ok"
 
                             elif data.get("func") == "menu":
-                                print(f"\n[WS拦截] MENU数据: {payload[:80]}...")
+                                print(f"\n[WS拦截] MENU数据: {payload[:20]}...")
 
                     except Exception as e:
                         print(f"[WS监听异常] {e}")

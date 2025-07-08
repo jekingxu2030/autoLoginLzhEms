@@ -44,7 +44,11 @@ config_ready = threading.Event()
 
 
 def thread_safe_update_debug_label(text):
-    settings_window.log_lbl.after(0, lambda: settings_window.update_debug_label(text))
+        # 自动清理日志，当日志行数超过1000行时删除最早的100行
+        if hasattr(settings_window, 'log_lbl') and settings_window.log_lbl.cget('text').count('\n') > 5000:
+            current_text = settings_window.log_lbl.cget('text')
+            settings_window.log_lbl.config(text='\n'.join(current_text.split('\n')[100:]))
+        settings_window.log_lbl.after(0, lambda: settings_window.update_debug_label(text))
 
 
 def set_config_value(filename, section, key, value):
@@ -245,7 +249,7 @@ def main_logic():
                         f"Event: BY-P01-EMS_StatusCheck\n"
                         f"State: Normal!\n"
                         f"CheckUrl: {driver.current_url}\n"
-                        f"Message:网站数据正常，收到真实数据，请检查！\n"
+                        f"Message:✅网站数据正常，收到真实数据，请检查！\n"
                         f"WebSiteState: Accessible！"
                     )
                     send_dingtalk_msg(Content)
@@ -306,9 +310,7 @@ def main_logic():
                     + elapsed_time2
                 )
 
-                print(f"❗ 当前为【异常状态: {status}】，距离下一次推送约 {error_push_interval} 秒 ≈ {error_push_interval / 60:.1f} 分钟")
-
-                if same_error_count == 2:
+                if same_error_count == 3:
                     send_dingtalk_msg(errocontent)
                     send_email(
                         [
@@ -321,7 +323,7 @@ def main_logic():
                     )
 
                     intervalCounts = 0
-                elif same_error_count > 2:
+                elif same_error_count > 3:
                     if intervalCounts >= dingtalk_times:
                         send_dingtalk_msg(errocontent)
                         send_email(
@@ -336,6 +338,10 @@ def main_logic():
                         intervalCounts = 0
                     else:
                         intervalCounts += 1
+                else:
+                    print(
+                        f"❗ 当前为【异常状态: {status}】，距离下一次推送约 {error_push_interval} 秒 ≈ {error_push_interval / 60:.1f} 分钟"
+                    )
 
             # 清理缓存与内存
             gc.collect()
@@ -347,7 +353,7 @@ def main_logic():
             print(f"\n✅已经检测第{checkCounts}轮")
 
             # 定期重启浏览器防止资源泄漏
-            if total_cycle_count % 1000 == 0:
+            if total_cycle_count % 10000 == 0:
                 print("🔁 达到1000次检测，准备重启浏览器...")
                 try:
                     restart_browser(username, password, load_wait_time+10)
@@ -439,5 +445,22 @@ def start_main_logic():
         thread_safe_update_debug_label("🚀主线程已启动")
 
 
+
+def kill_existing_processes():
+    """终止所有与自己相同的Chrome进程"""
+    try:
+        import psutil
+        current_pid = os.getpid()
+        for proc in psutil.process_iter(['pid', 'name']):
+            if proc.info['name'] == 'chrome.exe' and proc.info['pid'] != current_pid:
+                try:
+                    proc.kill()
+                    print(f"✅ 已终止Chrome进程: PID {proc.info['pid']}")
+                except Exception as e:
+                    print(f"❌ 终止Chrome进程失败: {e}")
+    except ImportError:
+        print("⚠️ 未安装psutil库，无法自动终止现有进程")
+
 if __name__ == "__main__":
+    kill_existing_processes()
     run_settings()
