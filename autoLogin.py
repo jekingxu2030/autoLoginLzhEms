@@ -84,7 +84,7 @@ def get_ws_url(driver):
         # 判断日志中的method字段是否为Network.webSocketCreated
         if message["method"] == "Network.webSocketCreated":
             ws_url = message["params"]["url"]
-            print("✅ 捕获到WebSocket URL:", ws_url)
+            # print("✅ 捕获到WebSocket URL:", ws_url)
 
             # 读取ini并写入配置文件
             set_config_value("config.ini", "websocket", "url", ws_url)
@@ -257,7 +257,7 @@ def main_logic():
                         [
                             "wicpower2023@gmail.com",
                             # "531556397@qq.com",
-                            # "ng.support@baiyiled.nl",
+                            "ng.support@baiyiled.nl",
                         ],
                         "【EMS Events】",
                         f"《提示!》\n\n尊敬的用户您好！您的215P01项目EMS后台系统数据“正常” ，请您放心运行!谢谢!\nCheckUrl: {driver.current_url}\n\n\n检测时间：{datetime.now()}",
@@ -315,7 +315,8 @@ def main_logic():
                     send_email(
                         [
                             "wicpower2023@gmail.com",
-                            "531556397@qq.com",
+                            # "531556397@qq.com",
+                            "ng.support@baiyiled.nl",
                         ],
                         "【EMS Events】",
                         f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统出现异常状态：{status}。请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
@@ -443,7 +444,6 @@ def start_main_logic():
         running_event.set()
         print("🚀 主线程已启动")
         thread_safe_update_debug_label("🚀主线程已启动")
-
 
 
 def kill_existing_processes():

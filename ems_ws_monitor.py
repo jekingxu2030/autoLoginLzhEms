@@ -176,7 +176,7 @@ class EmsWsMonitor:
                                                 export_data.append(export_item)
 
                                     # 构建保存路径
-                                    folder_path = r"F:\360Downloads\BaiduNetdiskDownload\WicToolDemo\getBY_EMS_Data\autoLoginLzhEms\dataLog"
+                                    folder_path = os.path.join(os.path.dirname(__file__), "dataLog")
                                     os.makedirs(
                                         folder_path, exist_ok=True
                                     )  # 若目录不存在则创建
