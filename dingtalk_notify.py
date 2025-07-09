@@ -10,8 +10,8 @@ def send_dingtalk_msg(content: str) -> bool:
     """
         发送钉钉文本消息，返回是否成功
         """
-    Token = "2790e24fa6bb40ba86208e99c4b02223941b51a5b61d0f0e08820d3f461e330d"
     # Token = "2790e24fa6bb40ba86208e99c4b02223941b51a5b61d0f0e08820d3f461e330d"
+    Token = "aa0366d18f2307daa196c4f96546ed629a92b110448ed104614fe9566dfa1b14"
     webhook = f"https://oapi.dingtalk.com/robot/send?access_token={Token}"
     headers = {"Content-Type": "application/json"}
     data = {"msgtype": "text", "text": {"content": content}} #纯文本
