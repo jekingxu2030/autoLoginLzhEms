@@ -276,15 +276,15 @@ def main_logic():
                 same_error_count += 1
                 # 根据状态自适应输出网站状态描述
                 if status == "❌empty":
-                    web_state_desc = "网站访问正常，但数据为空"
+                    web_state_desc = "网站访问正常，但数据返回为空"
                 elif status == "❌no_msg":
-                    web_state_desc = "WebSocket连接正常，但无有效消息"
+                    web_state_desc = "WebSocket连接正常，但无有效数据"
                 elif status == "❌no_ws":
                     web_state_desc = "⚠️ 无法建立 WebSocket 连接"
                 elif status == "❌error":
                     web_state_desc = "❌ 发生未知错误，页面可能无法访问"
                 else:
-                    web_state_desc = "❓ 状态异常"
+                    web_state_desc = "❓ 不明状态异常"
                 errocontent = (
                     f"Event: BY-P01-EMS_StatusCheck\n"
                     f"State: Alarm!\n"
