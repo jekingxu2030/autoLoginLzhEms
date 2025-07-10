@@ -231,7 +231,7 @@ def main_logic():
             elapsed_time2 = end_time - start_time
             print("WS检测状态：", status)
             print(f"\nload_wait_time={load_wait_time} , loop_interval={loop_interval},dingtalk_times={dingtalk_times},intervalCounts={intervalCounts}")
-            
+
             if status == "✅ok":
                 same_error_count = 0
 
@@ -298,8 +298,10 @@ def main_logic():
                     + elapsed_time1
                     + elapsed_time2) * (loop_interval - same_error_count)#错误推送也需要等待设定的次数
                 )
-                print(f"❗ 当前为【异常状态: {status}】，具体首次推送时间：{error_frist_push_interval}秒")
-                #持续异常推送间隔
+                print(
+                    f"❗ 当前为【异常状态: {status}】，距离首次推送时间：{error_frist_push_interval / 60:.1f} 分钟"
+                )
+                # 持续异常推送间隔
                 error_push_interval = (
                    ((
                         (((loop_interval * 3) + 48)
@@ -323,7 +325,7 @@ def main_logic():
                     same_error_count+=1
                     intervalCounts = 0
                 elif same_error_count > loop_interval:  #错误连续后时间延长
-                    
+
                     if intervalCounts >= dingtalk_times:  #延长异常推送间隔
                         send_dingtalk_msg(errocontent)
                         send_email(

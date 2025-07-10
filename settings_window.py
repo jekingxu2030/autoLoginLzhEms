@@ -104,7 +104,7 @@ class SettingsWindow:
         self.wait_entry.grid(row=4, column=1, sticky="w")
         self.wait_entry.insert(0, self.cfg["timing"]["load_wait_time"])
 
-        ttk.Label(m, text="循环间隔(秒):").grid(row=5, column=0, sticky="e", pady=3)
+        ttk.Label(m, text="循环间隔(次):").grid(row=5, column=0, sticky="e", pady=3)
         self.loop_entry = ttk.Entry(m, width=10)
         self.loop_entry.grid(row=5, column=1, sticky="w")
         self.loop_entry.insert(0, self.cfg["timing"]["loop_interval"])
