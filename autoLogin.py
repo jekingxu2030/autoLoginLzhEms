@@ -233,7 +233,7 @@ def main_logic():
             print(f"\nload_wait_time={load_wait_time} , loop_interval={loop_interval},dingtalk_times={dingtalk_times},intervalCounts={intervalCounts}")
 
             if status == "✅ok":
-                same_error_count = 0
+                same_error_count = 0  #打断异常，重置异常计数
 
                 # 打印正常状态推送间隔
                 normal_push_interval = (
@@ -322,7 +322,7 @@ def main_logic():
                         f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统出现异常状态：{status}。请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
                         from_addr="jekingxu@163.com",
                     )
-                    same_error_count+=1
+                    # same_error_count+=1
                     intervalCounts = 0
                 elif same_error_count > loop_interval:  #错误连续后时间延长
 
@@ -340,6 +340,7 @@ def main_logic():
                             from_addr="jekingxu@163.com",
                         )
                         intervalCounts = 0
+                        same_error_count=0
                     else:
                         intervalCounts += 1
                 else:
