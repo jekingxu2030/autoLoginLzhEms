@@ -194,7 +194,7 @@ def main_logic():
 
         # 登录
         login(driver, username, password, load_wait_time)
-        time.sleep(load_wait_time+loop_interval+10)
+        time.sleep(load_wait_time+10)
         # 状态计数变量
         same_error_count = 0
         intervalCounts = 0
@@ -218,12 +218,12 @@ def main_logic():
             )
             driver.execute_script("window.scrollBy(0, 10);")
             driver.execute_script("window.dispatchEvent(new Event('mousemove'))")
-            time.sleep(loop_interval + load_wait_time+5)
+            time.sleep(  load_wait_time+5)
 
             ws_url = get_ws_url(driver)
             # 记录开始时间
             start_time = time.time()
-            ws_monitor = EmsWsMonitor(driver, timeout=load_wait_time+loop_interval+5, menu_data=menu_data)
+            ws_monitor = EmsWsMonitor(driver, timeout=load_wait_time+15, menu_data=menu_data)
             status = ws_monitor.start()
             # 记录结束时间
             end_time = time.time()
@@ -237,7 +237,7 @@ def main_logic():
 
                 # 打印正常状态推送间隔
                 normal_push_interval = (
-                   ( ((loop_interval * 3) + 48 + (load_wait_time * 6))                  
+                   ( ((loop_interval * 0) + 53 + (load_wait_time * 12))                  
                     + elapsed_time1
                     + elapsed_time2) * ((dingtalk_times * 24) - intervalCounts)
                 )
@@ -294,7 +294,7 @@ def main_logic():
                 )
                 # 首次异常状态推送间隔
                 error_frist_push_interval = (
-                  (  ((loop_interval * 3) + 48 + (load_wait_time * 6))                  
+                  (  ((loop_interval * 0) + 53 + (load_wait_time * 12))                  
                     + elapsed_time1
                     + elapsed_time2) * (loop_interval - same_error_count)#错误推送也需要等待设定的次数
                 )
@@ -304,8 +304,8 @@ def main_logic():
                 # 持续异常推送间隔
                 error_push_interval = (
                    ((
-                        (((loop_interval * 3) + 48)
-                        + (load_wait_time * 6)) * (loop_interval - same_error_count)
+                        (((loop_interval * 0) + 53)
+                        + (load_wait_time * 12)) * (loop_interval - same_error_count)
                     ) + elapsed_time1 + elapsed_time2) * (dingtalk_times- intervalCounts)
                 )
 
@@ -351,9 +351,9 @@ def main_logic():
             # 清理缓存与内存
             gc.collect()
 
-            time.sleep(loop_interval)
+            time.sleep(load_wait_time)
             driver.refresh()    #刷新网页
-
+            time.sleep(load_wait_time )
             checkCounts += 1
             print(f"\n✅已经检测第{checkCounts}轮")
 
@@ -368,7 +368,8 @@ def main_logic():
                     thread_safe_update_debug_label(f"❌浏览器重启失败: {e}")
 
                     # 这里要重新执行登录操作（填写用户名、密码、验证码等）
-
+            else:
+                print(f"\n已循环{total_cycle_count}次")
     except Exception as e:
         print("主线程逻辑异常:", e)
         thread_safe_update_debug_label(f"❌主逻辑异常" + str(e))
