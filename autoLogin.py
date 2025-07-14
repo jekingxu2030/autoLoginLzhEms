@@ -250,7 +250,7 @@ def main_logic():
                         f"Event: BY-P01-EMS_StatusCheck\n"
                         f"State: Normal!\n"
                         f"CheckUrl: {driver.current_url}\n"
-                        f"Message:✅网站数据正常，收到真实数据，请检查！\n"
+                        f"Message:✅网站正常，收到实时新数据！\n"
                         f"WebSiteState: Accessible！"
                     )
                     send_dingtalk_msg(Content)
