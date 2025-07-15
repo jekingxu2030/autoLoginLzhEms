@@ -72,14 +72,13 @@ class EmsWsMonitor:
 
     def start(self):
         # 每次启动时更新websocket URL
-/*************  ✨ Windsurf Command ⭐  *************/
+# /*************  ✨ Windsurf Command ⭐  *************/
         """
         Start WebSocket performance log listener.
 
         :return: "✅ok" if success, "❌no_msg" if no message arrived, "❌empty" if no valid data, "❌error" if exception occurred, "❌no_ws" if no WebSocket available
         """
-
-/*******  ef719403-6b92-4577-a9fb-007211368625  *******/
+# /*******  ef719403-6b92-4577-a9fb-007211368625  *******/
         config = ConfigParser()
         config.read("config.ini")
         self.ws_url = config.get("websocket", "url")
