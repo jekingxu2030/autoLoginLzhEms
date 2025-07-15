@@ -1,3 +1,4 @@
+from asyncio import sleep
 import json
 import os
 import time
@@ -14,10 +15,11 @@ from selenium import webdriver
 import time
 import json
 from selenium import webdriver
-from ems_ws_monitor import EmsWsMonitor,fetch_menu_once
+from ems_ws_monitor import EmsWsMonitor, fetch_menu_once
 
 from datetime import datetime
 import gc  # 引入垃圾回收模块
+
 # 将WebSocket URL写入config.ini文件
 import configparser
 
@@ -44,11 +46,14 @@ config_ready = threading.Event()
 
 
 def thread_safe_update_debug_label(text):
-        # 自动清理日志，当日志行数超过1000行时删除最早的100行
-        if hasattr(settings_window, 'log_lbl') and settings_window.log_lbl.cget('text').count('\n') > 5000:
-            current_text = settings_window.log_lbl.cget('text')
-            settings_window.log_lbl.config(text='\n'.join(current_text.split('\n')[100:]))
-        settings_window.log_lbl.after(0, lambda: settings_window.update_debug_label(text))
+    # 自动清理日志，当日志行数超过1000行时删除最早的100行
+    if (
+        hasattr(settings_window, "log_lbl")
+        and settings_window.log_lbl.cget("text").count("\n") > 5000
+    ):
+        current_text = settings_window.log_lbl.cget("text")
+        settings_window.log_lbl.config(text="\n".join(current_text.split("\n")[100:]))
+    settings_window.log_lbl.after(0, lambda: settings_window.update_debug_label(text))
 
 
 def set_config_value(filename, section, key, value):
@@ -89,8 +94,8 @@ def get_ws_url(driver):
             # 读取ini并写入配置文件
             set_config_value("config.ini", "websocket", "url", ws_url)
             thread_safe_update_debug_label(
-                        f"✅ 获取到的 WebSocket 完整地址：{ws_url[30]}"
-                    )
+                f"✅ 获取到的 WebSocket 完整地址：{ws_url[30]}"
+            )
             return ws_url
     return None
 
@@ -162,8 +167,8 @@ def login(driver, username, password, load_wait_time):
         verification_code
     )
 
-    time.sleep(load_wait_time+ 2)
-    WebDriverWait(driver, 10).until(  #算3秒平均消耗
+    time.sleep(load_wait_time + 2)
+    WebDriverWait(driver, 10).until(  # 算3秒平均消耗
         EC.element_to_be_clickable((By.CSS_SELECTOR, "form.login-form button"))
     ).click()
     print("\n✅提交了登录表单")
@@ -172,6 +177,8 @@ def login(driver, username, password, load_wait_time):
     thread_safe_update_debug_label("登录成功，开始探测内容...")
     # 稍微晚点读取cock
     save_browser_cache_to_config(driver)
+  
+    ws_url = get_ws_url(driver)  #保持WS字套
 
 def main_logic():
     try:
@@ -180,9 +187,9 @@ def main_logic():
 
         username = config["account"]["username"]
         password = config["account"]["password"]
-        load_wait_time = config["timing"]["load_wait_time"]  #第一个时间
-        loop_interval = config["timing"]["loop_interval"]   #第二个时间
-        dingtalk_times = config["timing"]["dingtalk_times"]  #第三个时间
+        load_wait_time = config["timing"]["load_wait_time"]  # 第一个时间
+        loop_interval = config["timing"]["loop_interval"]  # 第二个时间
+        dingtalk_times = config["timing"]["dingtalk_times"]  # 第三个时间
         # email_times = config["timing"]["email_times"]  #第四个时间
         # email_interval = config["timing"]["email_interval"]  #第五个时间
 
@@ -194,7 +201,9 @@ def main_logic():
 
         # 登录
         login(driver, username, password, load_wait_time)
-        time.sleep(load_wait_time+10)
+        last_login_time = time.time()  # 记录初始登录时间
+        time.sleep(load_wait_time + 10)
+
         # 状态计数变量
         same_error_count = 0
         intervalCounts = 0
@@ -211,39 +220,54 @@ def main_logic():
         elapsed_time1 = end_time - start_time
 
         while not stop_event.is_set():
+            current_time = time.time()
+
+            # 检查是否超过23小时(82800秒)未重新登录
+            if current_time - last_login_time >= 23 * 36:
+                #  if current_time - last_login_time >= 23 * 3600:
+                print("🔄 已超过23小时，准备重新登录...")
+                thread_safe_update_debug_label(f"🔄登录已超过23小时，准备重新登录...")
+                # login(driver, username, password, load_wait_time)
+                restart_browser(username, password, load_wait_time)  # 
+                time.sleep(load_wait_time*2+10)
+                last_login_time = current_time  # 更新登录时间
+               
             total_cycle_count += 1
 
-            WebDriverWait(driver, 20).until(  #算3秒  
+            WebDriverWait(driver, 20).until(  # 算3秒
                 lambda d: d.execute_script("return document.readyState") == "complete"
             )
             driver.execute_script("window.scrollBy(0, 10);")
             driver.execute_script("window.dispatchEvent(new Event('mousemove'))")
-            time.sleep(  load_wait_time+5)
+            time.sleep(load_wait_time + 5)
 
-            ws_url = get_ws_url(driver)
+            # ws_url = get_ws_url(driver)
             # 记录开始时间
             start_time = time.time()
-            ws_monitor = EmsWsMonitor(driver, timeout=load_wait_time+15, menu_data=menu_data)
+            ws_monitor = EmsWsMonitor(
+                driver, timeout=load_wait_time + 15, menu_data=menu_data
+            )
             status = ws_monitor.start()
+            
             # 记录结束时间
             end_time = time.time()
             # 计算耗时（秒）
             elapsed_time2 = end_time - start_time
             print("WS检测状态：", status)
-            print(f"\nload_wait_time={load_wait_time} , loop_interval={loop_interval},dingtalk_times={dingtalk_times},intervalCounts={intervalCounts}")
+            print(
+                f"\nload_wait_time={load_wait_time} , loop_interval={loop_interval},dingtalk_times={dingtalk_times},intervalCounts={intervalCounts},same_error_count={same_error_count}"
+            )
 
             if status == "✅ok":
-                same_error_count = 0  #打断异常，重置异常计数
+                same_error_count = 0  # 打断异常，重置异常计数  在连续错误三次或三次后连续错误会一直保持大于3，等待正常逻状态下归零
 
                 # 打印正常状态推送间隔
                 normal_push_interval = (
-                   ( ((loop_interval * 0) + 53 + (load_wait_time * 12))                  
-                    + elapsed_time1
-                    + elapsed_time2) * ((dingtalk_times * 24) - intervalCounts)
-                )
-                print(
-                    f"✅ 当前为【正常状态】,距离下次推送间隔约 {normal_push_interval} 秒 ≈ {normal_push_interval / 60:.1f} 分钟"
-                )
+                    (63 + (load_wait_time * 14)) + elapsed_time1 + elapsed_time2
+                ) * ((dingtalk_times * 24) - intervalCounts)
+                # print(
+                #     f"✅ 当前为【正常状态】,距离下次推送间隔约 {normal_push_interval} 秒 ≈ {normal_push_interval / 60:.1f} 分钟"
+                # )
 
                 if intervalCounts >= dingtalk_times * 24:
                     Content = (
@@ -258,8 +282,7 @@ def main_logic():
                         [
                             "wicpower2023@gmail.com",
                             "531556397@qq.com",
-                            "marcin.lee@wic-power.com"
-                            "ng.support@baiyiled.nl",
+                            "marcin.lee@wic-power.com" "ng.support@baiyiled.nl",
                         ],
                         "【EMS Events】",
                         f"《提示!》\n\n尊敬的用户您好！您的215P01项目EMS后台系统数据“正常” ，请您放心运行!谢谢!\nCheckUrl: {driver.current_url}\n\n\n检测时间：{datetime.now()}",
@@ -267,9 +290,10 @@ def main_logic():
                     )
                     intervalCounts = 0
                 else:
-                    # print(
-                    # f"具体下次推送时间还剩：{dingtalk_times-intervalCounts} 秒 ≈ {normal_push_interval / 60:.1f} 分钟"
-                    # )
+                    print(
+                        f"✅ 当前为【正常状态】,距离下次推送间隔约 {normal_push_interval} 秒 ≈ {normal_push_interval / 60:.1f} 分钟"
+                    )
+
                     intervalCounts += 1
 
             elif status in ["❌empty", "❌no_msg", "❌no_ws", "❌error"]:
@@ -294,20 +318,17 @@ def main_logic():
                 )
                 # 首次异常状态推送间隔
                 error_frist_push_interval = (
-                  (  ((loop_interval * 0) + 53 + (load_wait_time * 12))                  
-                    + elapsed_time1
-                    + elapsed_time2) * (loop_interval - same_error_count)#错误推送也需要等待设定的次数
-                )
-                print(
-                    f"❗ 当前为【异常状态: {status}】，距离首次推送时间：{error_frist_push_interval / 60:.1f} 分钟"
-                )
+                    (63 + (load_wait_time * 14)) + elapsed_time1 + elapsed_time2
+                ) * (
+                    loop_interval - same_error_count
+                )  # 错误推送也需要等待设定的次数
+
                 # 持续异常推送间隔
                 error_push_interval = (
-                   ((
-                        (((loop_interval * 0) + 53)
-                        + (load_wait_time * 12)) * (loop_interval - same_error_count)
-                    ) + elapsed_time1 + elapsed_time2) * (dingtalk_times- intervalCounts)
-                )
+                    ((63 + (load_wait_time * 14)) * (loop_interval - same_error_count))
+                    + elapsed_time1
+                    + elapsed_time2
+                ) * (dingtalk_times - intervalCounts)
 
                 if same_error_count == loop_interval:
                     send_dingtalk_msg(errocontent)
@@ -315,35 +336,37 @@ def main_logic():
                         [
                             "wicpower2023@gmail.com",
                             "531556397@qq.com",
-                            "marcin.lee@wic-power.com"
+                            "marcin.lee@wic-power.com",
                             # "ng.support@baiyiled.nl",
                         ],
                         "【EMS Events】",
                         f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统出现异常状态：{status}。请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
                         from_addr="jekingxu@163.com",
                     )
-                    # same_error_count+=1
+                    same_error_count += 1
                     intervalCounts = 0
-                elif same_error_count > loop_interval:  #错误连续后时间延长
+                elif same_error_count > loop_interval:  # 错误连续后时间延长
 
-                    if intervalCounts >= dingtalk_times:  #延长异常推送间隔
+                    if intervalCounts >= dingtalk_times:  # 延长异常推送间隔
                         send_dingtalk_msg(errocontent)
                         send_email(
                             [
                                 "wicpower2023@gmail.com",
                                 "531556397@qq.com",
-                                "marcin.lee@wic-power.com"
-                                "ng.support@baiyiled.nl",
+                                "marcin.lee@wic-power.com" "ng.support@baiyiled.nl",
                             ],
                             "【EMS Events】",
                             f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统持续异常[{status}]。请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
                             from_addr="jekingxu@163.com",
                         )
-                        intervalCounts = 0
-                        same_error_count=0
+                        intervalCounts = 0  # 超过三次连续错误后又连续间隔错误次数后归零
+
                     else:
                         intervalCounts += 1
                 else:
+                    print(
+                        f"❗ 当前为【异常状态: {status}】，距离首次推送时间：{error_frist_push_interval / 60:.1f} 分钟"
+                    )
                     print(
                         f"❗ 当前为【异常状态: {status}】，距离下一次推送约 {error_push_interval} 秒 ≈ {error_push_interval / 60:.1f} 分钟"
                     )
@@ -352,8 +375,8 @@ def main_logic():
             gc.collect()
 
             time.sleep(load_wait_time)
-            driver.refresh()    #刷新网页
-            time.sleep(load_wait_time )
+            driver.refresh()  # 刷新网页
+            time.sleep(load_wait_time)
             checkCounts += 1
             print(f"\n✅已经检测第{checkCounts}轮")
 
@@ -361,8 +384,10 @@ def main_logic():
             if total_cycle_count % 10000 == 0:
                 print("🔁 达到1000次检测，准备重启浏览器...")
                 try:
-                    restart_browser(username, password, load_wait_time+10)  #算3秒平均消耗
-                    time.sleep(load_wait_time+5)
+                    restart_browser(
+                        username, password, load_wait_time + 10
+                    )  # 算3秒平均消耗
+                    time.sleep(load_wait_time + 5)
                 except Exception as e:
                     print(f"🔁 浏览器重启失败: {e}")
                     thread_safe_update_debug_label(f"❌浏览器重启失败: {e}")
@@ -410,6 +435,7 @@ def restart_browser(username, password, load_wait_time):
 
 # ==============================================
 
+
 # === 设置窗口线程 ===
 def run_settings():
     global settings_window
@@ -455,9 +481,10 @@ def kill_existing_processes():
     """终止所有与自己相同的Chrome进程"""
     try:
         import psutil
+
         current_pid = os.getpid()
-        for proc in psutil.process_iter(['pid', 'name']):
-            if proc.info['name'] == 'chrome.exe' and proc.info['pid'] != current_pid:
+        for proc in psutil.process_iter(["pid", "name"]):
+            if proc.info["name"] == "chrome.exe" and proc.info["pid"] != current_pid:
                 try:
                     proc.kill()
                     print(f"✅ 已终止Chrome进程: PID {proc.info['pid']}")
@@ -465,6 +492,7 @@ def kill_existing_processes():
                     print(f"❌ 终止Chrome进程失败: {e}")
     except ImportError:
         print("⚠️ 未安装psutil库，无法自动终止现有进程")
+
 
 if __name__ == "__main__":
     kill_existing_processes()
