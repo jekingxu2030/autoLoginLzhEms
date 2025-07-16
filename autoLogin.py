@@ -266,6 +266,7 @@ def main_logic():
             WebDriverWait(driver, 20).until(  # 算3秒
                 lambda d: d.execute_script("return document.readyState") == "complete"
             )
+            # 模拟鼠标动作
             driver.execute_script("window.scrollBy(0, 10);")
             driver.execute_script("window.dispatchEvent(new Event('mousemove'))")
             time.sleep(load_wait_time + 5)
@@ -274,9 +275,7 @@ def main_logic():
             # 记录开始时间
             start_time = time.time()
             # 原代码包含多余的config参数，已注释
-            # ws_monitor = EmsWsMonitor(
-            #     driver, timeout=load_wait_time + 15, menu_data=menu_data, config=config
-            # )
+          
             # 修改后移除config参数
             ws_monitor = EmsWsMonitor(
                 driver, timeout=load_wait_time + 15, menu_data=menu_data
@@ -416,7 +415,7 @@ def main_logic():
 
             time.sleep(load_wait_time)
             checkCounts += 1
-            print(f"\n已经检测第{checkCounts}轮")
+            # print(f"\n已经检测第{checkCounts}轮")
 
             # 定期重启浏览器防止资源泄漏
             if total_cycle_count % 10000 == 0:
