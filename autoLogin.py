@@ -3,6 +3,7 @@ import json
 import os
 import time
 import threading
+from tokenize import Token
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -387,7 +388,7 @@ def main_logic():
                     error_frist_push_interval = while_time * (
                         max(1, loop_interval - same_error_count)
                     )
-                    send_dingtalk_msg(errocontent)
+                    send_dingtalk_msg(errocontent,Token1)
                     send_email(
                         [
                             "wicpower2023@gmail.com",
