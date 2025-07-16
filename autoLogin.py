@@ -16,7 +16,7 @@ import time
 import json
 from selenium import webdriver
 from ems_ws_monitor import EmsWsMonitor, fetch_menu_once
-
+ 
 from datetime import datetime
 import gc  # 引入垃圾回收模块
 
@@ -299,9 +299,7 @@ def main_logic():
                 normal_push_interval = (
                     (63 + (load_wait_time * 14)) + elapsed_time1 + elapsed_time2
                 ) * (max(1,(dingtalk_times * 24) - intervalCounts))
-                # print(
-                #     f"✅ 当前为【正常状态】,距离下次推送间隔约 {normal_push_interval} 秒 ≈ {normal_push_interval / 60:.1f} 分钟"
-                # )
+             
 
                 if intervalCounts >= dingtalk_times * 24:
                     Content = (
@@ -310,7 +308,7 @@ def main_logic():
                         f"CheckUrl: {driver.current_url}\n"
                         f"Message:✅网站正常，收到实时新数据！\n"
                         f"WebSiteState: Accessible！\n"
-                        f"time：{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                        f"time：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                     )
                     send_dingtalk_msg(Content)
                     send_email(
@@ -350,7 +348,7 @@ def main_logic():
                     f"CheckUrl: {driver.current_url}\n"
                     f"Message:网站状态异常[{status}]，请检查！\n"
                     f"WebSiteState: {web_state_desc}\n"
-                    f"time：{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                    f"time：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                 )
 
                 # 持续异常推送间隔

@@ -4,7 +4,7 @@
         "password": "123456789"
     },
     "timing": {
-        "load_wait_time": 10,
+        "load_wait_time": 1,
         "loop_interval": 5,
         "dingtalk_times": 50
     },
