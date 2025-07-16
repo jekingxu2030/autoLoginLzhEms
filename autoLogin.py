@@ -298,7 +298,7 @@ def main_logic():
                 # 打印正常状态推送间隔
                 normal_push_interval = (
                     (63 + (load_wait_time * 14)) + elapsed_time1 + elapsed_time2
-                ) * ((dingtalk_times * 24) - intervalCounts)
+                ) * (max(1,(dingtalk_times * 24) - intervalCounts))
                 # print(
                 #     f"✅ 当前为【正常状态】,距离下次推送间隔约 {normal_push_interval} 秒 ≈ {normal_push_interval / 60:.1f} 分钟"
                 # )
@@ -309,14 +309,16 @@ def main_logic():
                         f"State: Normal!\n"
                         f"CheckUrl: {driver.current_url}\n"
                         f"Message:✅网站正常，收到实时新数据！\n"
-                        f"WebSiteState: Accessible！"
+                        f"WebSiteState: Accessible！\n"
+                        f"time：{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                     )
                     send_dingtalk_msg(Content)
                     send_email(
                         [
                             "wicpower2023@gmail.com",
                             "531556397@qq.com",
-                            "marcin.lee@wic-power.com" "ng.support@baiyiled.nl",
+                            "marcin.lee@wic-power.com",
+                            "ng.support@baiyiled.nl",
                         ],
                         "【EMS Events】",
                         f"《提示!》\n\n尊敬的用户您好！您的215P01项目EMS后台系统数据“正常” ，请您放心运行!谢谢!\nCheckUrl: {driver.current_url}\n\n\n检测时间：{datetime.now()}",
@@ -327,7 +329,6 @@ def main_logic():
                     print(
                         f"✅ 当前为【正常状态】,距离下次推送间隔约 {normal_push_interval} 秒 ≈ {normal_push_interval / 60:.1f} 分钟"
                     )
-
                     intervalCounts += 1
 
             elif status in ["❌empty", "❌no_msg", "❌no_ws", "❌error"]:
@@ -348,30 +349,32 @@ def main_logic():
                     f"State: Alarm!\n"
                     f"CheckUrl: {driver.current_url}\n"
                     f"Message:网站状态异常[{status}]，请检查！\n"
-                    f"WebSiteState: {web_state_desc}"
+                    f"WebSiteState: {web_state_desc}\n"
+                    f"time：{datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                 )
-                # 首次异常状态推送间隔
-                error_frist_push_interval = (
-                    (63 + (load_wait_time * 14)) + elapsed_time1 + elapsed_time2
-                ) * (
-                    loop_interval - same_error_count
-                )  # 错误推送也需要等待设定的次数
 
                 # 持续异常推送间隔
                 error_push_interval = (
                     ((63 + (load_wait_time * 14)) * (loop_interval - same_error_count))
                     + elapsed_time1
                     + elapsed_time2
-                ) * (dingtalk_times - intervalCounts)
+                ) * (max(1, loop_interval - same_error_count))
 
                 if same_error_count == loop_interval:
+                    # 首次异常状态推送间隔
+                    error_frist_push_interval = (
+                        (63 + (load_wait_time * 14)) + elapsed_time1 + elapsed_time2
+                    ) * (
+                        max(1, loop_interval - same_error_count)
+                    )  # 错误推送也需要等待设定的次数减去相同错误推送次数，避免错误推送间隔过短
+
                     send_dingtalk_msg(errocontent)
                     send_email(
                         [
                             "wicpower2023@gmail.com",
                             "531556397@qq.com",
                             "marcin.lee@wic-power.com",
-                            # "ng.support@baiyiled.nl",
+                            #"ng.support@baiyiled.nl",
                         ],
                         "【EMS Events】",
                         f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统出现异常状态：{status}。请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
