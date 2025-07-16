@@ -193,7 +193,7 @@ class EmsWsMonitor:
                                     #     json.dump(
                                     #         export_data, f, ensure_ascii=False, indent=2
                                     #     )
-                                    print(f"[RTV] 已保存更新数据到: {file_path}")
+                                    # print(f"[RTV] 已保存更新数据到: {file_path}")
 
                                 if self.data_valid:
                                     return "✅ok"

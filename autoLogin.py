@@ -29,7 +29,9 @@ config = configparser.ConfigParser()
 
 # === 路径 ===
 try:
-    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+    config_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "config.json"
+    )
 except Exception as e:
     print(f"无法确定配置文件路径: {e}")
     config_path = "config.json"  # 默认路径作为回退
@@ -65,6 +67,9 @@ stop_event = threading.Event()
 config_ready = threading.Event()
 # ng.support@baiyiled.nl
 
+Token1 = "2790e24fa6bb40ba86208e99c4b02223941b51a5b61d0f0e08820d3f461e330d"
+Token2 = "aa0366d18f2307daa196c4f96546ed629a92b110448ed104614fe9566dfa1b14"
+
 
 def thread_safe_update_debug_label(text):
     # 自动清理日志，当日志行数超过1000行时删除最早的100行
@@ -98,9 +103,10 @@ def set_config_value(filename, section, key, value):
         # 写入文件
         with open(filename, "w") as configfile:
             config.write(configfile)
-        print(f"✅ 写入成功：[{section}] {key} = {value}")  
+        print(f"✅ 写入成功：[{section}] {key} = {value}")
     except Exception as e:
         print(f"Error writing to config file: {e}")
+
 
 def get_ws_url(driver):
     # 获取浏览器性能日志
@@ -168,7 +174,7 @@ def login(driver, username, password, load_wait_time):
 
     driver.get("http://ems.hy-power.net:8114/login")
     thread_safe_update_debug_label("请求网页中...")
-    time.sleep(load_wait_time + 10)
+    time.sleep(load_wait_time + 5)
 
     # 设置emsId
     driver.execute_script(
@@ -200,8 +206,9 @@ def login(driver, username, password, load_wait_time):
     thread_safe_update_debug_label("登录成功，开始探测内容...")
     # 稍微晚点读取cock
     save_browser_cache_to_config(driver)
-  
-    ws_url = get_ws_url(driver)  #保持WS字套
+
+    ws_url = get_ws_url(driver)  # 保持WS字套
+
 
 def main_logic():
     try:
@@ -231,7 +238,7 @@ def main_logic():
         # 登录
         login(driver, username, password, load_wait_time)
         last_login_time = time.time()  # 记录初始登录时间
-        time.sleep(load_wait_time + 10)
+        time.sleep(load_wait_time + 5)
 
         # 状态计数变量
         same_error_count = 0
@@ -241,14 +248,18 @@ def main_logic():
 
         # 记录开始时间
         start_time = time.time()
-        # 在主程序启动时调用
+        # 在主程序启动时调用 菜单请求
         menu_data = fetch_menu_once()
         # 记录结束时间
         end_time = time.time()
         # 计算耗时（秒）
         elapsed_time1 = end_time - start_time
 
+        okCounts = 0
+        while_time = 0
         while not stop_event.is_set():
+            while_time_start = time.time()
+
             current_time = time.time()
 
             # 检查是否超过23小时(82800秒)未重新登录
@@ -257,8 +268,8 @@ def main_logic():
                 print("🔄 已超过23小时，准备重新登录...")
                 thread_safe_update_debug_label(f"🔄登录已超过23小时，准备重新登录...")
                 # login(driver, username, password, load_wait_time)
-                restart_browser(username, password, load_wait_time)  # 
-                time.sleep(load_wait_time*2+10)
+                restart_browser(username, password, load_wait_time)  #
+                time.sleep(load_wait_time * 2 + 10)
                 last_login_time = current_time  # 更新登录时间
 
             total_cycle_count += 1
@@ -275,7 +286,7 @@ def main_logic():
             # 记录开始时间
             start_time = time.time()
             # 原代码包含多余的config参数，已注释
-          
+
             # 修改后移除config参数
             ws_monitor = EmsWsMonitor(
                 driver, timeout=load_wait_time + 15, menu_data=menu_data
@@ -288,27 +299,30 @@ def main_logic():
             elapsed_time2 = end_time - start_time
             print("WS检测状态：", status)
             print(
-                f"\nload_wait_time={load_wait_time} , loop_interval={loop_interval},dingtalk_times={dingtalk_times},intervalCounts={intervalCounts},same_error_count={same_error_count}"
+                f"\nload_wait_time={load_wait_time} , \nloop_interval={loop_interval},\ndingtalk_times={dingtalk_times},\nintervalCounts={intervalCounts},\nsame_error_count={same_error_count},\nwsRunTime={ elapsed_time1 + elapsed_time2}"
             )
 
             if status == "✅ok":
                 same_error_count = 0  # 打断异常，重置异常计数  在连续错误三次或三次后连续错误会一直保持大于3，等待正常逻状态下归零
-
+                okCounts += 1
                 # 打印正常状态推送间隔
-                normal_push_interval = (
-                    (63 + (load_wait_time * 14)) + elapsed_time1 + elapsed_time2
-                ) * (max(1,(dingtalk_times * 24) - intervalCounts))
-
+                # normal_push_interval = (
+                #     (63 + (load_wait_time * 14)) + elapsed_time1 + elapsed_time2
+                # ) * (max(1,(dingtalk_times * 24) - intervalCounts))
+                normal_push_interval = while_time * (
+                    max(1, (dingtalk_times * 24) - intervalCounts)
+                )
+                Content = (
+                    f"Event: BY-P01-EMS_StatusCheck\n"
+                    f"State: Normal!\n"
+                    f"CheckUrl: {driver.current_url}\n"
+                    f"Message:✅网站正常，收到实时新数据！\n"
+                    f"WebSiteState: Accessible！\n"
+                    f"Time：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                )
                 if intervalCounts >= dingtalk_times * 24:
-                    Content = (
-                        f"Event: BY-P01-EMS_StatusCheck\n"
-                        f"State: Normal!\n"
-                        f"CheckUrl: {driver.current_url}\n"
-                        f"Message:✅网站正常，收到实时新数据！\n"
-                        f"WebSiteState: Accessible！\n"
-                        f"time：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
-                    )
-                    send_dingtalk_msg(Content)
+
+                    send_dingtalk_msg(Content, Token2)
                     send_email(
                         [
                             "wicpower2023@gmail.com",
@@ -317,18 +331,24 @@ def main_logic():
                             "ng.support@baiyiled.nl",
                         ],
                         "【EMS Events】",
-                        f"《提示!》\n\n尊敬的用户您好！您的215P01项目EMS后台系统数据“正常” ，请您放心运行!谢谢!\nCheckUrl: {driver.current_url}\n\n\n检测时间：{datetime.now()}",
+                        f"《提示!》\n\n尊敬的用户您好！您的215P01项目EMS后台系统数据“正常” ，请您放心运行!谢谢!\nCheckUrl: {driver.current_url}\n\n\n检测时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
                         from_addr="jekingxu@163.com",
                     )
                     intervalCounts = 0
                     driver.refresh()  # 刷新网页
                 else:
+                    if (
+                        okCounts == 1
+                    ):  # 首次正常或错误后恢复正常后的第一次正常也直接发出
+                        send_dingtalk_msg(Content, Token1)
+
                     print(
                         f"✅ 当前为【正常状态】,距离下次推送间隔约 {normal_push_interval} 秒 ≈ {normal_push_interval / 60:.1f} 分钟"
                     )
                     intervalCounts += 1
 
             elif status in ["❌empty", "❌no_msg", "❌no_ws", "❌error"]:
+                okCounts = 0
                 same_error_count += 1
                 # 根据状态自适应输出网站状态描述
                 if status == "❌empty":
@@ -347,34 +367,38 @@ def main_logic():
                     f"CheckUrl: {driver.current_url}\n"
                     f"Message:网站状态异常[{status}]，请检查！\n"
                     f"WebSiteState: {web_state_desc}\n"
-                    f"time：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+                    f"Time：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                 )
 
                 # 持续异常推送间隔
-                error_push_interval = (
-                    ((63 + (load_wait_time * 14)) * (loop_interval - same_error_count))
-                    + elapsed_time1
-                    + elapsed_time2
-                ) * (max(1, loop_interval - same_error_count))
-
+                # error_push_interval = (
+                #     ((63 + (load_wait_time * 14)) * (loop_interval - same_error_count))
+                #     + elapsed_time1
+                #     + elapsed_time2
+                # ) * (max(1, loop_interval - same_error_count))
+                error_push_interval = while_time * (
+                    max(1, loop_interval - same_error_count)
+                )
                 if same_error_count == loop_interval:
                     # 首次异常状态推送间隔
-                    error_frist_push_interval = (
-                        (63 + (load_wait_time * 14)) + elapsed_time1 + elapsed_time2
-                    ) * (
+                    # error_frist_push_interval = (
+                    #     (63 + (load_wait_time * 14)) + elapsed_time1 + elapsed_time2
+                    # ) * (
+                    #     max(1, loop_interval - same_error_count)
+                    # )  # 错误推送也需要等待设定的次数减去相同错误推送次数，避免错误推送间隔过短
+                    error_frist_push_interval = while_time * (
                         max(1, loop_interval - same_error_count)
-                    )  # 错误推送也需要等待设定的次数减去相同错误推送次数，避免错误推送间隔过短
-
+                    )
                     send_dingtalk_msg(errocontent)
                     send_email(
                         [
                             "wicpower2023@gmail.com",
                             "531556397@qq.com",
                             "marcin.lee@wic-power.com",
-                            #"ng.support@baiyiled.nl",
+                            # "ng.support@baiyiled.nl",
                         ],
                         "【EMS Events】",
-                        f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统出现异常状态：{status}。请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
+                        f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统出现异常状态：{status}。请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
                         from_addr="jekingxu@163.com",
                     )
                     # same_error_count += 1
@@ -403,9 +427,11 @@ def main_logic():
                         )
                     else:
                         intervalCounts += 1
-                        print(f"第{same_error_count}次异常状态，错误次数>0>错误间隔次数<推送间隔")
+                        print(
+                            f"第{same_error_count}次异常状态，错误次数>0>错误间隔次数<推送间隔"
+                        )
                 else:
-                    intervalCounts += 1  #跳过每次都加1
+                    intervalCounts += 1  # 跳过每次都加1
                     print(f"第{same_error_count}次异常状态，错误次数>0<错误间隔次数")
 
             # 清理缓存与内存
@@ -432,6 +458,11 @@ def main_logic():
                     # 这里要重新执行登录操作（填写用户名、密码、验证码等）
             else:
                 print(f"\n已循环{total_cycle_count}次")
+
+            while_time_end = time.time()
+            while_time = while_time_end - while_time_start
+            print(f"\n更新循环时长，循环一次需要时间{while_time}秒")
+
     except FileNotFoundError:
         print("错误：配置文件config.json不存在")
         return
@@ -482,6 +513,7 @@ def restart_browser(username, password, load_wait_time):
 
 
 # ==============================================
+
 
 # === 设置窗口线程 ===
 def run_settings():

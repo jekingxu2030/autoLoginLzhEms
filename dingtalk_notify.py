@@ -1,10 +1,11 @@
 
 
+from ast import Str
 import requests
 import json
 
 
-def send_dingtalk_msg(content: str) -> bool:
+def send_dingtalk_msg(content: str,qToken:str) -> bool:
 
 # def send_dingtalk_msg(content:dict) -> bool:
     """
@@ -12,7 +13,7 @@ def send_dingtalk_msg(content: str) -> bool:
         """
     # Token = "2790e24fa6bb40ba86208e99c4b02223941b51a5b61d0f0e08820d3f461e330d"
     Token = "aa0366d18f2307daa196c4f96546ed629a92b110448ed104614fe9566dfa1b14"
-    webhook = f"https://oapi.dingtalk.com/robot/send?access_token={Token}"
+    webhook = f"https://oapi.dingtalk.com/robot/send?access_token={qToken or Token}"
     headers = {"Content-Type": "application/json"}
     data = {"msgtype": "text", "text": {"content": content}} #纯文本
     # data = {"msgtype": "link", "link":  content}
