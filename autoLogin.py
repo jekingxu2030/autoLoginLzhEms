@@ -223,9 +223,9 @@ def main_logic():
 
         username = config["account"]["username"]
         password = config["account"]["password"]
-        load_wait_time = config["timing"]["load_wait_time"]  # 第一个时间
-        loop_interval = config["timing"]["loop_interval"]  # 第二个时间
-        dingtalk_times = config["timing"]["dingtalk_times"]  # 第三个时间
+        load_wait_time = config["timing"]["load_wait_time"]  # 第一个加载等待时间
+        loop_interval = config["timing"]["loop_interval"]  # 第二个时间  首次错误等待次数
+        dingtalk_times = config["timing"]["dingtalk_times"]  # 第三个时间  正常和不正常连续推送间隔次数
         # email_times = config["timing"]["email_times"]  #第四个时间
         # email_interval = config["timing"]["email_interval"]  #第五个时间
 
@@ -258,6 +258,7 @@ def main_logic():
         okCounts = 0
         while_time = 0
         while not stop_event.is_set():
+           
             while_time_start = time.time()
 
             current_time = time.time()
@@ -462,6 +463,17 @@ def main_logic():
             while_time_end = time.time()
             while_time = while_time_end - while_time_start
             print(f"\n更新循环时长，循环一次需要时间{while_time}秒")
+
+            # # 新增：重新加载配置文件
+            # try:
+            #     config = configparser.ConfigParser()
+            #     with open(config_path, "r", encoding="utf-8") as f:
+            #         config = json.load(f)
+            #         load_wait_time = config["timing"]["load_wait_time"]  # 第一个加载等待时间
+            #         loop_interval = config["timing"]["loop_interval"]  # 第二个时间  首次错误等待次数
+            #         dingtalk_times = config["timing"]["dingtalk_times"]  # 第三个时间  正常和不正常连续推送间隔次数 
+            # except Exception as e:
+            #     print(f"重新加载配置文件失败: {e}")
 
     except FileNotFoundError:
         print("错误：配置文件config.json不存在")
