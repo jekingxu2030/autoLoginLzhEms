@@ -72,6 +72,7 @@ class EmsWsMonitor:
 
     def start(self):
         # 每次启动时更新websocket URL
+        config = ConfigParser()
         config.read("config.ini")
         self.ws_url = config.get("websocket", "url")
         print("[WS] 启动性能日志监听...")

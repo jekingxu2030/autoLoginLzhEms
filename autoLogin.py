@@ -28,9 +28,30 @@ import configparser
 config = configparser.ConfigParser()
 
 # === 路径 ===
-config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+try:
+    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+except Exception as e:
+    print(f"无法确定配置文件路径: {e}")
+    config_path = "config.json"  # 默认路径作为回退
 JS_SAVE_DIR = "./downloaded_js"
 os.makedirs(JS_SAVE_DIR, exist_ok=True)
+
+# 初始化config变量
+config = None
+
+# 加载配置文件
+try:
+    with open(config_path, "r", encoding="utf-8") as f:
+        config = json.load(f)
+except FileNotFoundError:
+    print("错误：配置文件config.json不存在")
+    config = None
+except json.JSONDecodeError:
+    print("错误：配置文件格式不正确，无法解析JSON")
+    config = None
+except Exception as e:
+    print(f"加载配置文件时发生错误: {e}")
+    config = None
 
 # === 状态 ===
 stop_event = threading.Event()
@@ -64,20 +85,22 @@ def set_config_value(filename, section, key, value):
     :param key: 键名（如 url）
     :param value: 键值（如 ws://xxx）
     """
-    config = configparser.ConfigParser()
-    # 如果文件存在就读取
-    if os.path.exists(filename):
-        config.read(filename)
-    # 如果没有这个 section 就添加
-    if not config.has_section(section):
-        config.add_section(section)
-    # 设置键值
-    config.set(section, key, value)
-    # 写入文件
-    with open(filename, "w") as configfile:
-        config.write(configfile)
-    print(f"✅ 写入成功：[{section}] {key} = {value}")
-
+    try:
+        config = configparser.ConfigParser()
+        # 如果文件存在就读取
+        if os.path.exists(filename):
+            config.read(filename)
+        # 如果没有这个 section 就添加
+        if not config.has_section(section):
+            config.add_section(section)
+        # 设置键值
+        config.set(section, key, value)
+        # 写入文件
+        with open(filename, "w") as configfile:
+            config.write(configfile)
+        print(f"✅ 写入成功：[{section}] {key} = {value}")  
+    except Exception as e:
+        print(f"Error writing to config file: {e}")
 
 def get_ws_url(driver):
     # 获取浏览器性能日志
@@ -182,8 +205,14 @@ def login(driver, username, password, load_wait_time):
 
 def main_logic():
     try:
-        with open(config_path, "r", encoding="utf-8") as f:
-            config = json.load(f)
+        # 检查配置是否加载成功
+        if config is None:
+            print("错误：配置文件加载失败，无法继续执行")
+            return
+        # 移除原有的config加载代码
+        # global config
+        # with open(config_path, "r", encoding="utf-8") as f:
+        #     config = json.load(f)
 
         username = config["account"]["username"]
         password = config["account"]["password"]
@@ -244,6 +273,11 @@ def main_logic():
             # ws_url = get_ws_url(driver)
             # 记录开始时间
             start_time = time.time()
+            # 原代码包含多余的config参数，已注释
+            # ws_monitor = EmsWsMonitor(
+            #     driver, timeout=load_wait_time + 15, menu_data=menu_data, config=config
+            # )
+            # 修改后移除config参数
             ws_monitor = EmsWsMonitor(
                 driver, timeout=load_wait_time + 15, menu_data=menu_data
             )
@@ -395,9 +429,20 @@ def main_logic():
                     # 这里要重新执行登录操作（填写用户名、密码、验证码等）
             else:
                 print(f"\n已循环{total_cycle_count}次")
+    except FileNotFoundError:
+        print("错误：配置文件config.json不存在")
+        return
+    except json.JSONDecodeError:
+        print("错误：配置文件格式不正确，无法解析JSON")
+        return
+    except KeyError as e:
+        print(f"错误：配置文件缺少必要的键: {e}")
+        return
     except Exception as e:
         print("主线程逻辑异常:", e)
         thread_safe_update_debug_label(f"❌主逻辑异常" + str(e))
+        print(f"加载配置文件时发生错误: {e}")
+        return
     finally:
         if driver:
             try:
@@ -423,7 +468,7 @@ def restart_browser(username, password, load_wait_time):
         pass
 
     gc.collect()
-
+    kill_existing_processes()
     options = webdriver.ChromeOptions()
     options.add_argument("--start-maximized")
     options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
@@ -434,7 +479,6 @@ def restart_browser(username, password, load_wait_time):
 
 
 # ==============================================
-
 
 # === 设置窗口线程 ===
 def run_settings():
