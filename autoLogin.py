@@ -16,7 +16,7 @@ import time
 import json
 from selenium import webdriver
 from ems_ws_monitor import EmsWsMonitor, fetch_menu_once
- 
+
 from datetime import datetime
 import gc  # 引入垃圾回收模块
 
@@ -299,7 +299,6 @@ def main_logic():
                 normal_push_interval = (
                     (63 + (load_wait_time * 14)) + elapsed_time1 + elapsed_time2
                 ) * (max(1,(dingtalk_times * 24) - intervalCounts))
-             
 
                 if intervalCounts >= dingtalk_times * 24:
                     Content = (
@@ -323,6 +322,7 @@ def main_logic():
                         from_addr="jekingxu@163.com",
                     )
                     intervalCounts = 0
+                    driver.refresh()  # 刷新网页
                 else:
                     print(
                         f"✅ 当前为【正常状态】,距离下次推送间隔约 {normal_push_interval} 秒 ≈ {normal_push_interval / 60:.1f} 分钟"
@@ -398,6 +398,7 @@ def main_logic():
                             from_addr="jekingxu@163.com",
                         )
                         intervalCounts = 0  # 超过三次连续错误后又连续间隔错误次数后归零
+                        driver.refresh()  # 刷新网页
                         print(
                             f"❗ 当前为【异常状态: {status}】，距离下一次连续错误推送约 {error_push_interval} 秒 ≈ {error_push_interval / 60:.1f} 分钟"
                         )
@@ -412,7 +413,7 @@ def main_logic():
             gc.collect()
 
             time.sleep(load_wait_time)
-            driver.refresh()  # 刷新网页
+
             time.sleep(load_wait_time)
             checkCounts += 1
             print(f"\n已经检测第{checkCounts}轮")
