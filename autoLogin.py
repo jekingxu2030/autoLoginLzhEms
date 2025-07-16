@@ -212,15 +212,12 @@ def login(driver, username, password, load_wait_time):
 
 def main_logic():
     try:
-        # 检查配置是否加载成功
-        if config is None:
-            print("错误：配置文件加载失败，无法继续执行")
-            return
-        # 移除原有的config加载代码
-        # global config
-        # with open(config_path, "r", encoding="utf-8") as f:
-        #     config = json.load(f)
-
+        # 初始化配置字典
+        config = {}
+        # 加载配置文件
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = json.load(f)
+        
         username = config["account"]["username"]
         password = config["account"]["password"]
         load_wait_time = config["timing"]["load_wait_time"]  # 第一个加载等待时间
@@ -465,15 +462,15 @@ def main_logic():
             print(f"\n更新循环时长，循环一次需要时间{while_time}秒")
 
             # # 新增：重新加载配置文件
-            # try:
-            #     config = configparser.ConfigParser()
-            #     with open(config_path, "r", encoding="utf-8") as f:
-            #         config = json.load(f)
-            #         load_wait_time = config["timing"]["load_wait_time"]  # 第一个加载等待时间
-            #         loop_interval = config["timing"]["loop_interval"]  # 第二个时间  首次错误等待次数
-            #         dingtalk_times = config["timing"]["dingtalk_times"]  # 第三个时间  正常和不正常连续推送间隔次数 
-            # except Exception as e:
-            #     print(f"重新加载配置文件失败: {e}")
+            try:
+                # config = configparser.ConfigParser()
+                with open(config_path, "r", encoding="utf-8") as f:
+                    config = json.load(f)
+                    load_wait_time = config["timing"]["load_wait_time"]  # 第一个加载等待时间
+                    loop_interval = config["timing"]["loop_interval"]  # 第二个时间  首次错误等待次数
+                    dingtalk_times = config["timing"]["dingtalk_times"]  # 第三个时间  正常和不正常连续推送间隔次数 
+            except Exception as e:
+                print(f"重新加载配置文件失败: {e}")
 
     except FileNotFoundError:
         print("错误：配置文件config.json不存在")
