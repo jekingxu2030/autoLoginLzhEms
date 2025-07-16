@@ -260,7 +260,7 @@ def main_logic():
                 restart_browser(username, password, load_wait_time)  # 
                 time.sleep(load_wait_time*2+10)
                 last_login_time = current_time  # 更新登录时间
-               
+
             total_cycle_count += 1
 
             WebDriverWait(driver, 20).until(  # 算3秒
@@ -282,7 +282,7 @@ def main_logic():
                 driver, timeout=load_wait_time + 15, menu_data=menu_data
             )
             status = ws_monitor.start()
-            
+
             # 记录结束时间
             end_time = time.time()
             # 计算耗时（秒）
@@ -377,8 +377,11 @@ def main_logic():
                         f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统出现异常状态：{status}。请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
                         from_addr="jekingxu@163.com",
                     )
-                    same_error_count += 1
+                    # same_error_count += 1
                     intervalCounts = 0
+                    print(
+                        f"❗ 当前为【异常状态: {status}】，距离下轮首错推送时间：{error_frist_push_interval / 60:.1f} 分钟"
+                    )
                 elif same_error_count > loop_interval:  # 错误连续后时间延长
 
                     if intervalCounts >= dingtalk_times:  # 延长异常推送间隔
@@ -394,16 +397,15 @@ def main_logic():
                             from_addr="jekingxu@163.com",
                         )
                         intervalCounts = 0  # 超过三次连续错误后又连续间隔错误次数后归零
-
+                        print(
+                            f"❗ 当前为【异常状态: {status}】，距离下一次连续错误推送约 {error_push_interval} 秒 ≈ {error_push_interval / 60:.1f} 分钟"
+                        )
                     else:
                         intervalCounts += 1
+                        print(f"第{same_error_count}次异常状态，错误次数>0>错误间隔次数<推送间隔")
                 else:
-                    print(
-                        f"❗ 当前为【异常状态: {status}】，距离首次推送时间：{error_frist_push_interval / 60:.1f} 分钟"
-                    )
-                    print(
-                        f"❗ 当前为【异常状态: {status}】，距离下一次推送约 {error_push_interval} 秒 ≈ {error_push_interval / 60:.1f} 分钟"
-                    )
+                    intervalCounts += 1  #跳过每次都加1
+                    print(f"第{same_error_count}次异常状态，错误次数>0<错误间隔次数")
 
             # 清理缓存与内存
             gc.collect()
@@ -412,7 +414,7 @@ def main_logic():
             driver.refresh()  # 刷新网页
             time.sleep(load_wait_time)
             checkCounts += 1
-            print(f"\n✅已经检测第{checkCounts}轮")
+            print(f"\n已经检测第{checkCounts}轮")
 
             # 定期重启浏览器防止资源泄漏
             if total_cycle_count % 10000 == 0:
