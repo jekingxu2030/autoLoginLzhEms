@@ -339,7 +339,7 @@ def main_logic():
                     if (
                         okCounts == 1
                     ):  # 首次正常或错误后恢复正常后的第一次正常也直接发出
-                        send_dingtalk_msg(Content, Token1)
+                        send_dingtalk_msg(Content, Token2)
 
                     print(
                         f"✅ 当前为【正常状态】,距离下次推送间隔约 {normal_push_interval} 秒 ≈ {normal_push_interval / 60:.1f} 分钟"
@@ -388,7 +388,7 @@ def main_logic():
                     error_frist_push_interval = while_time * (
                         max(1, loop_interval - same_error_count)
                     )
-                    send_dingtalk_msg(errocontent,Token1)
+                    send_dingtalk_msg(errocontent,Token2)
                     send_email(
                         [
                             "wicpower2023@gmail.com",
@@ -408,7 +408,7 @@ def main_logic():
                 elif same_error_count > loop_interval:  # 错误连续后时间延长
 
                     if intervalCounts >= dingtalk_times:  # 延长异常推送间隔
-                        send_dingtalk_msg(errocontent)
+                        send_dingtalk_msg(errocontent,Token2)
                         send_email(
                             [
                                 "wicpower2023@gmail.com",
