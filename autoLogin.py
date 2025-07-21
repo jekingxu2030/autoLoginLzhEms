@@ -218,7 +218,7 @@ def main_logic():
         # 加载配置文件
         with open(config_path, "r", encoding="utf-8") as f:
             config = json.load(f)
-        
+
         username = config["account"]["username"]
         password = config["account"]["password"]
         load_wait_time = config["timing"]["load_wait_time"]  # 第一个加载等待时间
@@ -256,7 +256,7 @@ def main_logic():
         okCounts = 0
         while_time = 0
         while not stop_event.is_set():
-           
+
             while_time_start = time.time()
 
             current_time = time.time()
@@ -405,6 +405,9 @@ def main_logic():
                     print(
                         f"❗ 当前为【异常状态: {status}】，距离下轮首错推送时间：{error_frist_push_interval / 60:.1f} 分钟"
                     )
+                    driver.refresh()  # 刷新网页
+                    time.sleep(10)
+
                 elif same_error_count > loop_interval:  # 错误连续后时间延长
 
                     if intervalCounts >= dingtalk_times:  # 延长异常推送间隔
@@ -420,10 +423,12 @@ def main_logic():
                             from_addr="jekingxu@163.com",
                         )
                         intervalCounts = 0  # 超过三次连续错误后又连续间隔错误次数后归零
-                        driver.refresh()  # 刷新网页
+
                         print(
                             f"❗ 当前为【异常状态: {status}】，距离下一次连续错误推送约 {error_push_interval} 秒 ≈ {error_push_interval / 60:.1f} 分钟"
                         )
+                        driver.refresh()  # 刷新网页
+                        time.sleep(10)
                     else:
                         intervalCounts += 1
                         print(
