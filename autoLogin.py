@@ -323,12 +323,7 @@ def main_logic():
 
                     send_dingtalk_msg(Content, Token1)
                     send_email(
-                        [
-                            "wicpower2023@gmail.com",
-                            "531556397@qq.com",
-                            "marcin.lee@wic-power.com",
-                            "ng.support@baiyiled.nl",
-                        ],
+                        config["email"]["normal_recipients"],
                         "【EMS Events】",
                         f"《提示!》\n\n尊敬的用户您好！您的215P01项目EMS后台系统数据“正常” ，请您放心运行!谢谢!\nCheckUrl: {driver.current_url}\n\n\n检测时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
                         from_addr="jekingxu@163.com",
@@ -368,13 +363,7 @@ def main_logic():
                     f"WebSiteState: {web_state_desc}\n"
                     f"Time：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                 )
-
-                # 持续异常推送间隔
-                # error_push_interval = (
-                #     ((63 + (load_wait_time * 14)) * (loop_interval - same_error_count))
-                #     + elapsed_time1
-                #     + elapsed_time2
-                # ) * (max(1, loop_interval - same_error_count))
+ 
                 error_push_interval = while_time * (
                     max(1, loop_interval - same_error_count)
                 )
@@ -390,12 +379,7 @@ def main_logic():
                     )
                     send_dingtalk_msg(errocontent,Token1)
                     send_email(
-                        [
-                            "wicpower2023@gmail.com",
-                            "531556397@qq.com",
-                            "marcin.lee@wic-power.com",
-                            # "ng.support@baiyiled.nl",
-                        ],
+                        config["email"]["error_recipients"],
                         "【EMS Events】",
                         f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统出现异常状态：{status}。请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
                         from_addr="jekingxu@163.com",
@@ -405,8 +389,7 @@ def main_logic():
                     print(
                         f"❗ 当前为【异常状态: {status}】，距离下轮首错推送时间：{error_frist_push_interval / 60:.1f} 分钟"
                     )
-                    driver.refresh()  # 刷新网页
-                    time.sleep(10)
+
 
                 elif same_error_count > loop_interval:  # 错误连续后时间延长
 
@@ -427,16 +410,18 @@ def main_logic():
                         print(
                             f"❗ 当前为【异常状态: {status}】，距离下一次连续错误推送约 {error_push_interval} 秒 ≈ {error_push_interval / 60:.1f} 分钟"
                         )
-                        driver.refresh()  # 刷新网页
-                        time.sleep(10)
+
                     else:
                         intervalCounts += 1
+
                         print(
                             f"第{same_error_count}次异常状态，错误次数>0>错误间隔次数<推送间隔"
                         )
                 else:
                     intervalCounts += 1  # 跳过每次都加1
                     print(f"第{same_error_count}次异常状态，错误次数>0<错误间隔次数")
+            driver.refresh()  # 刷新网页
+            time.sleep(15)       
 
             # 清理缓存与内存
             gc.collect()

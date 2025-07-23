@@ -52,6 +52,16 @@ class SettingsWindow:
             #     messagebox.showerror("错误", "加密密钥必须是 16 字节（32 个字符）!")
             #     return
 
+            # 先加载当前配置文件，保留已有配置
+            try:
+                with open(self.cfg_path, "r", encoding="utf-8") as f:
+                    existing_cfg = json.load(f)
+                # 保留email配置节（如果存在）
+                if "email" in existing_cfg:
+                    self.cfg["email"] = existing_cfg["email"]
+            except Exception:
+                pass
+
             # 更新内存配置
             self.cfg["account"]["username"] = self.user_entry.get().strip()
             self.cfg["account"]["password"] = self.pwd_entry.get().strip()
