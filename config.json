@@ -4,20 +4,11 @@
         "password": "123456789"
     },
     "timing": {
-        "load_wait_time": 3,
-        "loop_interval": 1,
-        "dingtalk_times": 1
+        "load_wait_time": 1,
+        "loop_interval": 3,
+        "dingtalk_times": 5
     },
     "encryption": {
-        "ws_token_key": "514ee339fec647ce2353b5e0fa5ecc0a"
-    },
-    "email": {
-        "normal_recipients": [
-            "wicpower2023@gmail.com",
-            "ng.support@baiyiled.nl"
-        ],
-        "error_recipients": [
-            "wicpower2023@gmail.com"
-        ]
+        "ws_token_key": "CC2345AE2335VBB32AFC4ADECA2243545435"
     }
 }
