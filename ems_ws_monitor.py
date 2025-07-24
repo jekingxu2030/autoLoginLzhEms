@@ -121,7 +121,7 @@ class EmsWsMonitor:
 
                             if data.get("func") == "rtv":
                                 self.msg_arrived = True
-                                print(f"\n[WS拦截] 收到RTV数据帧: {payload[:40]}...")
+                                print(f"\n[WS拦截] 收到RTV数据帧: {payload[:60]}...")
 
                                 rtv_data = data.get("data", [])
                                 print(f"\n[WS拦截] 共接收 {len(rtv_data)} 个字段ID")

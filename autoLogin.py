@@ -354,7 +354,7 @@ def main_logic():
                         from_addr=email_config["from_addr"],
                     )
                     intervalCounts = 0
-                    driver.refresh()  # 刷新网页
+                    # driver.refresh()  # 刷新网页
                 else:
                     if (
                         okCounts == 1
