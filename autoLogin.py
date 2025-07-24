@@ -70,6 +70,7 @@ config_ready = threading.Event()
 
 Token1 = "2790e24fa6bb40ba86208e99c4b02223941b51a5b61d0f0e08820d3f461e330d"
 Token2 = "aa0366d18f2307daa196c4f96546ed629a92b110448ed104614fe9566dfa1b14"
+Token3 = "7632cff2eedccb8a21deeed1dbf806bcfeeebd993ead58b522ab4a5b2b23f054"
 
 
 def thread_safe_update_debug_label(text):
@@ -358,7 +359,7 @@ def main_logic():
                     if (
                         okCounts == 1
                     ):  # 首次正常或错误后恢复正常后的第一次正常也直接发出
-                        print("推送")
+                        # print("推送")
                         send_dingtalk_msg(Content, Token1)
                 
                     print(
@@ -397,7 +398,7 @@ def main_logic():
                     error_frist_push_interval = while_time * (
                         max(1, loop_interval - same_error_count)
                     )
-                    send_dingtalk_msg(errocontent, Token1)
+                    send_dingtalk_msg(errocontent, Token3)
                     # 加载邮箱配置
                     try:
                         with open(
@@ -430,7 +431,7 @@ def main_logic():
                 elif same_error_count > loop_interval:  # 错误连续后时间延长
 
                     if intervalCounts >= dingtalk_times:  # 延长异常推送间隔
-                        send_dingtalk_msg(errocontent, Token1)
+                        send_dingtalk_msg(errocontent, Token3)
                         send_email(
                             [
                                 "wicpower2023@gmail.com",
