@@ -1,63 +1,91 @@
-[13576:25888:0724/163120.876:ERROR:net\base\network_change_notifier_win.cc:189] WSALookupServiceBegin failed with: 10108
-[13576:25888:0724/163121.212:INFO:components\enterprise\browser\controller\chrome_browser_cloud_management_controller.cc:202] No machine level policy manager exists.
-[16796:15320:0724/163121.678:ERROR:net\base\network_change_notifier_win.cc:189] WSALookupServiceBegin failed with: 10108
-[22008:23364:0724/163122.001:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 8
-[10044:27016:0724/163122.047:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 8
-[27728:23416:0724/163122.393:VERBOSE1:components\viz\service\main\viz_main_impl.cc:86] VizNullHypothesis is disabled (not a warning)
-[23748:21040:0724/163123.066:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 8
-[27508:23152:0724/163123.105:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 8
-[13576:25888:0724/163126.201:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[13576:25888:0724/163131.207:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[13576:25888:0724/163136.223:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[13576:9960:0724/163136.399:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
-[13576:25888:0724/163156.974:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163156.976:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163159.991:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163159.991:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163203.001:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163203.001:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163203.001:INFO:CONSOLE:0] "Uncaught (in promise) undefined", source: http://ems.hy-power.net:8114/dashboard/index (0)
-[13576:25888:0724/163203.002:INFO:CONSOLE:0] "Uncaught (in promise) undefined", source: http://ems.hy-power.net:8114/dashboard/index (0)
-[13576:25888:0724/163224.648:INFO:CONSOLE:52] "Uncaught InvalidStateError: Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.", source: http://ems.hy-power.net:8114/assets/useDraw-CdcHpf9y.js (52)
-[13576:9960:0724/163230.967:ERROR:google_apis\gcm\engine\registration_request.cc:274] Registration URL fetching failed.
-[16796:15320:0724/163233.688:WARNING:net\spdy\spdy_session.cc:2784] Received RST for invalid stream1
-[16796:15320:0724/163233.688:WARNING:net\spdy\spdy_session.cc:2784] Received RST for invalid stream1
-[13576:25888:0724/163236.336:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[13576:25888:0724/163236.367:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163236.368:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163239.370:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163239.370:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163241.345:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[13576:25888:0724/163242.372:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163242.373:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163242.373:INFO:CONSOLE:0] "Uncaught (in promise) undefined", source: http://ems.hy-power.net:8114/dashboard/index (0)
-[13576:25888:0724/163242.373:INFO:CONSOLE:0] "Uncaught (in promise) undefined", source: http://ems.hy-power.net:8114/dashboard/index (0)
-[13576:25888:0724/163251.357:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[13576:25888:0724/163256.370:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[13576:25888:0724/163301.378:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[13576:25888:0724/163303.705:INFO:CONSOLE:52] "Uncaught InvalidStateError: Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.", source: http://ems.hy-power.net:8114/assets/useDraw-CdcHpf9y.js (52)
-[13576:25888:0724/163306.392:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[13576:25888:0724/163311.398:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[13576:25888:0724/163315.998:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163315.999:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163316.404:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[21204:22892:0724/163322.724:VERBOSE1:components\viz\service\main\viz_main_impl.cc:86] VizNullHypothesis is disabled (not a warning)
-[13576:9960:0724/163330.913:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
-[13576:25888:0724/163336.430:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[13576:25888:0724/163341.446:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[13576:25888:0724/163430.045:INFO:CONSOLE:52] "Uncaught InvalidStateError: Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.", source: http://ems.hy-power.net:8114/assets/useDraw-CdcHpf9y.js (52)
-[13576:25888:0724/163441.549:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[13576:25888:0724/163446.559:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[13576:25888:0724/163505.956:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:9960:0724/163507.309:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
-[13576:25888:0724/163508.961:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163511.587:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[13576:25888:0724/163521.671:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163521.671:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163524.682:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163524.682:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
-[13576:25888:0724/163616.689:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[13576:25888:0724/163619.768:INFO:CONSOLE:52] "Uncaught InvalidStateError: Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.", source: http://ems.hy-power.net:8114/assets/useDraw-CdcHpf9y.js (52)
-[13576:25888:0724/163621.696:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[13576:25888:0724/163626.699:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
-[13576:25888:0724/163631.705:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27828:0724/221631.791:ERROR:net\base\network_change_notifier_win.cc:189] WSALookupServiceBegin failed with: 10108
+[17780:27828:0724/221632.075:INFO:components\enterprise\browser\controller\chrome_browser_cloud_management_controller.cc:202] No machine level policy manager exists.
+[5464:16116:0724/221632.267:ERROR:net\base\network_change_notifier_win.cc:189] WSALookupServiceBegin failed with: 10108
+[21888:24276:0724/221632.551:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 8
+[14208:18620:0724/221632.613:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 8
+[20832:14152:0724/221632.905:VERBOSE1:components\viz\service\main\viz_main_impl.cc:86] VizNullHypothesis is disabled (not a warning)
+[21280:15492:0724/221633.257:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 8
+[24736:17068:0724/221633.286:INFO:third_party\webrtc\rtc_base\cpu_info.cc:57] Available number of cores: 8
+[17780:27584:0724/221637.621:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[17780:27828:0724/221647.486:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/221650.502:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/221653.510:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/221653.511:INFO:CONSOLE:0] "Uncaught (in promise) undefined", source: http://ems.hy-power.net:8114/dashboard/index (0)
+[17780:27584:0724/221704.096:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[17780:27828:0724/221714.742:INFO:CONSOLE:52] "Uncaught InvalidStateError: Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.", source: http://ems.hy-power.net:8114/assets/useDraw-CdcHpf9y.js (52)
+[17780:27584:0724/221800.768:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[17780:27828:0724/221832.694:INFO:CONSOLE:52] "Uncaught InvalidStateError: Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.", source: http://ems.hy-power.net:8114/assets/useDraw-CdcHpf9y.js (52)
+[28252:27948:0724/221833.676:VERBOSE1:components\viz\service\main\viz_main_impl.cc:86] VizNullHypothesis is disabled (not a warning)
+[17780:27828:0724/221846.940:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/221846.941:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/221849.951:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/221849.952:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/221852.953:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/221852.953:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/221852.954:INFO:CONSOLE:0] "Uncaught (in promise) undefined", source: http://ems.hy-power.net:8114/dashboard/index (0)
+[17780:27828:0724/221852.954:INFO:CONSOLE:0] "Uncaught (in promise) undefined", source: http://ems.hy-power.net:8114/dashboard/index (0)
+[17780:27828:0724/221902.505:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27584:0724/221909.087:ERROR:google_apis\gcm\engine\connection_factory_impl.cc:483] ConnectionHandler failed with net error: -2
+[17780:27828:0724/221914.131:INFO:CONSOLE:52] "Uncaught InvalidStateError: Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.", source: http://ems.hy-power.net:8114/assets/useDraw-CdcHpf9y.js (52)
+[17780:27828:0724/221922.523:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27584:0724/221928.920:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[17780:27828:0724/221947.546:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27828:0724/222012.598:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27828:0724/222017.051:INFO:CONSOLE:52] "Uncaught InvalidStateError: Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.", source: http://ems.hy-power.net:8114/assets/useDraw-CdcHpf9y.js (52)
+[17780:27828:0724/222027.817:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27828:0724/222029.948:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222029.948:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222032.964:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222032.965:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222035.967:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222035.967:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222035.967:INFO:CONSOLE:0] "Uncaught (in promise) undefined", source: http://ems.hy-power.net:8114/dashboard/index (0)
+[17780:27828:0724/222035.967:INFO:CONSOLE:0] "Uncaught (in promise) undefined", source: http://ems.hy-power.net:8114/dashboard/index (0)
+[17780:27828:0724/222057.212:INFO:CONSOLE:52] "Uncaught InvalidStateError: Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.", source: http://ems.hy-power.net:8114/assets/useDraw-CdcHpf9y.js (52)
+[17780:27828:0724/222057.866:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27828:0724/222102.868:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27828:0724/222107.885:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27828:0724/222112.889:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27828:0724/222155.909:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222155.909:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222158.920:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222158.920:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222202.919:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222202.919:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222202.919:INFO:CONSOLE:0] "Uncaught (in promise) undefined", source: http://ems.hy-power.net:8114/dashboard/index (0)
+[17780:27828:0724/222202.919:INFO:CONSOLE:0] "Uncaught (in promise) undefined", source: http://ems.hy-power.net:8114/dashboard/index (0)
+[17780:27828:0724/222223.910:INFO:CONSOLE:52] "Uncaught InvalidStateError: Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.", source: http://ems.hy-power.net:8114/assets/useDraw-CdcHpf9y.js (52)
+[17780:27584:0724/222320.473:ERROR:google_apis\gcm\engine\registration_request.cc:291] Registration response error message: DEPRECATED_ENDPOINT
+[17780:27828:0724/222326.914:INFO:CONSOLE:52] "Uncaught InvalidStateError: Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.", source: http://ems.hy-power.net:8114/assets/useDraw-CdcHpf9y.js (52)
+[17780:27828:0724/222333.140:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27828:0724/222338.154:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27828:0724/222340.916:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222340.916:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222343.162:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27828:0724/222344.916:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222344.918:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222348.909:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222348.910:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222348.910:INFO:CONSOLE:0] "Uncaught (in promise) undefined", source: http://ems.hy-power.net:8114/dashboard/index (0)
+[17780:27828:0724/222348.910:INFO:CONSOLE:0] "Uncaught (in promise) undefined", source: http://ems.hy-power.net:8114/dashboard/index (0)
+[17780:27828:0724/222403.211:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27828:0724/222407.922:INFO:CONSOLE:52] "Uncaught InvalidStateError: Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.", source: http://ems.hy-power.net:8114/assets/useDraw-CdcHpf9y.js (52)
+[17780:27828:0724/222408.222:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27828:0724/222413.226:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27828:0724/222418.231:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27584:0724/222450.856:ERROR:google_apis\gcm\engine\connection_factory_impl.cc:483] ConnectionHandler failed with net error: -2
+[17780:27828:0724/222556.919:INFO:CONSOLE:52] "Uncaught InvalidStateError: Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.", source: http://ems.hy-power.net:8114/assets/useDraw-CdcHpf9y.js (52)
+[17780:27828:0724/222608.397:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27828:0724/222610.909:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222610.909:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222614.275:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222614.275:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222617.917:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222617.919:INFO:CONSOLE:1] "WebSocket 一直处于 CONNECTING 状态，可能已挂起，尝试重连", source: http://ems.hy-power.net:8114/assets/socket-Dxy7-Ioo.js (1)
+[17780:27828:0724/222617.940:INFO:CONSOLE:0] "Uncaught (in promise) undefined", source: http://ems.hy-power.net:8114/dashboard/index (0)
+[17780:27828:0724/222617.941:INFO:CONSOLE:0] "Uncaught (in promise) undefined", source: http://ems.hy-power.net:8114/dashboard/index (0)
+[17780:27828:0724/222637.911:INFO:CONSOLE:52] "Uncaught InvalidStateError: Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.", source: http://ems.hy-power.net:8114/assets/useDraw-CdcHpf9y.js (52)
+[17780:27828:0724/222648.503:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27828:0724/222718.516:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27828:0724/222723.526:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0
+[17780:27828:0724/222743.543:WARNING:chrome\browser\performance_manager\policies\page_discarding_helper.cc:137] Discarding multiple pages with target (kb): 0, discard_protected_tabs: 0

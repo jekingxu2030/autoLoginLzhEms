@@ -5,8 +5,8 @@
     },
     "timing": {
         "load_wait_time": 1,
-        "loop_interval": 3,
-        "dingtalk_times": 5
+        "loop_interval": 1,
+        "dingtalk_times": 1
     },
     "encryption": {
         "ws_token_key": "CC2345AE2335VBB32AFC4ADECA2243545435"
