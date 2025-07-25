@@ -10,9 +10,9 @@ from selenium import webdriver
 # 配置基础日志格式
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    filename='debug.log',
-    encoding='utf-8'
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    filename="debug.log",
+    encoding="utf-8",
 )
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -62,7 +62,9 @@ except FileNotFoundError:
     logging.error(f"错误：配置文件不存在: {os.path.abspath(config_path)}")
     config = None
 except json.JSONDecodeError:
-    logging.error(f"错误：配置文件格式不正确，无法解析JSON: {os.path.abspath(config_path)}")
+    logging.error(
+        f"错误：配置文件格式不正确，无法解析JSON: {os.path.abspath(config_path)}"
+    )
     config = None
 except PermissionError:
     logging.error(f"错误：没有权限读取配置文件: {os.path.abspath(config_path)}")
@@ -246,7 +248,6 @@ def main_logic():
         dingtalk_times = config["timing"][
             "dingtalk_times"
         ]  # 第三个时间  正常和不正常连续推送间隔次数
-   
 
         global driver
         options = webdriver.ChromeOptions()
@@ -318,13 +319,13 @@ def main_logic():
             # 记录结束时间
             end_time = time.time()
             # 计算耗时（秒）
-            elapsed_time2 = end_time - start_time
+            # elapsed_time2 = end_time - start_time
             print("WS检测状态：", status)
 
             if status == "✅ok":
                 same_error_count = 0  # 打断异常，重置异常计数  在连续错误三次或三次后连续错误会一直保持大于3，等待正常逻状态下归零
-                okCounts += 1
-
+                okCounts += 1    #正常加一
+                intervalCounts += 1  # 总判断次数加一
                 normal_push_interval = while_time * (
                     max(1, (dingtalk_times * 24) - intervalCounts)  # 循环时间*剩余次数
                 )
@@ -369,11 +370,12 @@ def main_logic():
                     ):  # 首次正常或错误后恢复正常后的第一次正常也直接发出
                         # print("推送")
                         send_dingtalk_msg(Content, Token3)
+
                     else:  # 既不是首次也不未达到长间隔
                         print(
                             f"✅ 当前为【正常状态】,距离下次推送间隔约 {normal_push_interval} 秒 ≈ {normal_push_interval / 60:.1f} 分钟"
                         )
-                        intervalCounts += 1
+                       
 
             elif status in ["❌empty", "❌no_msg", "❌no_ws", "❌error"]:
                 okCounts = 0
@@ -435,7 +437,7 @@ def main_logic():
 
                 elif (
                     same_error_count > loop_interval
-                    ):  # 错误次数大于设于最小间隔连续后时间延长
+                ):  # 错误次数大于设于最小间隔连续后时间延长
 
                     if intervalCounts >= dingtalk_times:  # 延长异常推送间隔
 
@@ -462,23 +464,24 @@ def main_logic():
                             f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统持续异常[{status}]。请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
                             from_addr="jekingxu@163.com",
                         )
-                        intervalCounts = (
-                            0  # 超过指定次数后 连续错误后又连续间隔错误次数后归零
-                        )
+                        # 超过指定次数后 连续错误后又连续间隔错误次数后归零
+                        intervalCounts = 0
                         # error_push_interval = while_time * (max(1, loop_interval - same_error_count))
                         print(
                             f"❗ 当前为【异常状态: {status}】，距离下一次连续错误推送约 {error_push_interval} 秒 ≈ {error_push_interval / 60:.1f} 分钟"
                         )
 
                     else:
-                        intervalCounts += 1
+                        intervalCounts += 1 #跳过就+1
 
                         print(
-                            f"第{same_error_count}次异常状态，错误次数>0>错误间隔次数<推送间隔"
+                            f"第{same_error_count}次异常状态，错误次数>0和错误首次间隔次数，但<连续错误间隔次数"
                         )
                 else:
                     intervalCounts += 1  # 跳过每次都加1
-                    print(f"第{same_error_count}次异常状态，错误次数>0<错误首次间隔次数和连续错误间隔次数")
+                    print(
+                        f"第{same_error_count}次异常状态，错误次数>0<错误首次间隔次数和连续错误间隔次数"
+                    )
 
             driver.refresh()  # 刷新网页
             time.sleep(15)
@@ -530,7 +533,7 @@ def main_logic():
             print(
                 f"\nload_wait_time={load_wait_time} , \nloop_interval={loop_interval},\ndingtalk_times={dingtalk_times},\nintervalCounts={intervalCounts},\nsame_error_count={same_error_count},\nAllRunTime={ elapsed_time1 + while_time}"
             )
-            
+
     except FileNotFoundError:
         print("错误：配置文件config.json不存在")
         return

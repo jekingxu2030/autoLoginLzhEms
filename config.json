@@ -10,5 +10,14 @@
     },
     "encryption": {
         "ws_token_key": "CC2345AE2335VBB32AFC4ADECA2243545435"
+    },
+    "tokens": {
+        "dingtalk_normal": "2790e24fa6bb40ba86208e99c4b02223941b51a5b61d0f0e08820d3f461e330d",
+        "dingtalk_warning": "aa0366d18f2307daa196c4f96546ed629a92b110448ed104614fe9566dfa1b14",
+        "dingtalk_critical": "7632cff2eedccb8a21deeed1dbf806bcfeeebd993ead58b522ab4a5b2b23f054"
+    },
+    "urls": {
+        "login_page": "http://ems.hy-power.net:8114/login",
+        "ems_id": "E6F7D5412A20"
     }
 }
