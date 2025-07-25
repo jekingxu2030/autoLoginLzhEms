@@ -291,7 +291,7 @@ def main_logic():
             current_time = time.time()  # 登录间隔
 
             # 检查是否超过23小时(82800秒)未重新登录
-            if current_time - last_login_time >= 23 * 3600:
+            if current_time - last_login_time >= 72 * 3600:
                 #  if current_time - last_login_time >= 23 * 3600:
                 print("🔄 已超过23小时，准备重新登录...")
                 thread_safe_update_debug_label(f"🔄登录已超过23小时，准备重新登录...")
