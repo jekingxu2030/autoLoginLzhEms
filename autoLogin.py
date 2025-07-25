@@ -477,11 +477,17 @@ def main_logic():
                         print(
                             f"第{same_error_count}次异常状态，错误次数>0和错误首次间隔次数，但<连续错误间隔次数"
                         )
+                        print(
+                            f"❗ 当前为【异常状态: {status}】，距离下一次错误推送约 {error_push_interval} 秒 ≈ {error_push_interval / 60:.1f} 分钟"
+                        )
                 else:
                     intervalCounts += 1  # 跳过每次都加1
                     print(
                         f"第{same_error_count}次异常状态，错误次数>0<错误首次间隔次数和连续错误间隔次数"
                     )
+                    print(
+                            f"❗ 当前为【异常状态: {status}】，距离下一次错误推送约 {error_push_interval} 秒 ≈ {error_push_interval / 60:.1f} 分钟"
+                        )
 
             driver.refresh()  # 刷新网页
             time.sleep(15)
