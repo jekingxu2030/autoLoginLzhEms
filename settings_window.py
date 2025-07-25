@@ -114,7 +114,7 @@ class SettingsWindow:
         self.wait_entry.grid(row=4, column=1, sticky="w")
         self.wait_entry.insert(0, self.cfg["timing"]["load_wait_time"])
 
-        ttk.Label(m, text="循环间隔(次):").grid(row=5, column=0, sticky="e", pady=3)
+        ttk.Label(m, text="短期循环间隔(次):").grid(row=5, column=0, sticky="e", pady=3)
         self.loop_entry = ttk.Entry(m, width=10)
         self.loop_entry.grid(row=5, column=1, sticky="w")
         self.loop_entry.insert(0, self.cfg["timing"]["loop_interval"])
@@ -134,7 +134,7 @@ class SettingsWindow:
         ttk.Label(m, text="钉钉推送", font=("微软雅黑", 12, "bold")).grid(
             row=8, column=0, columnspan=2, pady=(10, 0), sticky="w"
         )
-        ttk.Label(m, text="推送间隔次数:").grid(row=9, column=0, sticky="e", pady=3)
+        ttk.Label(m, text="长期推送间隔次数:").grid(row=9, column=0, sticky="e", pady=3)
         self.dt_times_entry = ttk.Entry(m, width=10)
         self.dt_times_entry.grid(row=9, column=1, sticky="w")
         self.dt_times_entry.insert(0, self.cfg["timing"]["dingtalk_times"])

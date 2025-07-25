@@ -3,8 +3,17 @@ import json
 import os
 import time
 import threading
+import logging
 from tokenize import Token
 from selenium import webdriver
+
+# 配置基础日志格式
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    filename='debug.log',
+    encoding='utf-8'
+)
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -44,16 +53,22 @@ config = None
 
 # 加载配置文件
 try:
-    with open(config_path, "r", encoding="utf-8") as f:
+    # 使用绝对路径确保文件位置正确
+    abs_config_path = os.path.abspath(config_path)
+    with open(abs_config_path, "r", encoding="utf-8") as f:
         config = json.load(f)
+    logging.info(f"成功加载配置文件: {abs_config_path}")
 except FileNotFoundError:
-    print("错误：配置文件config.json不存在")
+    logging.error(f"错误：配置文件不存在: {os.path.abspath(config_path)}")
     config = None
 except json.JSONDecodeError:
-    print("错误：配置文件格式不正确，无法解析JSON")
+    logging.error(f"错误：配置文件格式不正确，无法解析JSON: {os.path.abspath(config_path)}")
+    config = None
+except PermissionError:
+    logging.error(f"错误：没有权限读取配置文件: {os.path.abspath(config_path)}")
     config = None
 except Exception as e:
-    print(f"加载配置文件时发生错误: {e}")
+    logging.error(f"加载配置文件时发生错误: {e}")
     config = None
 
 # === 状态 ===
@@ -215,6 +230,8 @@ def login(driver, username, password, load_wait_time):
 def main_logic():
     try:
         # 初始化配置字典
+        # Mian方法执行记录开始时间
+        start_time = time.time()
         config = {}
         # 加载配置文件
         with open(config_path, "r", encoding="utf-8") as f:
@@ -229,8 +246,7 @@ def main_logic():
         dingtalk_times = config["timing"][
             "dingtalk_times"
         ]  # 第三个时间  正常和不正常连续推送间隔次数
-        # email_times = config["timing"]["email_times"]  #第四个时间
-        # email_interval = config["timing"]["email_interval"]  #第五个时间
+   
 
         global driver
         options = webdriver.ChromeOptions()
@@ -255,8 +271,6 @@ def main_logic():
         total_cycle_count = 0
         checkCounts = 0
 
-        # 记录开始时间
-        start_time = time.time()
         # 在主程序启动时调用 菜单请求
         menu_data = fetch_menu_once()
         # 记录结束时间
@@ -265,12 +279,15 @@ def main_logic():
         elapsed_time1 = end_time - start_time
 
         okCounts = 0
-        while_time = 0
+        while_time = 0  # 循环次数
         while not stop_event.is_set():
+            # ws_url = get_ws_url(driver)
 
-            while_time_start = time.time()
+            # 原代码包含多余的config参数，已注释
 
-            current_time = time.time()
+            while_time_start = time.time()  # 主循环间隔
+
+            current_time = time.time()  # 登录间隔
 
             # 检查是否超过23小时(82800秒)未重新登录
             if current_time - last_login_time >= 23 * 3600:
@@ -292,32 +309,24 @@ def main_logic():
             driver.execute_script("window.dispatchEvent(new Event('mousemove'))")
             time.sleep(load_wait_time + 5)
 
-            # ws_url = get_ws_url(driver)
-            # 记录开始时间
-            start_time = time.time()
-            # 原代码包含多余的config参数，已注释
-
-            # 修改后移除config参数
+            # 爬取记录开始时间
+            start_time = time.time()  # 内容检测开始时间
             ws_monitor = EmsWsMonitor(
                 driver, timeout=load_wait_time + 15, menu_data=menu_data
             )
             status = ws_monitor.start()
-
             # 记录结束时间
             end_time = time.time()
             # 计算耗时（秒）
             elapsed_time2 = end_time - start_time
             print("WS检测状态：", status)
-            print(
-                f"\nload_wait_time={load_wait_time} , \nloop_interval={loop_interval},\ndingtalk_times={dingtalk_times},\nintervalCounts={intervalCounts},\nsame_error_count={same_error_count},\nwsRunTime={ elapsed_time1 + elapsed_time2}"
-            )
 
             if status == "✅ok":
                 same_error_count = 0  # 打断异常，重置异常计数  在连续错误三次或三次后连续错误会一直保持大于3，等待正常逻状态下归零
                 okCounts += 1
-            
+
                 normal_push_interval = while_time * (
-                    max(1, (dingtalk_times * 24) - intervalCounts)
+                    max(1, (dingtalk_times * 24) - intervalCounts)  # 循环时间*剩余次数
                 )
                 Content = (
                     f"Event: BY-P01-EMS_StatusCheck\n"
@@ -327,9 +336,8 @@ def main_logic():
                     f"WebSiteState: Accessible！\n"
                     f"Time：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                 )
-                if intervalCounts >= dingtalk_times * 24:
-
-                    send_dingtalk_msg(Content, Token1)
+                if intervalCounts >= dingtalk_times * 24:  # 连续推送
+                    send_dingtalk_msg(Content, Token3)
                     # 加载邮箱配置
                     try:
                         with open(
@@ -360,12 +368,12 @@ def main_logic():
                         okCounts == 1
                     ):  # 首次正常或错误后恢复正常后的第一次正常也直接发出
                         # print("推送")
-                        send_dingtalk_msg(Content, Token1)
-                
-                    print(
-                        f"✅ 当前为【正常状态】,距离下次推送间隔约 {normal_push_interval} 秒 ≈ {normal_push_interval / 60:.1f} 分钟"
-                    )
-                    intervalCounts += 1
+                        send_dingtalk_msg(Content, Token3)
+                    else:  # 既不是首次也不未达到长间隔
+                        print(
+                            f"✅ 当前为【正常状态】,距离下次推送间隔约 {normal_push_interval} 秒 ≈ {normal_push_interval / 60:.1f} 分钟"
+                        )
+                        intervalCounts += 1
 
             elif status in ["❌empty", "❌no_msg", "❌no_ws", "❌error"]:
                 okCounts = 0
@@ -389,15 +397,12 @@ def main_logic():
                     f"WebSiteState: {web_state_desc}\n"
                     f"Time：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                 )
-
                 error_push_interval = while_time * (
                     max(1, loop_interval - same_error_count)
                 )
-                if same_error_count == loop_interval:
 
-                    error_frist_push_interval = while_time * (
-                        max(1, loop_interval - same_error_count)
-                    )
+                if same_error_count == loop_interval:  # 错误次数等于设定错误等待间隔
+                    # error_frist_push_interval = while_time * (max(1, loop_interval - same_error_count))
                     send_dingtalk_msg(errocontent, Token3)
                     # 加载邮箱配置
                     try:
@@ -422,28 +427,45 @@ def main_logic():
                         f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统出现异常状态：{status}。请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
                         from_addr=email_config["from_addr"],
                     )
-                    # same_error_count += 1
+
                     intervalCounts = 0
                     print(
-                        f"❗ 当前为【异常状态: {status}】，距离下轮首错推送时间：{error_frist_push_interval / 60:.1f} 分钟"
+                        f"❗ 当前为【异常状态: {status}】，距离下轮首错推送时间至少：{error_push_interval / 60:.1f} 分钟"
                     )
 
-                elif same_error_count > loop_interval:  # 错误连续后时间延长
+                elif (
+                    same_error_count > loop_interval
+                    ):  # 错误次数大于设于最小间隔连续后时间延长
 
                     if intervalCounts >= dingtalk_times:  # 延长异常推送间隔
+
                         send_dingtalk_msg(errocontent, Token3)
+                        try:
+                            with open(
+                                os.path.join(
+                                    os.path.dirname(os.path.abspath(__file__)),
+                                    "email_config.json",
+                                ),
+                                "r",
+                                encoding="utf-8",
+                            ) as f:
+                                email_config = json.load(f)
+                        except FileNotFoundError:
+                            logging.error("邮箱配置文件不存在: email_config.json")
+                            raise
+                        except json.JSONDecodeError as e:
+                            logging.error(f"邮箱配置文件格式错误: {str(e)}")
+                            raise
                         send_email(
-                            [
-                                "wicpower2023@gmail.com",
-                                "531556397@qq.com",
-                                "marcin.lee@wic-power.com" "ng.support@baiyiled.nl",
-                            ],
+                            email_config["error_recipients"],
                             "【EMS Events】",
                             f"《警告!》\n\n尊敬的用户您好！我们检测到您的215P01项目EMS后台系统持续异常[{status}]。请您尽快检查和处理!谢谢!\nCheckUrl: {driver.current_url}\n\n\n事件时间：{datetime.now()}",
                             from_addr="jekingxu@163.com",
                         )
-                        intervalCounts = 0  # 超过三次连续错误后又连续间隔错误次数后归零
-
+                        intervalCounts = (
+                            0  # 超过指定次数后 连续错误后又连续间隔错误次数后归零
+                        )
+                        # error_push_interval = while_time * (max(1, loop_interval - same_error_count))
                         print(
                             f"❗ 当前为【异常状态: {status}】，距离下一次连续错误推送约 {error_push_interval} 秒 ≈ {error_push_interval / 60:.1f} 分钟"
                         )
@@ -456,16 +478,16 @@ def main_logic():
                         )
                 else:
                     intervalCounts += 1  # 跳过每次都加1
-                    print(f"第{same_error_count}次异常状态，错误次数>0<错误间隔次数")
+                    print(f"第{same_error_count}次异常状态，错误次数>0<错误首次间隔次数和连续错误间隔次数")
+
             driver.refresh()  # 刷新网页
             time.sleep(15)
 
             # 清理缓存与内存
             gc.collect()
 
-            time.sleep(load_wait_time)
+            time.sleep(load_wait_time + 5)
 
-            time.sleep(load_wait_time)
             checkCounts += 1
             # print(f"\n已经检测第{checkCounts}轮")
 
@@ -505,7 +527,10 @@ def main_logic():
                     ]  # 第三个时间  正常和不正常连续推送间隔次数
             except Exception as e:
                 print(f"重新加载配置文件失败: {e}")
-
+            print(
+                f"\nload_wait_time={load_wait_time} , \nloop_interval={loop_interval},\ndingtalk_times={dingtalk_times},\nintervalCounts={intervalCounts},\nsame_error_count={same_error_count},\nAllRunTime={ elapsed_time1 + while_time}"
+            )
+            
     except FileNotFoundError:
         print("错误：配置文件config.json不存在")
         return
@@ -518,7 +543,7 @@ def main_logic():
     except Exception as e:
         print("主线程逻辑异常:", e)
         thread_safe_update_debug_label(f"❌主逻辑异常" + str(e))
-        print(f"加载配置文件时发生错误: {e}")
+        print(f"加载配置文件时发生错误2: {e}")
         return
     finally:
         if driver:
