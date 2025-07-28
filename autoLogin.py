@@ -375,9 +375,8 @@ def main_logic():
                         print(
                             f"✅ 当前为【正常状态】,距离下次推送间隔约 {normal_push_interval} 秒 ≈ {normal_push_interval / 60:.1f} 分钟"
                         )
-                       
 
-            elif status in ["❌empty", "❌no_msg", "❌no_ws", "❌error"]:
+            elif status in ["❌empty", "❌no_msg", "❌no_ws", "❌error","❌timeout"]:
                 okCounts = 0
                 same_error_count += 1
                 # 根据状态自适应输出网站状态描述
@@ -386,9 +385,11 @@ def main_logic():
                 elif status == "❌no_msg":
                     web_state_desc = "WebSocket连接正常，但无有效数据"
                 elif status == "❌no_ws":
-                    web_state_desc = "⚠️ 无法建立 WebSocket 连接"
+                    web_state_desc = "❌ 无法建立 WebSocket 连接"
                 elif status == "❌error":
                     web_state_desc = "❌ 发生未知错误，页面可能无法访问"
+                elif status == "❌timeout":
+                    web_state_desc = "❌ WebSocket 连接超时"
                 else:
                     web_state_desc = "❓ 不明状态异常"
                 errocontent = (
@@ -490,6 +491,7 @@ def main_logic():
                         )
 
             driver.refresh()  # 刷新网页
+            print(f"刷新网页...")
             time.sleep(15)
 
             # 清理缓存与内存
