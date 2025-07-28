@@ -313,7 +313,7 @@ def main_logic():
             # 爬取记录开始时间
             start_time = time.time()  # 内容检测开始时间
             ws_monitor = EmsWsMonitor(
-                driver, timeout=load_wait_time + 15, menu_data=menu_data
+                driver, timeout=load_wait_time + 25, menu_data=menu_data
             )
             status = ws_monitor.start()
             # 记录结束时间
