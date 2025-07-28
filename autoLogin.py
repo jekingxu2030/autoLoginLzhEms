@@ -219,14 +219,31 @@ def login(driver, username, password, load_wait_time):
     WebDriverWait(driver, 10).until(  # 算3秒平均消耗
         EC.element_to_be_clickable((By.CSS_SELECTOR, "form.login-form button"))
     ).click()
-    print("\n✅提交了登录表单")
+    print("\n✅提交登录成功")
 
     time.sleep(load_wait_time + 5)
-    thread_safe_update_debug_label("登录成功，开始探测内容...")
+    # thread_safe_update_debug_label("登录成功，开始探测内容...")
+    # 验证登录是否成功并跳转到主页面
+    try:
+        # 等待页面跳转到主页面（检查URL是否包含主页标识）
+        WebDriverWait(driver, 15).until(
+            lambda d: "login" not in d.current_url.lower() and 
+                     d.current_url != "http://ems.hy-power.net:8114/login"
+        )
+        print(f"\n✅登录成功，已跳转到: {driver.current_url}")
+        thread_safe_update_debug_label("登录成功，开始探测内容...")
+    except:
+        # 如果还在登录页面，可能是登录失败
+        current_url = driver.current_url
+        if "login" in current_url.lower():
+            print("\n❌登录失败，仍在登录页面")
+            thread_safe_update_debug_label("❌登录失败，请检查用户名密码")
+            raise Exception("登录失败，仍在登录页面")
+
     # 稍微晚点读取cock
     save_browser_cache_to_config(driver)
 
-    ws_url = get_ws_url(driver)  # 保持WS字套
+    ws_url = get_ws_url(driver)  # 保存WS字套
 
 
 def main_logic():
@@ -243,7 +260,7 @@ def main_logic():
         password = config["account"]["password"]
         load_wait_time = config["timing"]["load_wait_time"]  # 第一个加载等待时间
         loop_interval = config["timing"][
-            "loop_interval"
+            "loop_interval"  
         ]  # 第二个时间  首次错误等待次数
         dingtalk_times = config["timing"][
             "dingtalk_times"
@@ -251,7 +268,16 @@ def main_logic():
 
         global driver
         options = webdriver.ChromeOptions()
+        options.add_argument("--disable-gcm-registration")  # 阻止 GCM 注册尝试
         options.add_argument("--start-maximized")
+        options.add_argument("--disable-extensions")
+        options.add_argument("--disable-plugins")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--disable-background-timer-throttling")
+        options.add_argument("--disable-backgrounding-occluded-windows")
+        options.add_argument("--disable-renderer-backgrounding")
         options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
         # 添加唯一用户数据目录避免冲突
         user_data_dir = os.path.join(
@@ -264,13 +290,13 @@ def main_logic():
         # 登录
         login(driver, username, password, load_wait_time)
         last_login_time = time.time()  # 记录初始登录时间
-        time.sleep(load_wait_time + 5)
+        time.sleep(load_wait_time + 15)
 
         # 状态计数变量
-        same_error_count = 0
-        intervalCounts = 0
-        total_cycle_count = 0
-        checkCounts = 0
+        same_error_count = 0  # 连续错误次数
+        intervalCounts = 0  # 单次连续循环次数
+        total_cycle_count = 0  # 总循环次数
+        checkCounts = 0 # 总判断次数
 
         # 在主程序启动时调用 菜单请求
         menu_data = fetch_menu_once()
@@ -280,7 +306,7 @@ def main_logic():
         elapsed_time1 = end_time - start_time
 
         okCounts = 0
-        while_time = 0  # 循环次数
+        while_time = 0  # 循环一次的时间
         while not stop_event.is_set():
             # ws_url = get_ws_url(driver)
 
@@ -401,7 +427,7 @@ def main_logic():
                     f"Time：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                 )
                 error_push_interval = while_time * (
-                    max(1, loop_interval - same_error_count)
+                    max(1, loop_interval - same_error_count) #设定首次错误减去已错误次数
                 )
 
                 if same_error_count == loop_interval:  # 错误次数等于设定错误等待间隔
@@ -433,7 +459,7 @@ def main_logic():
 
                     intervalCounts = 0
                     print(
-                        f"❗ 当前为【异常状态: {status}】，距离下轮首错推送时间至少：{error_push_interval / 60:.1f} 分钟"
+                        f"❗ 当前为【异常状态: {status}】，距离下轮首错推送时间至少：{(error_push_interval*dingtalk_times) / 60:.1f} 分钟"
                     )
 
                 elif (
@@ -468,9 +494,11 @@ def main_logic():
                         # 超过指定次数后 连续错误后又连续间隔错误次数后归零
                         intervalCounts = 0
                         # error_push_interval = while_time * (max(1, loop_interval - same_error_count))
+                        #前几次时间最短
                         print(
                             f"❗ 当前为【异常状态: {status}】，距离下一次连续错误推送约 {error_push_interval} 秒 ≈ {error_push_interval / 60:.1f} 分钟"
                         )
+                        
 
                     else:
                         intervalCounts += 1 #跳过就+1
@@ -516,7 +544,7 @@ def main_logic():
 
                     # 这里要重新执行登录操作（填写用户名、密码、验证码等）
             else:
-                print(f"\n已循环{total_cycle_count}次")
+                print(f"\n已累积循环{total_cycle_count}次")
 
             while_time_end = time.time()
             while_time = while_time_end - while_time_start
@@ -584,6 +612,15 @@ def restart_browser(username, password, load_wait_time):
     kill_existing_processes()
     options = webdriver.ChromeOptions()
     options.add_argument("--start-maximized")
+    options.add_argument("--disable-gcm-registration")  # 阻止 GCM 注册尝试
+    options.add_argument("--disable-extensions")
+    options.add_argument("--disable-plugins")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--disable-background-timer-throttling")
+    options.add_argument("--disable-backgrounding-occluded-windows")
+    options.add_argument("--disable-renderer-backgrounding")
     options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
     # 使用相同的用户数据目录
     user_data_dir = os.path.join(
@@ -595,8 +632,7 @@ def restart_browser(username, password, load_wait_time):
     login(driver, username, password, load_wait_time)
     time.sleep(load_wait_time + load_wait_time + 5)
 
-
-# ==============================================
+# ==============================================重启浏览器结束
 
 
 # === 设置窗口线程 ===
