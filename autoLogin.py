@@ -84,7 +84,7 @@ settings_window = None
 stop_event = threading.Event()
 config_ready = threading.Event()
 # ng.support@baiyiled.nl
-
+loginOk=False
 Token1 = "2790e24fa6bb40ba86208e99c4b02223941b51a5b61d0f0e08820d3f461e330d"
 Token2 = "aa0366d18f2307daa196c4f96546ed629a92b110448ed104614fe9566dfa1b14"
 Token3 = "7632cff2eedccb8a21deeed1dbf806bcfeeebd993ead58b522ab4a5b2b23f054"
@@ -190,7 +190,7 @@ def save_browser_cache_to_config(driver):
 # ==============主线程2.0=======================
 # === 主执行函数（登录 + 探测） ===
 def login(driver, username, password, load_wait_time):
-
+    global loginOk
     driver.get("http://ems.hy-power.net:8114/login")
     thread_safe_update_debug_label("请求网页中...")
     time.sleep(load_wait_time + 5)
@@ -226,12 +226,13 @@ def login(driver, username, password, load_wait_time):
     # 验证登录是否成功并跳转到主页面
     try:
         # 等待页面跳转到主页面（检查URL是否包含主页标识）
-        WebDriverWait(driver, 15).until(
+        WebDriverWait(driver, 20).until(
             lambda d: "login" not in d.current_url.lower() and 
                      d.current_url != "http://ems.hy-power.net:8114/login"
         )
         print(f"\n✅登录成功，已跳转到: {driver.current_url}")
         thread_safe_update_debug_label("登录成功，开始探测内容...")
+        loginOk=True
     except:
         # 如果还在登录页面，可能是登录失败
         current_url = driver.current_url
@@ -266,7 +267,7 @@ def main_logic():
             "dingtalk_times"
         ]  # 第三个时间  正常和不正常连续推送间隔次数
 
-        global driver
+        global driver ,loginOk
         options = webdriver.ChromeOptions()
         options.add_argument("--disable-gcm-registration")  # 阻止 GCM 注册尝试
         options.add_argument("--start-maximized")
@@ -309,12 +310,17 @@ def main_logic():
         while_time = 0  # 循环一次的时间
         while not stop_event.is_set():
             # ws_url = get_ws_url(driver)
-
+            while_time_start = time.time()  # 主循环间隔
+            current_time = time.time()  # 登录间隔
+            
+            if  loginOk:
+              print("登录有效！")
+            else:  
+                login(driver, username, password, load_wait_time)
+                time.sleep(load_wait_time * 2 + 10)
             # 原代码包含多余的config参数，已注释
 
-            while_time_start = time.time()  # 主循环间隔
-
-            current_time = time.time()  # 登录间隔
+          
 
             # 检查是否超过23小时(82800秒)未重新登录
             if current_time - last_login_time >= 72 * 3600:
@@ -334,7 +340,7 @@ def main_logic():
             # 模拟鼠标动作
             driver.execute_script("window.scrollBy(0, 10);")
             driver.execute_script("window.dispatchEvent(new Event('mousemove'))")
-            time.sleep(load_wait_time + 5)
+            time.sleep(5)
 
             # 爬取记录开始时间
             start_time = time.time()  # 内容检测开始时间
@@ -390,6 +396,7 @@ def main_logic():
                     )
                     intervalCounts = 0
                     # driver.refresh()  # 刷新网页
+                    time.sleep(1)
                 else:
                     if (
                         okCounts == 1
@@ -494,11 +501,10 @@ def main_logic():
                         # 超过指定次数后 连续错误后又连续间隔错误次数后归零
                         intervalCounts = 0
                         # error_push_interval = while_time * (max(1, loop_interval - same_error_count))
-                        #前几次时间最短
+                        # 前几次时间最短
                         print(
                             f"❗ 当前为【异常状态: {status}】，距离下一次连续错误推送约 {error_push_interval} 秒 ≈ {error_push_interval / 60:.1f} 分钟"
                         )
-                        
 
                     else:
                         intervalCounts += 1 #跳过就+1
@@ -596,14 +602,16 @@ def main_logic():
             except Exception as e:
                 print(f"关闭浏览器时出错: {e}")
                 thread_safe_update_debug_label(f"❌关闭浏览器时出错: {e}")
+                loginOk = False
 
 
 # ==============================================
 # 重启函数
 def restart_browser(username, password, load_wait_time):
-    global driver
+    global driver, loginOk
     try:
         driver.quit()
+        loginOk = False
         time.sleep(5)
     except Exception:
         pass
@@ -637,16 +645,18 @@ def restart_browser(username, password, load_wait_time):
 
 # === 设置窗口线程 ===
 def run_settings():
-    global settings_window
+    global settings_window  ,loginOk
     root = tk.Tk()
 
     def on_closing():
         # /*******  88517a0e-ce2f-486d-b6d6-1ecd6e20a7f5  *******/
+        global loginOk
         stop_event.set()
         running_event.clear()
         if driver:
             try:
                 driver.quit()
+                loginOk = False
                 time.sleep(2)  # 增加等待时间
                 if hasattr(driver, "service") and driver.service.process:
                     driver.service.process.kill()  # 使用更强制的方式终止进程
