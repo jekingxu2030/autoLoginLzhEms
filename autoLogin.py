@@ -6,6 +6,7 @@ import threading
 import logging
 from tokenize import Token
 from selenium import webdriver
+from page_status_checker import PageStatusChecker  # 导入页面状态检查器
 
 # 配置基础日志格式
 logging.basicConfig(
@@ -84,7 +85,7 @@ settings_window = None
 stop_event = threading.Event()
 config_ready = threading.Event()
 # ng.support@baiyiled.nl
-loginOk=False
+loginOk = False
 Token1 = "2790e24fa6bb40ba86208e99c4b02223941b51a5b61d0f0e08820d3f461e330d"
 Token2 = "aa0366d18f2307daa196c4f96546ed629a92b110448ed104614fe9566dfa1b14"
 Token3 = "7632cff2eedccb8a21deeed1dbf806bcfeeebd993ead58b522ab4a5b2b23f054"
@@ -189,8 +190,47 @@ def save_browser_cache_to_config(driver):
 
 # ==============主线程2.0=======================
 # === 主执行函数（登录 + 探测） ===
-def login(driver, username, password, load_wait_time):
-    global loginOk
+def login(   username, password, load_wait_time ,existing_driver=None):
+    """
+    登录函数，负责创建或使用现有浏览器实例进行登录
+    
+    参数:
+    username -- 用户名
+    password -- 密码
+    load_wait_time -- 加载等待时间
+    existing_driver -- 可选的现有浏览器驱动实例
+    
+    返回:
+    driver -- 浏览器驱动实例
+    """
+    global loginOk, driver
+    
+    # 如果没有提供现有driver，则创建新的
+    if existing_driver is None:
+        logging.info("创建新的浏览器实例...")
+        options = webdriver.ChromeOptions()
+        options.add_argument("--disable-gcm-registration")  # 阻止 GCM 注册尝试
+        options.add_argument("--start-maximized")
+        options.add_argument("--disable-extensions")
+        options.add_argument("--disable-plugins")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--disable-background-timer-throttling")
+        options.add_argument("--disable-backgrounding-occluded-windows")
+        options.add_argument("--disable-renderer-backgrounding")
+        options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
+        # 使用唯一用户数据目录避免冲突
+        user_data_dir = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "chrome_user_data"
+        )
+        os.makedirs(user_data_dir, exist_ok=True)
+        options.add_argument(f"--user-data-dir={user_data_dir}")
+        driver = webdriver.Chrome(options=options)
+    else:
+        logging.info("使用现有浏览器实例...")
+        driver = existing_driver
+    
     driver.get("http://ems.hy-power.net:8114/login")
     thread_safe_update_debug_label("请求网页中...")
     time.sleep(load_wait_time + 5)
@@ -227,12 +267,12 @@ def login(driver, username, password, load_wait_time):
     try:
         # 等待页面跳转到主页面（检查URL是否包含主页标识）
         WebDriverWait(driver, 20).until(
-            lambda d: "login" not in d.current_url.lower() and 
-                     d.current_url != "http://ems.hy-power.net:8114/login"
+            lambda d: "login" not in d.current_url.lower()
+            and d.current_url != "http://ems.hy-power.net:8114/login"
         )
         print(f"\n✅登录成功，已跳转到: {driver.current_url}")
         thread_safe_update_debug_label("登录成功，开始探测内容...")
-        loginOk=True
+        loginOk = True
     except:
         # 如果还在登录页面，可能是登录失败
         current_url = driver.current_url
@@ -245,9 +285,12 @@ def login(driver, username, password, load_wait_time):
     save_browser_cache_to_config(driver)
 
     ws_url = get_ws_url(driver)  # 保存WS字套
+    
+    return driver  # 返回浏览器驱动实例
 
 
 def main_logic():
+    global driver  # 声明使用全局变量driver
     try:
         # 初始化配置字典
         # Mian方法执行记录开始时间
@@ -261,13 +304,13 @@ def main_logic():
         password = config["account"]["password"]
         load_wait_time = config["timing"]["load_wait_time"]  # 第一个加载等待时间
         loop_interval = config["timing"][
-            "loop_interval"  
+            "loop_interval"
         ]  # 第二个时间  首次错误等待次数
         dingtalk_times = config["timing"][
             "dingtalk_times"
         ]  # 第三个时间  正常和不正常连续推送间隔次数
 
-        global driver ,loginOk
+        global driver, loginOk
         options = webdriver.ChromeOptions()
         options.add_argument("--disable-gcm-registration")  # 阻止 GCM 注册尝试
         options.add_argument("--start-maximized")
@@ -289,7 +332,7 @@ def main_logic():
         driver = webdriver.Chrome(options=options)
 
         # 登录
-        login(driver, username, password, load_wait_time)
+        driver=   login( username, password, load_wait_time,driver)
         last_login_time = time.time()  # 记录初始登录时间
         time.sleep(load_wait_time + 15)
 
@@ -297,7 +340,7 @@ def main_logic():
         same_error_count = 0  # 连续错误次数
         intervalCounts = 0  # 单次连续循环次数
         total_cycle_count = 0  # 总循环次数
-        checkCounts = 0 # 总判断次数
+        checkCounts = 0  # 总判断次数
 
         # 在主程序启动时调用 菜单请求
         menu_data = fetch_menu_once()
@@ -312,18 +355,16 @@ def main_logic():
             # ws_url = get_ws_url(driver)
             while_time_start = time.time()  # 主循环间隔
             current_time = time.time()  # 登录间隔
-            
-            if  loginOk:
-              print("登录有效！")
-            else:  
-                login(driver, username, password, load_wait_time)
+
+            if loginOk:
+                print("登录有效！")
+            else:
+                driver=login( username, password, load_wait_time,driver)
                 time.sleep(load_wait_time * 2 + 10)
             # 原代码包含多余的config参数，已注释
 
-          
-
             # 检查是否超过23小时(82800秒)未重新登录
-            if current_time - last_login_time >= 72 * 3600:
+            if current_time - last_login_time >= 22 * 3600:
                 #  if current_time - last_login_time >= 23 * 3600:
                 print("🔄 已超过23小时，准备重新登录...")
                 thread_safe_update_debug_label(f"🔄登录已超过23小时，准备重新登录...")
@@ -356,7 +397,7 @@ def main_logic():
 
             if status == "✅ok":
                 same_error_count = 0  # 打断异常，重置异常计数  在连续错误三次或三次后连续错误会一直保持大于3，等待正常逻状态下归零
-                okCounts += 1    #正常加一
+                okCounts += 1  # 正常加一
                 intervalCounts += 1  # 总判断次数加一
                 normal_push_interval = while_time * (
                     max(1, (dingtalk_times * 24) - intervalCounts)  # 循环时间*剩余次数
@@ -409,7 +450,7 @@ def main_logic():
                             f"✅ 当前为【正常状态】,距离下次推送间隔约 {normal_push_interval} 秒 ≈ {normal_push_interval / 60:.1f} 分钟"
                         )
 
-            elif status in ["❌empty", "❌no_msg", "❌no_ws", "❌error","❌timeout"]:
+            elif status in ["❌empty", "❌no_msg", "❌no_ws", "❌error", "❌timeout"]:
                 okCounts = 0
                 same_error_count += 1
                 # 根据状态自适应输出网站状态描述
@@ -434,7 +475,9 @@ def main_logic():
                     f"Time：{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
                 )
                 error_push_interval = while_time * (
-                    max(1, loop_interval - same_error_count) #设定首次错误减去已错误次数
+                    max(
+                        1, loop_interval - same_error_count
+                    )  # 设定首次错误减去已错误次数
                 )
 
                 if same_error_count == loop_interval:  # 错误次数等于设定错误等待间隔
@@ -507,7 +550,7 @@ def main_logic():
                         )
 
                     else:
-                        intervalCounts += 1 #跳过就+1
+                        intervalCounts += 1  # 跳过就+1
 
                         print(
                             f"第{same_error_count}次异常状态，错误次数>0和错误首次间隔次数，但<连续错误间隔次数"
@@ -521,12 +564,24 @@ def main_logic():
                         f"第{same_error_count}次异常状态，错误次数>0<错误首次间隔次数和连续错误间隔次数"
                     )
                     print(
-                            f"❗ 当前为【异常状态: {status}】，距离下一次错误推送约 {error_push_interval} 秒 ≈ {error_push_interval / 60:.1f} 分钟"
-                        )
+                        f"❗ 当前为【异常状态: {status}】，距离下一次错误推送约 {error_push_interval} 秒 ≈ {error_push_interval / 60:.1f} 分钟"
+                    )
 
             driver.refresh()  # 刷新网页
             print(f"刷新网页...")
-            time.sleep(15)
+
+            # 使用页面状态检查器检查是否出现登录页面
+            page_checker = PageStatusChecker(driver)
+            time.sleep(5)
+            # 定义重新登录的函数（需要根据实际登录逻辑实现）
+            # 检查是否出现登录页面，返回状态
+            is_logged_out = page_checker.is_login_page_present()
+            time.sleep(10)
+            if is_logged_out:
+                print("⚠️ 系统当前状态：掉线")
+                # 可以在这里添加掉线后的处理逻辑，如记录日志或发送通知
+            else:
+                print("✅ 系统当前状态：已登录")
 
             # 清理缓存与内存
             gc.collect()
@@ -611,41 +666,26 @@ def restart_browser(username, password, load_wait_time):
     global driver, loginOk
     try:
         driver.quit()
+        time.sleep(5)
         loginOk = False
         time.sleep(5)
+
+        gc.collect()
+        kill_existing_processes()
+        # 调用login函数，让其创建新的driver实例并更新全局变量
+        driver = login(username, password, load_wait_time )
+        time.sleep(load_wait_time + load_wait_time + 5)
+
     except Exception:
         pass
 
-    gc.collect()
-    kill_existing_processes()
-    options = webdriver.ChromeOptions()
-    options.add_argument("--start-maximized")
-    options.add_argument("--disable-gcm-registration")  # 阻止 GCM 注册尝试
-    options.add_argument("--disable-extensions")
-    options.add_argument("--disable-plugins")
-    options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--no-sandbox")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--disable-background-timer-throttling")
-    options.add_argument("--disable-backgrounding-occluded-windows")
-    options.add_argument("--disable-renderer-backgrounding")
-    options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
-    # 使用相同的用户数据目录
-    user_data_dir = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)), "chrome_user_data"
-    )
-    options.add_argument(f"--user-data-dir={user_data_dir}")
-
-    driver = webdriver.Chrome(options=options)
-    login(driver, username, password, load_wait_time)
-    time.sleep(load_wait_time + load_wait_time + 5)
 
 # ==============================================重启浏览器结束
 
 
 # === 设置窗口线程 ===
 def run_settings():
-    global settings_window  ,loginOk
+    global settings_window, loginOk
     root = tk.Tk()
 
     def on_closing():

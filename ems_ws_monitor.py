@@ -39,7 +39,7 @@ def fetch_menu_once():
 
                     if data.get("func") == "menu":
                         print(
-                            f"[MENU] 收到 menu 数据，字段数量: {len(data.get('data', {}))}"
+                            f"[MENU]收到menu数据，字段数量: {len(data.get('data', {}))}"
                         )
                         # print(f"[MENU]数据: {data[1]}")   #---字典不能切分打印
                         # print(f"[MENU]数据（前10项）: {dict(list(data.items())[:10])}")
@@ -79,9 +79,7 @@ class EmsWsMonitor:
         try:
             if self.menu_data:
                 print(f"[WS] 预载 menu 数据，设备种类: {len(self.menu_data)}")
-
                 print(f"[MENU]顶层字段键名: {list(self.menu_data.keys())}")
-
                 menu_cache = self.parse_menu_data(self.menu_data)
                 self.menu_cache = menu_cache  # ← 加这一句
                 print("[MENU] 缓存字典数据项:", len(menu_cache))  # 总共多少个设备类型
@@ -211,7 +209,7 @@ class EmsWsMonitor:
                                     break
 
                             elif data.get("func") == "menu":
-                                print(f"\n[WS拦截] MENU数据: {payload[:20]}...")
+                                print(f"\n[WS拦截] MENU数据: {payload[:40]}...")
                             else:
                                 print(f"\n[WS拦截] 未知类型数据: {payload[:50]}...")
 
