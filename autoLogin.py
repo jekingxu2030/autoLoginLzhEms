@@ -8,6 +8,20 @@ from tokenize import Token
 from selenium import webdriver
 from page_status_checker import PageStatusChecker  # 导入页面状态检查器
 
+# 配置文件读取工具函数 - 轻量级实现
+def load_config_safe(config_path, max_retries=3, retry_delay=1):
+    """安全读取配置文件，支持重试但不锁定文件"""
+    for attempt in range(max_retries):
+        try:
+            with open(config_path, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError, PermissionError) as e:
+            if attempt < max_retries - 1:
+                time.sleep(retry_delay)
+                continue
+            raise e
+    return None
+
 # 配置基础日志格式
 logging.basicConfig(
     level=logging.INFO,
@@ -46,6 +60,16 @@ try:
 except Exception as e:
     print(f"无法确定配置文件路径: {e}")
     config_path = "config.json"  # 默认路径作为回退
+
+# 初始化config变量
+config = None
+
+# 加载配置文件 - 使用安全读取函数
+try:
+    config = load_config_safe(config_path, max_retries=3, retry_delay=1)
+except Exception as e:
+    print(f"配置文件加载失败: {e}")
+    config = None
 JS_SAVE_DIR = "./downloaded_js"
 os.makedirs(JS_SAVE_DIR, exist_ok=True)
 
@@ -332,9 +356,24 @@ def main_logic():
         # Mian方法执行记录开始时间
         start_time = time.time()
         config = {}
-        # 加载配置文件
-        with open(config_path, "r", encoding="utf-8") as f:
-            config = json.load(f)
+        
+        # 加载配置文件 - 添加重试机制
+        max_retries = 10
+        retry_delay = 60  # 1分钟
+        
+        for attempt in range(max_retries):
+            try:
+                with open(config_path, "r", encoding="utf-8") as f:
+                    config = json.load(f)
+                break  # 成功读取后退出循环
+            except (FileNotFoundError, json.JSONDecodeError, PermissionError) as e:
+                print(f"⚠️ 配置文件读取失败 (尝试 {attempt + 1}/{max_retries}): {e}")
+                if attempt < max_retries - 1:
+                    print(f"⏳ {retry_delay}秒后重试...")
+                    time.sleep(retry_delay)
+                else:
+                    print("❌ 配置文件读取失败，程序无法继续")
+                    return
 
         username = config["account"]["username"]
         password = config["account"]["password"]
@@ -788,7 +827,7 @@ def main_logic():
             except Exception as recovery_error:
                 print(f"❌ 恢复过程中出错: {recovery_error}")
                 
-            time.sleep(15)  # 等待15秒后重试
+            time.sleep(5)  # 等待15秒后重试
             
         if recovery_attempts >= max_recovery_attempts:
             print("❌ 程序恢复失败，需要手动干预")
@@ -800,7 +839,7 @@ def main_logic():
                 thread_safe_update_debug_label(f"❌线程退出,正在关闭浏览器...")
                 print("⚠️线程退出,正在关闭浏览器")
                 driver.quit()
-                time.sleep(12)
+                time.sleep(5)
                 if hasattr(driver, "service") and driver.service.process:
                     driver.service.process.terminate()
             except Exception as e:
@@ -815,9 +854,9 @@ def restart_browser(username, password, load_wait_time):
     global driver, loginOk
     try:
         driver.quit()
-        time.sleep(5)
+        time.sleep(2)
         loginOk = False
-        time.sleep(5)
+        time.sleep(2)
 
         gc.collect()
         kill_existing_processes()
