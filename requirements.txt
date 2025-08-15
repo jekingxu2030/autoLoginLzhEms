@@ -10,3 +10,4 @@ aiohttp==3.9.1
 pymysql==1.1.0
 pycryptodome==3.20.0
 websocket-client==1.7.0
+psutil==5.9.6
