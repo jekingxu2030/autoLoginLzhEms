@@ -6,9 +6,9 @@
         "password_backup": "123456789"
     },
     "timing": {
-        "load_wait_time": 2,
-        "loop_interval": 2,
-        "dingtalk_times": 1,
+        "load_wait_time": 150,
+        "loop_interval": 6,
+        "dingtalk_times": 30,
         "monitor_interval": 60,
         "check_cycles": 60
     },

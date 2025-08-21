@@ -8,20 +8,6 @@ from tokenize import Token
 from selenium import webdriver
 from page_status_checker import PageStatusChecker  # 导入页面状态检查器
 
-# 配置文件读取工具函数 - 轻量级实现
-def load_config_safe(config_path, max_retries=3, retry_delay=1):
-    """安全读取配置文件，支持重试但不锁定文件"""
-    for attempt in range(max_retries):
-        try:
-            with open(config_path, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError, PermissionError) as e:
-            if attempt < max_retries - 1:
-                time.sleep(retry_delay)
-                continue
-            raise e
-    return None
-
 # 配置基础日志格式
 logging.basicConfig(
     level=logging.INFO,
@@ -60,16 +46,6 @@ try:
 except Exception as e:
     print(f"无法确定配置文件路径: {e}")
     config_path = "config.json"  # 默认路径作为回退
-
-# 初始化config变量
-config = None
-
-# 加载配置文件 - 使用安全读取函数
-try:
-    config = load_config_safe(config_path, max_retries=3, retry_delay=1)
-except Exception as e:
-    print(f"配置文件加载失败: {e}")
-    config = None
 JS_SAVE_DIR = "./downloaded_js"
 os.makedirs(JS_SAVE_DIR, exist_ok=True)
 
@@ -352,42 +328,31 @@ def login(   username, password, load_wait_time ,existing_driver=None):
 def main_logic():
     global driver  # 声明使用全局变量driver
     try:
+        print("📋 开始加载配置文件...")
+        thread_safe_update_debug_label("📋加载配置中...")
+        
         # 初始化配置字典
-        # Mian方法执行记录开始时间
         start_time = time.time()
         config = {}
-        
-        # 加载配置文件 - 添加重试机制
-        max_retries = 10
-        retry_delay = 60  # 1分钟
-        
-        for attempt in range(max_retries):
-            try:
-                with open(config_path, "r", encoding="utf-8") as f:
-                    config = json.load(f)
-                break  # 成功读取后退出循环
-            except (FileNotFoundError, json.JSONDecodeError, PermissionError) as e:
-                print(f"⚠️ 配置文件读取失败 (尝试 {attempt + 1}/{max_retries}): {e}")
-                if attempt < max_retries - 1:
-                    print(f"⏳ {retry_delay}秒后重试...")
-                    time.sleep(retry_delay)
-                else:
-                    print("❌ 配置文件读取失败，程序无法继续")
-                    return
+        # 加载配置文件
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = json.load(f)
 
         username = config["account"]["username"]
         password = config["account"]["password"]
-        load_wait_time = config["timing"]["load_wait_time"]  # 第一个加载等待时间
-        loop_interval = config["timing"][
-            "loop_interval"
-        ]  # 第二个时间  首次错误等待次数
-        dingtalk_times = config["timing"][
-            "dingtalk_times"
-        ]  # 第三个时间  正常和不正常连续推送间隔次数
+        load_wait_time = config["timing"]["load_wait_time"]
+        loop_interval = config["timing"]["loop_interval"]
+        dingtalk_times = config["timing"]["dingtalk_times"]
+        
+        print(f"✅ 配置加载完成：用户={username}, 等待时间={load_wait_time}s")
+        thread_safe_update_debug_label("✅配置加载完成")
 
         global driver, loginOk
+        print("🌐 正在启动Chrome浏览器...")
+        thread_safe_update_debug_label("🌐启动浏览器中...")
+        
         options = webdriver.ChromeOptions()
-        options.add_argument("--disable-gcm-registration")  # 阻止 GCM 注册尝试
+        options.add_argument("--disable-gcm-registration")
         options.add_argument("--start-maximized")
         options.add_argument("--disable-extensions")
         options.add_argument("--disable-plugins")
@@ -398,28 +363,36 @@ def main_logic():
         options.add_argument("--disable-backgrounding-occluded-windows")
         options.add_argument("--disable-renderer-backgrounding")
         options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
+        
         # 添加唯一用户数据目录避免冲突
         user_data_dir = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "chrome_user_data"
         )
         os.makedirs(user_data_dir, exist_ok=True)
         options.add_argument(f"--user-data-dir={user_data_dir}")
+        
         driver = webdriver.Chrome(options=options)
+        print("✅ Chrome浏览器启动成功")
+        thread_safe_update_debug_label("✅浏览器启动成功")
 
-        # 登录
-        driver=   login( username, password, load_wait_time,driver)
-        last_login_time = time.time()  # 记录初始登录时间
-        time.sleep(load_wait_time + 15)
+        print("🔐 开始登录EMS系统...")
+        thread_safe_update_debug_label("🔐登录系统中...")
+        driver = login(username, password, load_wait_time, driver)
+        last_login_time = time.time()
+        print("✅ 登录完成")
+        thread_safe_update_debug_label("✅登录完成")
+        
+        time.sleep(load_wait_time + 5)  # 减少等待时间
 
         # 状态计数变量
-        same_error_count = 0  # 连续错误次数
-        intervalCounts = 0  # 单次连续循环次数
-        total_cycle_count = 0  # 总循环次数
-        checkCounts = 0  # 总判断次数
+        same_error_count = 0
+        intervalCounts = 0
+        total_cycle_count = 0
+        checkCounts = 0
         
         # 浏览器重启管理变量
-        browser_restart_interval = 23 * 3600  # 23小时重启一次浏览器
-        last_browser_restart = time.time()  # 记录上次浏览器重启时间
+        browser_restart_interval = 23 * 3600
+        last_browser_restart = time.time()
         
         # 启动浏览器监控线程
         monitor_thread = threading.Thread(
@@ -429,17 +402,31 @@ def main_logic():
         monitor_thread.start()
         print("🔍 浏览器监控线程已启动")
 
-        # 在主程序启动时调用 菜单请求
+        print("📊 正在初始化菜单数据...")
+        thread_safe_update_debug_label("📊初始化数据中...")
         menu_data = fetch_menu_once()
-        # 记录结束时间
+        print("✅ 菜单数据初始化完成")
+        thread_safe_update_debug_label("✅初始化完成")
+        
         end_time = time.time()
-        # 计算耗时（秒）
         elapsed_time1 = end_time - start_time
+        print(f"🎉 系统启动完成，总耗时：{elapsed_time1:.2f}秒")
+        thread_safe_update_debug_label("🎉系统启动完成，开始监控")
+        
+        # 启动成功提示
+        print("🔄 监控系统已启动，正在进入主循环...")
+        print("💡 这是正常行为：程序将持续监控EMS系统状态")
+        print("⏰ 每轮检测间隔约60秒，请耐心等待下一轮检测...")
+        thread_safe_update_debug_label("🔄监控系统运行中，每60秒检测一次")
 
         okCounts = 0
         while_time = 0  # 循环一次的时间
         while not stop_event.is_set():
             # ws_url = get_ws_url(driver)
+            if total_cycle_count == 0:
+                print("🎯 开始第一轮检测...")
+                thread_safe_update_debug_label("🎯开始第一轮检测...")
+            
             while_time_start = time.time()  # 主循环间隔
             current_time = time.time()  # 登录间隔
 
@@ -673,17 +660,37 @@ def main_logic():
             # 清理缓存与内存
             gc.collect()
             
-            # 浏览器状态检查和异常处理
+            # 浏览器状态检查和异常处理 - 增加重启保护
             try:
+                # 如果正在重启，跳过状态检查
+                if is_restarting.is_set():
+                    print("⏸️ 浏览器正在重启中，跳过本轮状态检查")
+                    time.sleep(10)  # 等待重启完成
+                    continue  # 跳过本轮检测，直接下一轮
+                    
                 # 使用专门的检查函数验证浏览器状态
                 browser_alive = check_browser_status(driver)
             except Exception as e:
                 print(f"🚨 检测到浏览器异常退出: {e}")
+                
+                # 如果正在重启，不重复处理
+                if is_restarting.is_set():
+                    print("⏸️ 重启已在进行中，跳过异常处理")
+                    time.sleep(10)
+                    continue
+                    
                 thread_safe_update_debug_label("🚨检测到浏览器异常退出，准备重启...")
                 browser_alive = False
                 
             if not browser_alive:
                 print("🔄 开始浏览器异常恢复流程...")
+                
+                # 再次确认没有正在重启
+                if is_restarting.is_set():
+                    print("⏸️ 检测到重启已在进行中，等待完成...")
+                    time.sleep(15)
+                    continue
+                
                 retry_count = 0
                 max_retries = 3
                 
@@ -692,18 +699,19 @@ def main_logic():
                     print(f"🔄 第{retry_count}次尝试重启浏览器...")
                     
                     if force_restart_browser(username, password, load_wait_time):
-                        print("✅ 浏览器异常重启完成，程序继续运行")
-                        thread_safe_update_debug_label("✅浏览器异常重启完成")
+                        print("✅ 浏览器重启流程已启动，等待完成...")
+                        # force_restart_browser内部已经处理了40秒等待
                         last_browser_restart = time.time()
                         break
                     else:
                         print(f"❌ 第{retry_count}次重启失败，等待后重试...")
-                        time.sleep(10)  # 等待10秒后重试
+                        time.sleep(20)  # 进一步增加等待时间
                         
                 if retry_count >= max_retries:
                     print("❌ 浏览器重启失败，程序可能无法继续运行")
                     thread_safe_update_debug_label("❌浏览器重启失败，请手动检查")
-                    # 继续尝试下一次循环，给用户手动处理的机会
+                    # 给手动处理机会，等待更长时间
+                    time.sleep(30)
             
             # 内存监控和强制清理（仅当浏览器正常时执行）
             if browser_alive:
@@ -762,11 +770,12 @@ def main_logic():
 
                     # 这里要重新执行登录操作（填写用户名、密码、验证码等）
             else:
-                print(f"\n已累积循环{total_cycle_count}次")
+                print(f"\n✅ 第{total_cycle_count}轮检测完成，等待下一轮...")
+                thread_safe_update_debug_label(f"✅第{total_cycle_count}轮完成，等待下一轮...")
 
             while_time_end = time.time()
             while_time = while_time_end - while_time_start
-            print(f"\n更新循环时长，循环一次需要时间{while_time}秒")
+            print(f"⏱️ 本轮耗时{while_time:.1f}秒，{load_wait_time+5}秒后开始下一轮")
 
             # # 新增：重新加载配置文件
             try:
@@ -827,7 +836,7 @@ def main_logic():
             except Exception as recovery_error:
                 print(f"❌ 恢复过程中出错: {recovery_error}")
                 
-            time.sleep(5)  # 等待15秒后重试
+            time.sleep(15)  # 等待15秒后重试
             
         if recovery_attempts >= max_recovery_attempts:
             print("❌ 程序恢复失败，需要手动干预")
@@ -839,7 +848,7 @@ def main_logic():
                 thread_safe_update_debug_label(f"❌线程退出,正在关闭浏览器...")
                 print("⚠️线程退出,正在关闭浏览器")
                 driver.quit()
-                time.sleep(5)
+                time.sleep(12)
                 if hasattr(driver, "service") and driver.service.process:
                     driver.service.process.terminate()
             except Exception as e:
@@ -854,9 +863,9 @@ def restart_browser(username, password, load_wait_time):
     global driver, loginOk
     try:
         driver.quit()
-        time.sleep(2)
+        time.sleep(5)
         loginOk = False
-        time.sleep(2)
+        time.sleep(5)
 
         gc.collect()
         kill_existing_processes()
@@ -906,39 +915,70 @@ def force_restart_browser(username, password, load_wait_time):
         # 2. 强制清理所有chrome进程
         kill_existing_processes()
         
-        # 3. 垃圾回收和冷却时间
+        # 3. 垃圾回收和冷却时间 - 增加冷却时间
         gc.collect()
-        time.sleep(5)  # 增加冷却时间，确保进程完全退出
+        print("⏳ 冷却期：等待进程完全退出...")
+        time.sleep(8)  # 增加到8秒，确保进程完全退出
         
-        # 4. 重新创建浏览器实例
+        # 4. 重新创建浏览器实例 - 添加启动保护
         print("🔄 重新创建浏览器实例...")
         driver = login(username, password, load_wait_time)
         
-        # 5. 等待浏览器完全就绪
-        print("⏳ 等待浏览器完全就绪...")
-        time.sleep(load_wait_time + 5)  # 额外等待确保完全加载
+        # 5. 强制等待浏览器完全就绪 - 关键改进
+        print("⏳ 浏览器启动中，强制等待40秒确保完全就绪...")
+        thread_safe_update_debug_label("⏳浏览器启动中，40秒后验证...")
+        time.sleep(40)  # 强制等待40秒，这是关键
         
-        # 6. 双重验证新实例是否正常工作
-        max_verify_attempts = 3
+        # 6. 渐进式验证新实例是否正常工作
+        max_verify_attempts = 5  # 增加到5次验证
         for attempt in range(max_verify_attempts):
-            if check_browser_status(driver):
-                print(f"✅ 浏览器重启成功，第{attempt+1}次验证通过")
-                loginOk = True
-                return True
-            else:
-                print(f"⏳ 浏览器验证失败，第{attempt+1}次重试...")
-                time.sleep(3)
-        
-        print("❌ 浏览器重启后多次验证仍无法正常工作")
+            print(f"🔍 第{attempt+1}次验证浏览器状态...")
+            
+            # 渐进式验证：先简单后复杂
+            try:
+                # 验证1：检查driver对象是否存在
+                if not driver:
+                    raise Exception("driver对象为空")
+                
+                # 验证2：检查能否执行简单脚本
+                driver.execute_script("return 1;")
+                
+                # 验证3：检查能否获取当前URL
+                current_url = driver.current_url
+                
+                # 验证4：检查页面是否加载完成
+                ready_state = driver.execute_script("return document.readyState;")
+                
+                if ready_state in ['complete', 'interactive']:
+                    print(f"✅ 浏览器重启成功，所有验证通过")
+                    print(f"📍 当前URL: {current_url}")
+                    print(f"📊 页面状态: {ready_state}")
+                    loginOk = True
+                    return True
+                else:
+                    print(f"⏳ 页面状态为{ready_state}，继续等待...")
+                    
+            except Exception as verify_error:
+                print(f"⚠️ 第{attempt+1}次验证失败: {str(verify_error)[:100]}")
+                if attempt < max_verify_attempts - 1:
+                    wait_time = 10 * (attempt + 1)  # 递增等待时间
+                    print(f"⏳ 等待{wait_time}秒后重试...")
+                    time.sleep(wait_time)
+                else:
+                    print("❌ 浏览器重启后多次验证仍无法正常工作")
+                    
         return False
             
     except Exception as e:
         print(f"❌ 强制重启浏览器失败: {e}")
+        import traceback
+        traceback.print_exc()
         return False
     finally:
-        # 无论成功失败，都清除重启标记
+        # 延迟清除重启标记，给系统更多时间稳定
+        time.sleep(5)
         is_restarting.clear()
-        print("🔄 重启流程结束，清除重启标记")
+        print("🔄 重启流程结束，重启标记已清除")
 
 
 # === 设置窗口线程 ===
@@ -976,14 +1016,17 @@ def run_settings():
 def start_main_logic():
     # 如果running_event没有设置，则启动主线程
     if not running_event.is_set():
+        print("🚀 正在启动主线程...")
+        thread_safe_update_debug_label("🚀正在启动主线程...")
+        
         # 启动主线程
         logic_thread = threading.Thread(target=main_logic, daemon=True)
         logic_thread.start()
         
         # 监控线程将在主线程启动后，从配置文件中获取参数启动
         running_event.set()
-        print("🚀 主线程已启动")
-        thread_safe_update_debug_label("🚀主线程已启动")
+        print("✅ 主线程启动完成")
+        thread_safe_update_debug_label("✅主线程启动完成")
 
 
 def kill_existing_processes():
