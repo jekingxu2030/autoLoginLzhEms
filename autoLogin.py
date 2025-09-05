@@ -269,20 +269,50 @@ def login(   username, password, load_wait_time ,existing_driver=None):
     
     driver.get("http://ems.hy-power.net:8114/login")
     thread_safe_update_debug_label("请求网页中...")
-    # 减少固定等待，使用WebDriverWait动态等待
+    
+    # 智能页面加载检查
     try:
-        WebDriverWait(driver, min(10, load_wait_time + 3)).until(
+        # 等待页面完全加载并检查访问权限
+        WebDriverWait(driver, min(15, load_wait_time + 5)).until(
+            lambda d: d.execute_script("return document.readyState;") == "complete" and 
+                     d.execute_script("return window.location.href;") != "about:blank"
+        )
+        
+        # 检查页面是否正常加载
+        current_url = driver.current_url
+        print(f"📍 页面加载完成: {current_url}")
+        
+        # 预检查页面元素是否存在
+        WebDriverWait(driver, 5).until(
+            lambda d: d.execute_script("return document.body != null;")
+        )
+        
+    except Exception as e:
+        print(f"⚠️ 页面加载异常: {str(e)}")
+        # 继续执行，避免中断流程
+
+    # 设置emsId - 添加权限检查和错误处理
+    try:
+        # 等待页面完全加载
+        WebDriverWait(driver, 10).until(
             lambda d: d.execute_script("return document.readyState;") == "complete"
         )
-    except:
-        # 如果页面加载超时，继续执行
-        pass
-
-    # 设置emsId
-    driver.execute_script(
-        "localStorage.setItem('local-power-station-active-emsId', 'E6F7D5412A20');"
-    )
-    time.sleep(load_wait_time)
+        
+        # 检查localStorage权限并设置emsId
+        driver.execute_script("""
+            try {
+                localStorage.setItem('local-power-station-active-emsId', 'E6F7D5412A20');
+                return true;
+            } catch(e) {
+                console.log('localStorage访问失败:', e.message);
+                return false;
+            }
+        """)
+        print("✅ localStorage设置成功")
+    except Exception as e:
+        print(f"⚠️ 设置emsId失败: {str(e)}，继续执行登录流程")
+    
+    time.sleep(min(load_wait_time, 3))  # 减少等待时间
 
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "canvas")))
     canvas = driver.find_element(By.ID, "canvas")
@@ -848,6 +878,15 @@ def main_logic():
     except Exception as e:
         print("🚨 主线程逻辑异常:", e)
         thread_safe_update_debug_label(f"❌主逻辑异常: {str(e)}")
+        
+        # 检查是否为权限错误，避免无限重启
+        error_msg = str(e).lower()
+        if "localstorage" in error_msg or "access is denied" in error_msg:
+            print("⚠️ 检测到权限错误，跳过localStorage设置继续运行...")
+            # 不触发重启，记录后继续运行
+            time.sleep(30)  # 等待30秒后重试，避免频繁异常
+            return  # 退出当前异常处理，继续主循环
+            
         print(f"🔄 尝试自动恢复程序运行...")
         
         # 尝试自动恢复
@@ -968,7 +1007,7 @@ def force_restart_browser(username, password, load_wait_time):
         thread_safe_update_debug_label("⏳浏览器启动中，智能等待就绪...")
         
         # 使用渐进式等待替代固定40秒
-        max_wait = 20  # 最大等待时间减少到20秒
+        max_wait = 30  # 最大等待时间减少到20秒
         start_wait = time.time()
         while time.time() - start_wait < max_wait:
             try:
