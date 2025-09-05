@@ -269,7 +269,14 @@ def login(   username, password, load_wait_time ,existing_driver=None):
     
     driver.get("http://ems.hy-power.net:8114/login")
     thread_safe_update_debug_label("请求网页中...")
-    time.sleep(load_wait_time + 5)
+    # 减少固定等待，使用WebDriverWait动态等待
+    try:
+        WebDriverWait(driver, min(10, load_wait_time + 3)).until(
+            lambda d: d.execute_script("return document.readyState;") == "complete"
+        )
+    except:
+        # 如果页面加载超时，继续执行
+        pass
 
     # 设置emsId
     driver.execute_script(
@@ -370,6 +377,28 @@ def main_logic():
         )
         os.makedirs(user_data_dir, exist_ok=True)
         options.add_argument(f"--user-data-dir={user_data_dir}")
+        
+        # 优化Chrome启动速度 - 使用轻量级配置
+        options = webdriver.ChromeOptions()
+        options.add_argument("--disable-gcm-registration")
+        options.add_argument("--start-maximized")
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-dev-shm-usage")
+        options.add_argument("--disable-gpu")
+        options.add_argument("--disable-extensions")
+        options.add_argument("--disable-plugins")
+        options.add_argument("--disable-background-timer-throttling")
+        options.add_argument("--disable-backgrounding-occluded-windows")
+        options.add_argument("--disable-renderer-backgrounding")
+        options.add_argument("--disable-logging")
+        options.add_argument("--log-level=3")
+        options.add_argument("--silent")
+        
+        # 使用临时用户数据目录避免缓存积累
+        import tempfile
+        temp_dir = tempfile.mkdtemp(prefix="chrome_temp_")
+        options.add_argument(f"--user-data-dir={temp_dir}")
+        options.set_capability("goog:loggingPrefs", {"performance": "ALL"})
         
         driver = webdriver.Chrome(options=options)
         print("✅ Chrome浏览器启动成功")
@@ -653,7 +682,17 @@ def main_logic():
             time.sleep(10)
             if is_logged_out:
                 print("⚠️ 系统当前状态：掉线")
-                # 可以在这里添加掉线后的处理逻辑，如记录日志或发送通知
+                # 立即触发重新登录流程
+                try:
+                    print("🔍 检测到登录页面，开始执行重新登录...")
+                    thread_safe_update_debug_label("系统状态：掉线 - 正在重新登录...")
+                    page_checker.handle_login_page(login_func)
+                    print("✅ 重新登录流程已触发")
+                    thread_safe_update_debug_label("系统状态：重新登录完成")
+                except Exception as e:
+                    print(f"❌ 重新登录失败：{str(e)}")
+                    thread_safe_update_debug_label("系统状态：重新登录失败")
+                    time.sleep(10)  # 失败后等待较长时间再重试
             else:
                 print("✅ 系统当前状态：已登录")
 
@@ -924,10 +963,19 @@ def force_restart_browser(username, password, load_wait_time):
         print("🔄 重新创建浏览器实例...")
         driver = login(username, password, load_wait_time)
         
-        # 5. 强制等待浏览器完全就绪 - 关键改进
-        print("⏳ 浏览器启动中，强制等待40秒确保完全就绪...")
-        thread_safe_update_debug_label("⏳浏览器启动中，40秒后验证...")
-        time.sleep(40)  # 强制等待40秒，这是关键
+        # 5. 智能等待浏览器就绪 - 减少固定等待
+        print("⏳ 浏览器启动中，智能等待就绪...")
+        thread_safe_update_debug_label("⏳浏览器启动中，智能等待就绪...")
+        
+        # 使用渐进式等待替代固定40秒
+        max_wait = 20  # 最大等待时间减少到20秒
+        start_wait = time.time()
+        while time.time() - start_wait < max_wait:
+            try:
+                driver.execute_script("return 1;")
+                break  # 浏览器已就绪，提前退出等待
+            except:
+                time.sleep(1)  # 每秒检查一次
         
         # 6. 渐进式验证新实例是否正常工作
         max_verify_attempts = 5  # 增加到5次验证

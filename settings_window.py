@@ -36,8 +36,8 @@ class SettingsWindow:
                 return json.load(f)
         except Exception:
             return {
-                # "account": {"username": "WC001", "password": "123456789"},
-                  "account": {"username": "BAIYILED01", "password": "lXl123456"},
+                "account": {"username": "WC001", "password": "123456789"},
+                  # "account": {"username": "BAIYILED01", "password": "lXl123456"},
                 "timing": {
                     "load_wait_time": 5,
                     "loop_interval": 60,

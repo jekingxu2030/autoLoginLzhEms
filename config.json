@@ -1,12 +1,12 @@
 {
     "account": {
-        "username": "BAIYILED01",
-        "password": "lXl123456",
-        "username_backup": "WC001",
-        "password_backup": "123456789"
+        "username": "WC001",
+        "password": "123456789",
+        "username_backup": "BAIYILED01",
+        "password_backup": "lXl123456"
     },
     "timing": {
-        "load_wait_time": 150,
+        "load_wait_time": 10,
         "loop_interval": 6,
         "dingtalk_times": 30,
         "monitor_interval": 60,
