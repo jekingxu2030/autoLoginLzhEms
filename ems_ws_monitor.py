@@ -17,7 +17,7 @@ def fetch_menu_once():
 
     headers = {
         "User-Agent": "Mozilla/5.0",
-        "Origin": "http://ems.hy-power.net:8114",
+        "Origin": "http://ems.hy-power.net:8114/E6F7D5412A20?",
         "X-LocalStorage": (
             f"local-power-station-active-emsid={config.get('localStorage', 'local-power-station-active-emsid')};"
             f"locale={config.get('localStorage', 'locale')};"
