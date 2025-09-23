@@ -2,7 +2,7 @@ node_modules
 temp
 backup
 
-dist
+# dist
 chrome_user_data/
 chrome_user_data/
 chrome_user_data/

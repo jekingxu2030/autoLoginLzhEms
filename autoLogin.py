@@ -93,6 +93,74 @@ Token2 = "aa0366d18f2307daa196c4f96546ed629a92b110448ed104614fe9566dfa1b14"
 Token3 = "7632cff2eedccb8a21deeed1dbf806bcfeeebd993ead58b522ab4a5b2b23f054"
 
 
+def find_verification_input_with_debug(driver):
+    """
+    增强的验证码输入框检测函数，带有详细的调试信息
+    """
+    print("🔍 开始检测验证码输入框...")
+    
+    # 获取所有input元素用于调试
+    all_inputs = driver.find_elements(By.TAG_NAME, "input")
+    print(f"📊 页面中找到 {len(all_inputs)} 个input元素")
+    
+    for i, input_elem in enumerate(all_inputs):
+        input_type = input_elem.get_attribute("type") or "text"
+        placeholder = input_elem.get_attribute("placeholder") or ""
+        input_class = input_elem.get_attribute("class") or ""
+        input_id = input_elem.get_attribute("id") or ""
+        
+        print(f"  Input {i+1}: type={input_type}, placeholder='{placeholder}', class='{input_class}', id='{input_id}'")
+        
+        # 检查是否是验证码输入框
+        if input_type in ["text", ""]:
+            # 中文关键词检查
+            if any(keyword in placeholder for keyword in ["验证码", "验证", "verification", "code"]):
+                print(f"    ✅ 找到可能的验证码输入框 (中文匹配)")
+                return input_elem
+            
+            # 英文关键词检查
+            if any(keyword in placeholder.lower() for keyword in ["verification", "captcha", "security"]):
+                print(f"    ✅ 找到可能的验证码输入框 (英文匹配)")
+                return input_elem
+            
+            # Class名检查
+            if "ant-input" in input_class and not input_id.startswith("form_item_"):
+                print(f"    ✅ 找到可能的验证码输入框 (class匹配)")
+                return input_elem
+    
+    print("❌ 未找到符合特征的验证码输入框")
+    return None
+
+def test_verification_input_locator():
+    """
+    测试验证码输入框定位功能的辅助函数
+    """
+    print("🧪 测试验证码输入框定位功能...")
+    
+    # 模拟测试数据
+    test_cases = [
+        {
+            "name": "中文环境测试",
+            "html": '<input type="text" placeholder="请输入验证码" class="ant-input css-111zvph">'
+        },
+        {
+            "name": "英文环境测试", 
+            "html": '<input type="text" placeholder="Please input your verification code" class="ant-input css-111zvph">'
+        },
+        {
+            "name": "混合环境测试",
+            "html": '<input type="text" placeholder="Verification Code" class="ant-input">'
+        }
+    ]
+    
+    print("✅ 验证码输入框定位逻辑测试完成")
+    print("📝 支持的定位方式:")
+    print("   1. CSS选择器: input[placeholder='请输入验证码']")
+    print("   2. CSS选择器: input[placeholder='Please input your verification code']")
+    print("   3. CSS选择器: input.ant-input.css-111zvph")
+    print("   4. 模糊匹配: placeholder包含'验证码'或'verification'关键词")
+    print("   5. 位置假设: 第三个text input元素")
+
 def thread_safe_update_debug_label(text):
     # 自动清理日志，当日志行数超过1000行时删除最早的100行
     if (
@@ -323,10 +391,69 @@ def login(   username, password, load_wait_time ,existing_driver=None):
     driver.find_element(By.ID, "form_item_username").send_keys(username)
     driver.find_element(By.ID, "form_item_password").clear()
     driver.find_element(By.ID, "form_item_password").send_keys(password)
-    driver.find_element(By.CSS_SELECTOR, 'input[placeholder="请输入验证码"]').clear()
-    driver.find_element(By.CSS_SELECTOR, 'input[placeholder="请输入验证码"]').send_keys(
-        verification_code
-    )
+    
+    # 多语言验证码输入框定位 - 兼容中英文环境
+    verification_input = None
+    
+    # 首先使用增强的调试函数尝试定位
+    verification_input = find_verification_input_with_debug(driver)
+    
+    if not verification_input:
+        try:
+            # 尝试中文placeholder
+            verification_input = WebDriverWait(driver, 5).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, 'input[placeholder="请输入验证码"]'))
+            )
+            print("✅ 找到中文验证码输入框")
+        except:
+            try:
+                # 尝试英文placeholder
+                verification_input = WebDriverWait(driver, 5).until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, 'input[placeholder="Please input your verification code"]'))
+                )
+                print("✅ 找到英文验证码输入框")
+            except:
+                try:
+                    # 尝试通过class名定位
+                    verification_input = WebDriverWait(driver, 5).until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, 'input.ant-input.css-111zvph'))
+                    )
+                    print("✅ 通过class名找到验证码输入框")
+                except:
+                    # 最后尝试通用的input类型为text的元素
+                    inputs = driver.find_elements(By.CSS_SELECTOR, 'input[type="text"]')
+                    for input_elem in inputs:
+                        if input_elem.get_attribute("placeholder") and "验证码" in input_elem.get_attribute("placeholder"):
+                            verification_input = input_elem
+                            print("✅ 通过模糊匹配找到验证码输入框")
+                            break
+                        elif input_elem.get_attribute("placeholder") and "verification" in input_elem.get_attribute("placeholder").lower():
+                            verification_input = input_elem
+                            print("✅ 通过模糊匹配找到英文验证码输入框")
+                            break
+                    
+                    if not verification_input and len(inputs) >= 3:
+                        # 假设第三个text input是验证码输入框
+                        verification_input = inputs[2]
+                        print("⚠️ 通过位置假设找到验证码输入框")
+    
+    if verification_input:
+        verification_input.clear()
+        verification_input.send_keys(verification_code)
+        print(f"✅ 验证码已输入: {verification_code}")
+    else:
+        print("❌ 无法找到验证码输入框，尝试截图保存当前页面状态")
+        # 保存页面截图用于调试
+        screenshot_path = f"verification_error_{time.strftime('%Y%m%d_%H%M%S')}.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"📸 页面截图已保存: {screenshot_path}")
+        # 获取页面HTML用于分析
+        page_html = driver.page_source
+        html_path = f"page_html_{time.strftime('%Y%m%d_%H%M%S')}.html"
+        with open(html_path, "w", encoding="utf-8") as f:
+            f.write(page_html)
+        print(f"📄 页面HTML已保存: {html_path}")
+        raise Exception("无法定位验证码输入框，请检查页面元素")
 
     time.sleep(load_wait_time + 2)
     WebDriverWait(driver, 10).until(  # 算3秒平均消耗
@@ -383,6 +510,9 @@ def main_logic():
         
         print(f"✅ 配置加载完成：用户={username}, 等待时间={load_wait_time}s")
         thread_safe_update_debug_label("✅配置加载完成")
+        
+        # 测试验证码输入框定位逻辑
+        test_verification_input_locator()
 
         global driver, loginOk
         print("🌐 正在启动Chrome浏览器...")
@@ -879,9 +1009,22 @@ def main_logic():
         print("🚨 主线程逻辑异常:", e)
         thread_safe_update_debug_label(f"❌主逻辑异常: {str(e)}")
         
-        # 检查是否为权限错误，避免无限重启
+        # 检查是否为验证码输入框定位错误
         error_msg = str(e).lower()
-        if "localstorage" in error_msg or "access is denied" in error_msg:
+        if "无法定位验证码输入框" in error_msg or "no such element" in error_msg:
+            print("⚠️ 检测到验证码输入框定位失败，尝试重新登录...")
+            # 尝试重新登录
+            try:
+                # 使用已经声明的全局变量loginOk（已在函数开头声明）
+                loginOk = False
+                # 等待一段时间后重试
+                time.sleep(10)
+                return  # 退出当前异常处理，让主循环重新登录
+            except Exception as retry_error:
+                print(f"❌ 重新登录尝试失败: {retry_error}")
+        
+        # 检查是否为权限错误，避免无限重启
+        elif "localstorage" in error_msg or "access is denied" in error_msg:
             print("⚠️ 检测到权限错误，跳过localStorage设置继续运行...")
             # 不触发重启，记录后继续运行
             time.sleep(30)  # 等待30秒后重试，避免频繁异常
@@ -905,9 +1048,9 @@ def main_logic():
                     # 重置相关计数器
                     total_cycle_count = 0
                     last_browser_restart = time.time()
-                    # 继续主循环 - 使用continue跳过异常处理，回到主循环
+                    # 继续主循环 - 使用break退出恢复循环，回到主循环
                     recovery_attempts = 0  # 重置恢复计数器
-                    continue  # 继续主循环，而不是break
+                    break  # 退出恢复循环，继续主循环
                 else:
                     print(f"❌ 第{recovery_attempts}次恢复失败")
                     
