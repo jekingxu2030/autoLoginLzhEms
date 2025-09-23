@@ -1,7 +1,7 @@
 ('c:\\program '
  'files\\python310\\lib\\site-packages\\importlib_metadata-7.1.0-py3.10.egg',
  None,
- {'*.pyc', '*.pyd', '*.py', 'EGG-INFO', '*.pyw', '*.cp310-win_amd64.pyd'},
+ {'*.pyw', 'EGG-INFO', '*.cp310-win_amd64.pyd', '*.pyc', '*.py', '*.pyd'},
  'DATA',
  [('importlib_metadata\\py.typed',
    'c:\\program '

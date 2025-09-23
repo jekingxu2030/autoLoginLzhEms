@@ -27,7 +27,57 @@ python autoLogin.py
 - 分发包：`autoLoginLzhEms_Dist_20250923_121427.zip` (81.25 MB)
 - 打包时间：2025-09-23 12:14:27
 
-## 打包说明
+## 🚀 快速打包指令汇总
+
+### 1️⃣ 输出到dist目录的打包指令（推荐）
+```bash
+# 使用PyInstaller打包，输出到dist目录
+pyinstaller --clean --noconfirm autoLogin.spec
+
+# 打包完成后查看dist目录
+dir dist\
+```
+**输出位置**：`dist\autoLoginLzhEms.exe`
+**文件大小**：约82MB（包含所有依赖库）
+**特点**：单个可执行文件，可直接运行
+
+### 📁 关于dist目录
+`dist`目录是PyInstaller的默认输出目录，当前包含：
+- `autoLoginLzhEms.exe` - 主程序可执行文件（81.97 MB）
+- `config.ini` - 配置文件
+- `downloaded_js\` - JavaScript文件目录
+- `debug.log` - 调试日志文件
+
+**使用方法**：
+```bash
+# 进入dist目录
+cd dist
+
+# 直接运行程序
+autoLoginLzhEms.exe
+
+# 或者从项目根目录运行
+dist\autoLoginLzhEms.exe
+```
+
+**注意**：由于使用了`--onefile`模式，大部分依赖已打包到exe文件中，dist目录相对简洁。
+
+### 2️⃣ 完整分发包（推荐）
+```bash
+python create_dist_package.py
+```
+**输出位置**：`autoLoginLzhEms_Dist_时间戳.zip`
+
+### 3️⃣ 一键打包脚本（自动执行以上两种）
+```bash
+# 先执行基础打包
+pyinstaller --clean --noconfirm autoLogin.spec
+
+# 再创建完整分发包
+python create_dist_package.py
+```
+
+## 📋 打包说明
 
 ### 方法一：基础打包（推荐）
 ```bash
